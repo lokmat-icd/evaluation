@@ -357,7 +357,7 @@
 
 <script>
     // ---------- GLOBALS ----------
-    let APP_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzXgZdHeI-QQuprSQUVTSk392pb7YUQL0HSLC6yz_ejmNAtHQNoT7GVhpyYnCpRNkpg/exec';  // will be set by user or we use default prompt
+    let APP_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyHKGwV6yjTkGIeZX5HmpcI_LdkLSkrEhvjdRGVD1WZangE3iY_Lyvh0nthFzqBVlvQ/exec';  // will be set by user or we use default prompt
     let currentUser = { code: null, role: null, name: null, isHOD: false, isVH: false };
     let kraDefinitions = [
         { id: "Page_Layout_Editorial_Design", name: "Page Layout & Editorial Design", desc: "Quality, typography & visual appeal" },
@@ -381,22 +381,40 @@
     }
 
     async function callApi(action, payload = {}) {
-        if(!APP_SCRIPT_URL) {
-            let userUrl = prompt("Please enter your Google Apps Script Web App URL (deployed as 'Anyone'):", "https://script.google.com/macros/s/.../exec");
-            if(!userUrl) throw new Error("URL required");
-            APP_SCRIPT_URL = userUrl;
-        }
-        try {
-            let res = await fetch(APP_SCRIPT_URL, {
-                method: 'POST',
-                mode: 'cors',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action, ...payload })
-            });
-            if(!res.ok) throw new Error(`HTTP ${res.status}`);
-            return await res.json();
-        } catch(e) { throw new Error(`API error: ${e.message}`); }
-    }
+		if(!APP_SCRIPT_URL) {
+			let userUrl = prompt("Please enter your Google Apps Script Web App URL (deployed as 'Anyone'):", "https://script.google.com/macros/s/.../exec");
+			if(!userUrl) throw new Error("URL required");
+			APP_SCRIPT_URL = userUrl;
+		}
+		
+		try {
+			// Make sure the URL ends with /exec
+			let url = APP_SCRIPT_URL;
+			if (!url.endsWith('/exec')) {
+				url = url.replace(/\/$/, '') + '/exec';
+			}
+			
+			const response = await fetch(url, {
+				method: 'POST',
+				mode: 'cors',
+				cache: 'no-cache',
+				headers: { 
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({ action, ...payload })
+			});
+			
+			if (!response.ok) {
+				throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+			}
+			
+			const data = await response.json();
+			return data;
+		} catch(e) { 
+			console.error('API call failed:', e);
+			throw new Error(`API error: ${e.message}`); 
+		}
+	}
 
     // login / check code
     async function loginWithCode(code) {
