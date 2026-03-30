@@ -357,7 +357,7 @@
 
 <script>
     // ---------- GLOBALS ----------
-    let APP_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyHKGwV6yjTkGIeZX5HmpcI_LdkLSkrEhvjdRGVD1WZangE3iY_Lyvh0nthFzqBVlvQ/exec';  // will be set by user or we use default prompt
+    let APP_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwD13vhqdJ47govgWzdB9lX03DeKq4AqH83ix7JXrYxzaTjgtAgFDil9P0BoqdKG4VM/exec';  // will be set by user or we use default prompt
     let currentUser = { code: null, role: null, name: null, isHOD: false, isVH: false };
     let kraDefinitions = [
         { id: "Page_Layout_Editorial_Design", name: "Page Layout & Editorial Design", desc: "Quality, typography & visual appeal" },
@@ -381,38 +381,59 @@
     }
 
     async function callApi(action, payload = {}) {
-		if(!APP_SCRIPT_URL) {
-			let userUrl = prompt("Please enter your Google Apps Script Web App URL (deployed as 'Anyone'):", "https://script.google.com/macros/s/.../exec");
-			if(!userUrl) throw new Error("URL required");
-			APP_SCRIPT_URL = userUrl;
+		// Don't prompt if we already have a URL
+		if (!APP_SCRIPT_URL) {
+			throw new Error("Apps Script URL not configured. Please set APP_SCRIPT_URL in the code.");
 		}
 		
+		// Ensure URL is properly formatted
+		let url = APP_SCRIPT_URL;
+		if (!url.includes('/exec')) {
+			console.warn('URL might not be a valid Apps Script exec URL:', url);
+		}
+		
+		console.log(`Calling API: ${action}`, payload);
+		
 		try {
-			// Make sure the URL ends with /exec
-			let url = APP_SCRIPT_URL;
-			if (!url.endsWith('/exec')) {
-				url = url.replace(/\/$/, '') + '/exec';
-			}
+			const controller = new AbortController();
+			const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
 			
 			const response = await fetch(url, {
 				method: 'POST',
 				mode: 'cors',
 				cache: 'no-cache',
+				credentials: 'omit', // Important for CORS
 				headers: { 
 					'Content-Type': 'application/json',
 				},
-				body: JSON.stringify({ action, ...payload })
+				body: JSON.stringify({ action, ...payload }),
+				signal: controller.signal
 			});
+			
+			clearTimeout(timeoutId);
 			
 			if (!response.ok) {
 				throw new Error(`HTTP ${response.status}: ${response.statusText}`);
 			}
 			
 			const data = await response.json();
+			console.log(`API response for ${action}:`, data);
 			return data;
-		} catch(e) { 
-			console.error('API call failed:', e);
-			throw new Error(`API error: ${e.message}`); 
+			
+		} catch(e) {
+			console.error(`API call failed for ${action}:`, e);
+			
+			// Provide more helpful error messages
+			if (e.name === 'AbortError') {
+				throw new Error('Request timeout - server took too long to respond');
+			} else if (e.message.includes('Failed to fetch')) {
+				throw new Error('Cannot connect to server. Please check:\n' +
+							  '1. Apps Script is properly deployed with "Anyone" access\n' +
+							  '2. URL is correct: ' + url + '\n' +
+							  '3. You have authorized the script');
+			} else {
+				throw new Error(`API error: ${e.message}`);
+			}
 		}
 	}
 
