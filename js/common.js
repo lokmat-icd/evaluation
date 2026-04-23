@@ -1,7 +1,7 @@
 // ==================== CONFIGURATION ====================
 // IMPORTANT: Replace this URL with your ACTUAL deployed Apps Script URL
 // After deploying your GS-Code.txt as a Web App, copy the URL here
-const API_URL = "https://script.google.com/macros/s/AKfycby82A7Wg2JdxXZ4w3Vydiv2OcwvKmuAo8zNCrTYwm3sTf0Z-23NknfyZ9V99_dve7sW/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbzt9gA6D3diNg0ctyrPlYvRtakzDHiTxihiTY8BDSYLgHY0KCnbzWuJExb7V5cLEO3H/exec";
 
 // ==================== GLOBAL VARIABLES ====================
 let authenticatedUser = null;      // For ICD/Head/Vertical Head
