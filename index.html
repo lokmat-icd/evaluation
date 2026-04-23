@@ -631,7 +631,713 @@
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
   
-  <!-- Include JavaScript file -->
-  <?!= include('JavaScript'); ?>
+  <!-- Combined JavaScript -->
+  <script>
+  // ==================== CONFIGURATION ====================
+  // IMPORTANT: Replace this URL with your ACTUAL deployed Apps Script URL
+  const API_URL = "https://script.google.com/macros/s/AKfycbya5qDx8YD4qTgw_ghFjVzHCLaXVnKjlc6YAx5qRfUT8ZncZEomsUEP-9YkzNGJ7pd5/exec";
+
+  // ==================== GLOBAL VARIABLES ====================
+  let authenticatedUser = null;
+  let authenticatedUnitHead = null;
+  let currentEvalEmp = null;
+  let currentSelectedCentre = null;
+  let currentSelectedWorkplace = null;
+  let currentSelectedHODWorkplace = null;
+  let currentSelectedUnitHeadWorkplace = null;
+  let currentSelfEvalEmpCode = null;
+  let currentSelfEvalIsEditable = true;
+  let currentSelfEvalIsSubmitted = false;
+  let currentHODEvalEmpCode = null;
+  let currentHODEvalIsEditable = true;
+  let currentUnitHeadEvalEmpCode = null;
+  let currentUnitHeadEvalIsEditable = true;
+  let unitHeadEmployeesCache = null;
+
+  // KRA Definitions
+  const kraDefinitions = [
+    { id: "page_layout", name: "Page Layout & Editorial Design", kpi: "Design, Layout, Visual Appeal", target: "100% adherence to typography, grid structures" },
+    { id: "deadline_adherence", name: "Deadline Adherence & Speed", kpi: "Punctuality in sending pages to press", target: "Streamlining Processes for Better Deadline Management" },
+    { id: "quality_accuracy", name: "Quality, Accuracy & Print Readiness", kpi: "Error‑free output", target: "Error free ready to print PDF" },
+    { id: "advertising_integration", name: "Advertising & Content Integration", kpi: "Designing various kinds of advertisements", target: "100% accuracy making advertisements" },
+    { id: "platform_adaptation", name: "Various Platforms / E‑Paper Adaptation", kpi: "Convert Print Assets for digital", target: "Timely delivery for web/mobile/print formats" },
+    { id: "collaboration", name: "Collaboration & Communication", kpi: "Teamwork", target: "Proactive communication" }
+  ];
+  const ratingOptions = [1, 2, 3, 3.5, 4, 4.5, 5];
+  const defaultRating = 2;
+  const CENTRES = ['Akola', 'Nagpur(LS)','Nagpur(LM)','Nagpur(LT)','Chh. Sambhajinagar(LM)', 'Chh. Sambhajinagar(LS)', 'Goa', 'Jalgaon', 'Kolhapur', 'Mumbai', 'Nashik', 'Pune', 'Solapur'];
+
+  // ==================== API HELPER ====================
+  function callServer(action, params) {
+    console.log(`Calling ${action} with params:`, params);
+    return new Promise((resolve, reject) => {
+      const callbackName = 'jsonp_cb_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+      let url = `${API_URL}?action=${encodeURIComponent(action)}&callback=${callbackName}`;
+      if (params) url += `&params=${encodeURIComponent(JSON.stringify(params))}`;
+      const script = document.createElement('script');
+      script.src = url;
+      const timeout = setTimeout(() => { cleanup(); reject(new Error(`Request timeout for ${action}`)); }, 30000);
+      function cleanup() { clearTimeout(timeout); if (script.parentNode) script.parentNode.removeChild(script); delete window[callbackName]; }
+      window[callbackName] = function(data) { cleanup(); resolve(data); };
+      script.onerror = function() { cleanup(); reject(new Error(`JSONP request failed for ${action}`)); };
+      document.body.appendChild(script);
+    });
+  }
+
+  // ==================== HELPER FUNCTIONS ====================
+  function getHelloPagesLabel(editionName) {
+    if (!editionName) return "Hello Pages";
+    const lowerEdition = editionName.toLowerCase();
+    if (lowerEdition.indexOf("samachar") !== -1) return "Apna Pages";
+    if (lowerEdition.indexOf("times") !== -1) return "FIRST Pages";
+    return "Hello Pages";
+  }
+
+  function showToast(message, type) {
+    const existingToast = document.querySelector('.custom-toast');
+    if (existingToast) existingToast.remove();
+    const toast = document.createElement('div');
+    toast.className = `custom-toast toast-${type}`;
+    const icon = type === 'success' ? '✓' : (type === 'error' ? '✗' : (type === 'warning' ? '⚠' : 'ℹ'));
+    toast.innerHTML = `<span class="toast-icon">${icon}</span><span class="toast-message">${message}</span>`;
+    document.body.appendChild(toast);
+    setTimeout(() => { toast.remove(); }, 3000);
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  function formatTeamWorkloadDisplay(teamWorkload) {
+    if (!teamWorkload || Object.keys(teamWorkload).length === 0) return '';
+    const parts = [];
+    let grandTotal = 0;
+    for (const edition in teamWorkload) {
+      const wl = teamWorkload[edition];
+      if (wl && (wl.main_pages || wl.hello_pages)) {
+        const mainPages = wl.main_pages || 0;
+        const helloPages = wl.hello_pages || 0;
+        const editionTotal = mainPages + helloPages;
+        grandTotal += editionTotal;
+        const helloLabel = getHelloPagesLabel(edition);
+        parts.push(`${edition}: Main(${mainPages})+${helloLabel}(${helloPages})=${editionTotal}`);
+      }
+    }
+    return parts.length ? `📊 Team Workload: ${parts.join(' | ')} | <strong>Total: ${grandTotal} pages</strong>` : '';
+  }
+
+  function generateDailyWorkloadHTML(dailyWorkload) {
+    if (!dailyWorkload || Object.keys(dailyWorkload).length === 0) {
+      return '<div style="background: #f8f9fa; padding: 10px; margin: 10px 0; border-radius: 6px;"><strong><i class="fa fa-calendar"></i> 📋 Daily Workload:</strong><div>No data</div></div>';
+    }
+    const items = [];
+    if (dailyWorkload.main_full_page_design) items.push(`${dailyWorkload.main_full_page_design} Full Page Design (Main)`);
+    if (dailyWorkload.main_page_alter_ad_schedule) items.push(`${dailyWorkload.main_page_alter_ad_schedule} Page Alter - Ad Schedule (Main)`);
+    if (dailyWorkload.main_page_alter_news_update) items.push(`${dailyWorkload.main_page_alter_news_update} Page Alter - News Update (Main)`);
+    if (dailyWorkload.main_infographic) items.push(`${dailyWorkload.main_infographic} Infographic (Main)`);
+    if (dailyWorkload.hello_full_page_design) items.push(`${dailyWorkload.hello_full_page_design} Full Page Design (Hello)`);
+    if (dailyWorkload.hello_page_alter_ad_schedule) items.push(`${dailyWorkload.hello_page_alter_ad_schedule} Page Alter - Ad Schedule (Hello)`);
+    if (dailyWorkload.hello_page_alter_news_update) items.push(`${dailyWorkload.hello_page_alter_news_update} Page Alter - News Update (Hello)`);
+    if (dailyWorkload.hello_infographic) items.push(`${dailyWorkload.hello_infographic} Infographic (Hello)`);
+    if (dailyWorkload.display_ad_design) items.push(`${dailyWorkload.display_ad_design} Display Ad Design`);
+    if (dailyWorkload.event_creative) items.push(`${dailyWorkload.event_creative} Event Creative`);
+    if (dailyWorkload.supplement_design) items.push(`${dailyWorkload.supplement_design} Supplement Design`);
+    if (dailyWorkload.ai_image) items.push(`${dailyWorkload.ai_image} AI Image`);
+    if (dailyWorkload.photo_correction) items.push(`${dailyWorkload.photo_correction} Photo Correction`);
+    if (dailyWorkload.pdf_quality_check) items.push(`${dailyWorkload.pdf_quality_check} PDF Quality Check`);
+    if (dailyWorkload.epaper_page_upload) items.push(`${dailyWorkload.epaper_page_upload} Epaper Page Upload`);
+    if (dailyWorkload.news_article_typing) items.push(`${dailyWorkload.news_article_typing} Words-News Typing`);
+    if (items.length === 0) return '<div style="background: #f8f9fa; padding: 10px; margin: 10px 0; border-radius: 6px;"><strong><i class="fa fa-calendar"></i> 📋 Daily Workload:</strong><div>No data</div></div>';
+    let itemsHtml = '<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 5px 15px; margin-top: 5px;">';
+    for (const item of items) itemsHtml += `<div><i class="fa fa-check-circle-o" style="color: #1e3c72; font-size: 12px;"></i> ${item}</div>`;
+    itemsHtml += '</div>';
+    return `<div style="background: #f8f9fa; padding: 10px; margin: 10px 0; border-radius: 6px;"><strong><i class="fa fa-calendar"></i> 📋 Daily Workload:</strong>${itemsHtml}</div>`;
+  }
+
+  function calculatePaginationScore(dailyWorkload) {
+    if (!dailyWorkload) return 0;
+    let score = 0;
+    score += (parseInt(dailyWorkload.main_full_page_design) || 0) * 1;
+    score += (parseInt(dailyWorkload.main_page_alter_ad_schedule) || 0) * 0.5;
+    score += (parseInt(dailyWorkload.main_page_alter_news_update) || 0) * 0.5;
+    score += (parseInt(dailyWorkload.hello_full_page_design) || 0) * 1;
+    score += (parseInt(dailyWorkload.hello_page_alter_ad_schedule) || 0) * 0.5;
+    score += (parseInt(dailyWorkload.hello_page_alter_news_update) || 0) * 0.5;
+    score += (parseInt(dailyWorkload.supplement_design) || 0) * 0.14;
+    return score;
+  }
+
+  function calculateOtherWorkScore(dailyWorkload) {
+    if (!dailyWorkload) return 0;
+    let score = 0;
+    score += (parseInt(dailyWorkload.main_infographic) || 0) * 0.2;
+    score += (parseInt(dailyWorkload.hello_infographic) || 0) * 0.2;
+    score += (parseInt(dailyWorkload.display_ad_design) || 0) * 0.3;
+    score += (parseInt(dailyWorkload.event_creative) || 0) * 0.4;
+    score += (parseInt(dailyWorkload.ai_image) || 0) * 0.2;
+    score += (parseInt(dailyWorkload.photo_correction) || 0) * 0.01;
+    score += (parseInt(dailyWorkload.pdf_quality_check) || 0) * 0.1;
+    score += (parseInt(dailyWorkload.epaper_page_upload) || 0) * 0.05;
+    score += (parseInt(dailyWorkload.news_article_typing) || 0) * 0.002;
+    return score;
+  }
+
+  function updateLogoutButton() {
+    const logoutBtn = document.getElementById('globalLogoutBtn');
+    if (logoutBtn) logoutBtn.style.display = (authenticatedUser || authenticatedUnitHead) ? 'inline-block' : 'none';
+  }
+
+  async function logoutCurrentUser() {
+    authenticatedUser = null;
+    authenticatedUnitHead = null;
+    showToast('Logged out successfully', 'success');
+    const hodAuthSection = document.getElementById('hodAuthSection');
+    const hodProtected = document.getElementById('hodProtectedContent');
+    const unitHeadAuth = document.getElementById('unitHeadAuthSection');
+    const unitHeadProtected = document.getElementById('unitHeadProtectedContent');
+    const vhAuth = document.getElementById('vhAuthSection');
+    const vhProtected = document.getElementById('vhProtectedContent');
+    if (hodAuthSection) hodAuthSection.style.display = 'block';
+    if (hodProtected) hodProtected.style.display = 'none';
+    if (unitHeadAuth) unitHeadAuth.style.display = 'block';
+    if (unitHeadProtected) unitHeadProtected.style.display = 'none';
+    if (vhAuth) vhAuth.style.display = 'block';
+    if (vhProtected) vhProtected.style.display = 'none';
+    const hodTeamList = document.getElementById('hodTeamList');
+    const unitHeadTeamList = document.getElementById('unitHeadTeamList');
+    const employeeList = document.getElementById('employeeList');
+    if (hodTeamList) hodTeamList.innerHTML = '';
+    if (unitHeadTeamList) unitHeadTeamList.innerHTML = '';
+    if (employeeList) employeeList.innerHTML = '';
+    const hodEmail = document.getElementById('hod_email');
+    const hodSecret = document.getElementById('hod_secret_code');
+    const unitEmail = document.getElementById('unithead_email');
+    const unitSecret = document.getElementById('unithead_secret_code');
+    const vhEmail = document.getElementById('vh_email');
+    const vhSecret = document.getElementById('vh_secret_code');
+    if (hodEmail) hodEmail.value = '';
+    if (hodSecret) hodSecret.value = '';
+    if (unitEmail) unitEmail.value = '';
+    if (unitSecret) unitSecret.value = '';
+    if (vhEmail) vhEmail.value = '';
+    if (vhSecret) vhSecret.value = '';
+    updateLogoutButton();
+    $('.nav-pills a[href="#self"]').tab('show');
+  }
+
+  // ==================== SELF EVALUATION ====================
+  async function openSelfEvaluationFromSelfTab() {
+    const empCode = document.getElementById('self_emp_code').value.trim();
+    if (!empCode) { showToast('Please enter employee code', 'error'); return; }
+    showToast('Loading employee data...', 'info');
+    try {
+      const checkResult = await callServer("checkEmployeeExists", { empCode: empCode });
+      if (!checkResult.exists) { showToast('Employee code not found. Please contact HR.', 'warning'); return; }
+      const icdStatus = await callServer("checkIfICDUserWithStatus", { empCode: empCode });
+      if (icdStatus.isICD && icdStatus.teamWorkloadSaved !== 'Yes') { showRegistrationModal(empCode); return; }
+      const empInfo = await callServer("getEmployeeBasicInfo", { empCode: empCode });
+      const empName = empInfo.success ? empInfo.name : empCode;
+      const isCompleted = checkResult.completion === 'Yes';
+      openSelfEvaluationModal(empCode, empName, true, isCompleted);
+    } catch(error) { showToast(`Error: ${error.message}`, 'error'); }
+  }
+
+  function openSelfEvaluationModal(empCode, empName, isEditable, isSubmitted) {
+    currentSelfEvalEmpCode = empCode;
+    currentSelfEvalIsEditable = isEditable && !isSubmitted;
+    currentSelfEvalIsSubmitted = isSubmitted;
+    window.currentUserRole = authenticatedUser ? authenticatedUser.position : null;
+    document.getElementById('selfEvalModalTitle').innerHTML = `Self Evaluation - ${escapeHtml(empName)}`;
+    document.getElementById('selfEvalModalBody').innerHTML = '<div class="loading"><i class="fa fa-spinner fa-spin"></i> Loading self evaluation data...</div>';
+    const saveBtn = document.getElementById('selfEvalSaveBtn');
+    if (saveBtn) saveBtn.style.display = currentSelfEvalIsEditable ? 'inline-block' : 'none';
+    const draftBtn = document.getElementById('selfEvalDraftBtn');
+    if (draftBtn) draftBtn.style.display = currentSelfEvalIsEditable ? 'inline-block' : 'none';
+    $('#selfEvalModal').modal('show');
+    Promise.all([callServer("getSelfEvaluation", { empCode: empCode }), callServer("getEmployeeFromMaster", { empCode: empCode })]).then(([dataResult, masterResult]) => {
+      const latest = (dataResult.evaluations && dataResult.evaluations.length) ? dataResult.evaluations[dataResult.evaluations.length - 1] : null;
+      const employeeMaster = masterResult.success ? masterResult.employee : null;
+      renderSelfEvalModalContent(latest, employeeMaster);
+    }).catch(error => { showToast('Error loading data: ' + error.message, 'error'); renderSelfEvalModalContent(null, null); });
+  }
+
+  function renderSelfEvalModalContent(evalData, employeeMasterData) {
+    let isLocked = false;
+    if (evalData && evalData.status) {
+      if (evalData.status === "Complete" || evalData.status === "Assessed" || evalData.status === "Assessed-UH") isLocked = true;
+    }
+    const disabledAttr = (currentSelfEvalIsEditable && !isLocked) ? '' : 'disabled';
+    const empName = employeeMasterData ? employeeMasterData.name : '';
+    const empCode = employeeMasterData ? employeeMasterData.code : currentSelfEvalEmpCode;
+    const empDesignation = employeeMasterData ? employeeMasterData.designation : '';
+    const empUnit = employeeMasterData ? employeeMasterData.unit : '';
+    const empWorkplace = employeeMasterData ? employeeMasterData.workplace : '';
+    let jobDescription = '', specialProjectsText = '';
+    if (evalData && evalData.specialProjectsText) {
+      try { const mColumnData = JSON.parse(evalData.specialProjectsText); jobDescription = mColumnData.job_description || ''; specialProjectsText = mColumnData.special_projects || ''; } catch(e) { specialProjectsText = evalData.specialProjectsText || ''; }
+    }
+    let kraHtml = '';
+    for (const kra of kraDefinitions) {
+      let ratingValue = defaultRating;
+      if (evalData && evalData.kraRatings && evalData.kraRatings[kra.id]) ratingValue = evalData.kraRatings[kra.id];
+      let optionsHtml = '';
+      ratingOptions.forEach(opt => { optionsHtml += `<option value="${opt}" ${opt == ratingValue ? 'selected' : ''}>${opt}</option>`; });
+      kraHtml += `<div class="col-md-6"><div class="kra-box"><div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;"><h5 style="margin: 0;"><strong>${kra.name}</strong></h5><select id="modal_kra_${kra.id}" class="form-control rating-select" style="width: 65px;" ${disabledAttr} onchange="updateSelfModalLiveScore()">${optionsHtml}</select></div><div style="font-size: 11px; color: #666; margin-top: 8px;"><div><strong>KPI:</strong> ${kra.kpi}</div><div><strong>Target:</strong> ${kra.target}</div></div></div></div>`;
+    }
+    const dw = (evalData && evalData.dailyWorkload) ? evalData.dailyWorkload : {};
+    const modalHtml = `<div class="employee-info-card" style="background: #e8f4fd; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #1e3c72;"><div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 15px;"><div><span class="info-label"><i class="fa fa-user"></i> Name:</span> <span class="info-value">${escapeHtml(empName)}</span></div><div><span class="info-label"><i class="fa fa-id-card"></i> Employee Code:</span> <span class="info-value">${escapeHtml(empCode)}</span></div><div><span class="info-label"><i class="fa fa-briefcase"></i> Designation:</span> <span class="info-value">${escapeHtml(empDesignation)}</span></div><div><span class="info-label"><i class="fa fa-building"></i> Unit:</span> <span class="info-value">${escapeHtml(empUnit)}</span></div><div><span class="info-label"><i class="fa fa-map-marker"></i> Work Place:</span> <span class="info-value">${escapeHtml(empWorkplace)}</span></div></div><div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding-top: 10px; border-top: 1px dashed #cce5ff;"><div><span class="info-label"><i class="fa fa-envelope"></i> Email *:</span><input type="email" class="form-control" id="modal_self_email" style="width: 100%; margin-top: 5px;" placeholder="Enter your email" value="" ${disabledAttr}></div></div></div><div class="panel panel-default"><div class="panel-heading" style="background-color: #1e3c72; color: white; display: flex; justify-content: space-between; align-items: center;"><strong><i class="fa fa-star"></i> KRA Performance Ratings (1-5 Scale)</strong><div><span id="modalSelfLiveScoreDisplay" style="background: #ffc107; color: #1e3c72; padding: 3px 10px; border-radius: 15px; font-size: 12px;">Score: 0.0/10</span><span id="modalSelfLiveLevelDisplay" style="background: #6c757d; color: white; padding: 3px 10px; border-radius: 15px; font-size: 12px; margin-left: 5px;">Level: Not Assessed</span></div></div><div class="panel-body"><div class="row">${kraHtml}</div></div></div><div class="panel panel-default"><div class="panel-heading" style="background-color: #1e3c72; color: white;"><strong><i class="fa fa-calendar"></i> 📊 Daily Workload</strong></div><div class="panel-body"><div class="row"><div class="col-md-3"><label>Full Page Design (Main)</label><input type="number" class="form-control" id="modal_main_full_page_design" value="${dw.main_full_page_design || 0}" min="0" ${disabledAttr}></div><div class="col-md-3"><label>Full Page Design (Hello)</label><input type="number" class="form-control" id="modal_hello_full_page_design" value="${dw.hello_full_page_design || 0}" min="0" ${disabledAttr}></div><div class="col-md-3"><label>Display Ad Design</label><input type="number" class="form-control" id="modal_display_ad_design" value="${dw.display_ad_design || 0}" min="0" ${disabledAttr}></div><div class="col-md-3"><label>Event Creative</label><input type="number" class="form-control" id="modal_event_creative" value="${dw.event_creative || 0}" min="0" ${disabledAttr}></div></div><div class="row" style="margin-top:10px"><div class="col-md-3"><label>Supplement Design</label><input type="number" class="form-control" id="modal_supplement_design" value="${dw.supplement_design || 0}" min="0" ${disabledAttr}></div><div class="col-md-3"><label>AI Image</label><input type="number" class="form-control" id="modal_ai_image" value="${dw.ai_image || 0}" min="0" ${disabledAttr}></div><div class="col-md-3"><label>Photo Correction</label><input type="number" class="form-control" id="modal_photo_correction" value="${dw.photo_correction || 0}" min="0" ${disabledAttr}></div><div class="col-md-3"><label>PDF Quality Check</label><input type="number" class="form-control" id="modal_pdf_quality_check" value="${dw.pdf_quality_check || 0}" min="0" ${disabledAttr}></div></div></div></div><div class="panel panel-default"><div class="panel-heading" style="background-color: #1e3c72; color: white;"><strong><i class="fa fa-file-text"></i> Job Description</strong></div><div class="panel-body"><textarea class="form-control" id="modal_job_description" rows="3" ${disabledAttr} placeholder="Describe your job responsibilities...">${escapeHtml(jobDescription)}</textarea></div></div><div class="panel panel-default"><div class="panel-heading" style="background-color: #1e3c72; color: white;"><strong><i class="fa fa-rocket"></i> Special Projects & Initiatives</strong></div><div class="panel-body"><textarea class="form-control" id="modal_special_projects" rows="3" ${disabledAttr} placeholder="Describe any special projects...">${escapeHtml(specialProjectsText)}</textarea></div></div>`;
+    document.getElementById('selfEvalModalBody').innerHTML = modalHtml;
+    if (isLocked) { const warningDiv = document.createElement('div'); warningDiv.className = 'alert alert-warning'; warningDiv.innerHTML = '<i class="fa fa-lock"></i> This evaluation has been completed and cannot be edited.'; document.getElementById('selfEvalModalBody').insertBefore(warningDiv, document.getElementById('selfEvalModalBody').firstChild); }
+    updateSelfModalLiveScore();
+  }
+
+  function updateSelfModalLiveScore() {
+    const kraIds = ['page_layout','deadline_adherence','quality_accuracy','advertising_integration','platform_adaptation','collaboration'];
+    let selfTotal = 0;
+    for (const id of kraIds) { const select = document.getElementById(`modal_kra_${id}`); selfTotal += select ? parseFloat(select.value) || 0 : 0; }
+    const percentage = (selfTotal / 30) * 100;
+    const scoreOutOf10 = Math.round((percentage / 100) * 10 * 10) / 10;
+    let assessmentLevel = '', levelColor = '';
+    if (percentage >= 80) { assessmentLevel = 'DE - Distinguished Expert'; levelColor = '#28a745'; }
+    else if (percentage >= 50) { assessmentLevel = 'ME - Meets Expectations'; levelColor = '#ffc107'; }
+    else { assessmentLevel = 'NI - Needs Improvement'; levelColor = '#dc3545'; }
+    const scoreDisplay = document.getElementById('modalSelfLiveScoreDisplay');
+    if (scoreDisplay) { scoreDisplay.innerHTML = `⭐ Score: ${scoreOutOf10}/10`; scoreDisplay.style.background = levelColor; }
+    const levelDisplay = document.getElementById('modalSelfLiveLevelDisplay');
+    if (levelDisplay) { levelDisplay.innerHTML = `📊 Level: ${assessmentLevel}`; levelDisplay.style.background = levelColor; }
+  }
+
+  async function saveSelfEvaluationFromModal(isDraft) {
+    if (!currentSelfEvalIsEditable) { showToast('This evaluation is locked and cannot be edited.', 'warning'); return; }
+    if (!currentSelfEvalEmpCode) return;
+    const kraValues = {};
+    for (const kra of kraDefinitions) { const select = document.getElementById(`modal_kra_${kra.id}`); kraValues[kra.id] = select ? parseFloat(select.value) || 0 : 0; }
+    const email = document.getElementById('modal_self_email')?.value || '';
+    const jobDescription = document.getElementById('modal_job_description')?.value || '';
+    const specialProjectsText = document.getElementById('modal_special_projects')?.value || '';
+    const mColumnData = JSON.stringify({ job_description: jobDescription, special_projects: specialProjectsText });
+    if (!isDraft && !email) { showToast('Please enter your email address', 'error'); return; }
+    if (!isDraft) { let allValid = true; for (const val of Object.values(kraValues)) { if (val < 1 || val > 5) { allValid = false; break; } } if (!allValid) { showToast('Please provide self ratings (1-5) for all 6 KRAs', 'error'); return; } }
+    const formObject = { emp_code: currentSelfEvalEmpCode, email: email, status: isDraft ? "Draft" : "Pending", comments: "", m_column_data: mColumnData, ...kraValues, main_full_page_design: parseInt(document.getElementById('modal_main_full_page_design')?.value) || 0, hello_full_page_design: parseInt(document.getElementById('modal_hello_full_page_design')?.value) || 0, display_ad_design: parseInt(document.getElementById('modal_display_ad_design')?.value) || 0, event_creative: parseInt(document.getElementById('modal_event_creative')?.value) || 0, supplement_design: parseInt(document.getElementById('modal_supplement_design')?.value) || 0, ai_image: parseInt(document.getElementById('modal_ai_image')?.value) || 0, photo_correction: parseInt(document.getElementById('modal_photo_correction')?.value) || 0, pdf_quality_check: parseInt(document.getElementById('modal_pdf_quality_check')?.value) || 0 };
+    try { const result = await callServer('saveSelfEvaluation', formObject); if (result.success) { showToast(result.message, 'success'); $('#selfEvalModal').modal('hide'); } else { showToast(`Error: ${result.message}`, 'error'); } } catch(error) { showToast(`Error: ${error.message}`, 'error'); }
+  }
+
+  // ==================== HOD AUTHENTICATION ====================
+  async function authenticateHOD() {
+    const email = document.getElementById('hod_email').value;
+    const secretCode = document.getElementById('hod_secret_code').value;
+    if (!email || !secretCode) { showToast('Please enter email and secret code', 'error'); return; }
+    const authBtn = document.querySelector('#hodAuthSection .btn-primary');
+    const originalText = authBtn.innerHTML;
+    authBtn.disabled = true;
+    authBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Authenticating...';
+    try {
+      const result = await callServer("authenticateUser", { email: email, secretCode: secretCode });
+      if (result.success) {
+        authenticatedUser = result;
+        document.getElementById('hodProtectedContent').style.display = 'block';
+        document.getElementById('hodAuthSection').style.display = 'none';
+        showToast(result.message, 'success');
+        updateLogoutButton();
+        if (result.position === 'ICD') { await loadEmployeesForICD(result.unit, result.editions); }
+        else if (result.position === 'Head') { await loadTeamMembersForHead(result.name); }
+        else { showToast('Access denied. Only ICD and Head can access this tab.', 'error'); document.getElementById('hodProtectedContent').style.display = 'none'; document.getElementById('hodAuthSection').style.display = 'block'; }
+      } else { showToast(result.message || 'Authentication failed', 'error'); }
+    } catch(error) { showToast('Authentication failed: ' + error.message, 'error'); } finally { authBtn.disabled = false; authBtn.innerHTML = originalText; }
+  }
+
+  async function loadEmployeesForICD(unit, editionsList) {
+    const teamListDiv = document.getElementById('hodTeamList');
+    teamListDiv.innerHTML = '<div class="loading"><i class="fa fa-spinner fa-spin"></i> Loading employees...</div>';
+    try {
+      const employeesResult = await callServer("getEmployeesByUnit", { unit: unit, excludeEmpCode: authenticatedUser.empCode });
+      if (employeesResult.success && employeesResult.employees && employeesResult.employees.length > 0) { displayHODEmployeeCards(employeesResult.employees, ''); }
+      else { teamListDiv.innerHTML = `<div class="alert alert-info">No employees have submitted self evaluation yet for unit: ${unit}</div>`; }
+    } catch(error) { teamListDiv.innerHTML = `<div class="alert alert-danger">Error loading employees: ${error.message}</div>`; }
+  }
+
+  async function loadTeamMembersForHead(headName) {
+    const teamListDiv = document.getElementById('hodTeamList');
+    teamListDiv.innerHTML = '<div class="loading"><i class="fa fa-spinner fa-spin"></i> Loading team members...</div>';
+    try {
+      const result = await callServer("getTeamMembersByReportingAuthority", { reportingAuth: headName });
+      if(result.success && result.team && result.team.length > 0) displayHODEmployeeCards(result.team, '');
+      else teamListDiv.innerHTML = '<div class="alert alert-info">No team members have submitted self evaluation yet reporting to '+headName+'</div>';
+    } catch(error) { teamListDiv.innerHTML = '<div class="alert alert-danger">Error loading team: '+error.message+'</div>'; }
+  }
+
+  function displayHODEmployeeCards(employees, workplaceFilter) {
+    const teamListDiv = document.getElementById('hodTeamList');
+    let filteredEmployees = employees;
+    if(workplaceFilter && workplaceFilter !== '') filteredEmployees = employees.filter(function(emp) { return emp.workplace === workplaceFilter; });
+    if(filteredEmployees.length === 0) { teamListDiv.innerHTML = '<div class="alert alert-info">No employees found' + (workplaceFilter ? ' for workplace: ' + workplaceFilter : '') + '</div>'; return; }
+    let html = '<h4>Team Members <span class="badge">' + filteredEmployees.length + '</span></h4>';
+    for(let i=0;i<filteredEmployees.length;i++) {
+      const member = filteredEmployees[i];
+      const statusClass = member.completion === 'Yes' ? 'status-submitted' : 'status-pending';
+      const statusText = member.completion === 'Yes' ? '✓ Self Evaluation Submitted' : '📝 Draft';
+      const dailyWorkloadHtml = generateDailyWorkloadHTML(member.dailyWorkload);
+      const hodComplete = member.hodRatings && member.hodRatings.page_layout > 0;
+      html += `<div class="team-member-card"><div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; margin-bottom: 10px;"><div style="flex: 1;"><strong style="font-size: 16px;"><i class="fa fa-user"></i> ${escapeHtml(member.name)}</strong><br><small><i class="fa fa-briefcase"></i> ${escapeHtml(member.designation || 'N/A')} | <i class="fa fa-building"></i> ${escapeHtml(member.unit)}</small><br><small><i class="fa fa-map-marker"></i> Workplace: ${escapeHtml(member.workplace || 'N/A')} | <i class="fa fa-id-card"></i> Code: ${escapeHtml(member.code)}</small></div><div style="text-align: right;"><span class="remark-badge ${statusClass}">${statusText}</span><span class="remark-badge ${hodComplete ? 'status-complete' : 'status-pending'}">HOD: ${hodComplete ? '✓ Complete' : '⏳ Pending'}</span></div></div>${dailyWorkloadHtml}<div style="margin-top: 15px; text-align: right; border-top: 1px solid #eee; padding-top: 12px;"><button class="btn btn-sm btn-primary" onclick="openHODEvalForHODTab('${member.code}', '${escapeHtml(member.name)}', false)"><i class="fa fa-star"></i> Evaluate</button></div></div>`;
+    }
+    teamListDiv.innerHTML = html;
+  }
+
+  async function openHODEvalForHODTab(empCode, empName, isReadOnly) {
+    window.currentUserRole = authenticatedUser ? authenticatedUser.position : null;
+    try {
+      const empData = await callServer("getEmployeeForHODEval", { empCode: empCode });
+      if (empData.exists) {
+        const hodResult = await callServer("getHODEvaluation", { empCode: empCode });
+        let existingRatings = {}, existingComments = '', existingOverallLevel = '';
+        if (hodResult.evaluations && hodResult.evaluations.length > 0) {
+          existingRatings = hodResult.evaluations[0].kraRatings || {};
+          existingComments = hodResult.evaluations[0].comments || '';
+          existingOverallLevel = hodResult.evaluations[0].overallLevel || '';
+        }
+        openHODEvaluationModal(empCode, empName, true, existingRatings, existingComments, existingOverallLevel, empData.selfRatings, isReadOnly);
+      }
+    } catch(error) { showToast('Error: ' + error.message, 'error'); }
+  }
+
+  function openHODEvaluationModal(empCode, empName, isEditable, existingRatings, existingComments, existingOverallLevel, selfRatings, isViewOnly) {
+    currentHODEvalEmpCode = empCode;
+    currentHODEvalIsEditable = isEditable;
+    if (isViewOnly) currentHODEvalIsEditable = false;
+    document.getElementById('hodEvalModalTitle').innerHTML = `Evaluation by ICD/Branch Head - ${escapeHtml(empName)}`;
+    const disabledAttr = currentHODEvalIsEditable ? '' : 'disabled';
+    let kraHtml = '';
+    for (let i = 0; i < kraDefinitions.length; i++) {
+      const kra = kraDefinitions[i];
+      const ratingValue = existingRatings[kra.id] ? existingRatings[kra.id] : defaultRating;
+      let optionsHtml = '';
+      ratingOptions.forEach(function(opt) { optionsHtml += '<option value="' + opt + '" ' + (opt == ratingValue ? 'selected' : '') + '>' + opt + '</option>'; });
+      kraHtml += `<div class="col-md-6"><div class="kra-box"><div style="display: flex; justify-content: space-between; align-items: center;"><h5 style="margin: 0;"><strong>${kra.name}</strong></h5><select id="modal_hod_kra_${kra.id}" class="form-control rating-select" style="width: 65px;" ${disabledAttr}>${optionsHtml}</select></div><div style="font-size: 11px; color: #666; margin-top: 8px;"><div><strong>KPI:</strong> ${kra.kpi}</div><div><strong>Target:</strong> ${kra.target}</div></div></div></div>`;
+    }
+    const modalHtml = `<div class="panel panel-default"><div class="panel-heading" style="background-color: #1e3c72; color: white;"><strong><i class="fa fa-star"></i> KRA Performance Ratings (1-5 Scale)</strong></div><div class="panel-body"><div class="row">${kraHtml}</div></div></div><div class="form-group"><label>Comments</label><textarea id="modal_hod_comments" class="form-control" rows="3" ${disabledAttr}>${escapeHtml(existingComments || '')}</textarea></div><input type="hidden" id="modal_hod_overall_level" value="${escapeHtml(existingOverallLevel || '')}">`;
+    document.getElementById('hodEvalModalBody').innerHTML = modalHtml;
+    const saveBtn = document.getElementById('hodEvalSaveBtn');
+    if (saveBtn) saveBtn.style.display = (currentHODEvalIsEditable && !isViewOnly) ? 'inline-block' : 'none';
+    $('#hodEvalModal').modal('show');
+  }
+
+  async function saveHODEvaluationFromModal() {
+    if (!currentHODEvalIsEditable) { showToast('This evaluation is locked and cannot be edited.', 'warning'); return; }
+    if (!currentHODEvalEmpCode) return;
+    const kraIds = ['page_layout','deadline_adherence','quality_accuracy','advertising_integration','platform_adaptation','collaboration'];
+    let allValid = true;
+    for (let i = 0; i < kraIds.length; i++) { const val = parseFloat(document.getElementById('modal_hod_kra_' + kraIds[i]).value) || 0; if (val < 1 || val > 5) allValid = false; }
+    if (!allValid) { showToast('Please provide ratings for all 6 KRAs', 'error'); return; }
+    const comments = document.getElementById('modal_hod_comments').value;
+    if (!comments.trim()) { showToast('Please enter comments', 'error'); return; }
+    const formObject = { emp_code: currentHODEvalEmpCode, comments: comments };
+    kraDefinitions.forEach(function(kra) { formObject[kra.id] = parseFloat(document.getElementById('modal_hod_kra_' + kra.id).value) || 0; });
+    try { const result = await callServer('saveHODEvaluation', formObject); if (result.success) { showToast(result.message, 'success'); $('#hodEvalModal').modal('hide'); if (authenticatedUser && authenticatedUser.unit) loadEmployeesForICD(authenticatedUser.unit, authenticatedUser.editions); } else showToast('Error: ' + result.message, 'error'); } catch(error) { showToast('Error: ' + error.message, 'error'); }
+  }
+
+  async function printEvaluationReport(empCode, empName) {
+    const loadingDiv = document.createElement('div'); loadingDiv.id = 'printLoading'; loadingDiv.innerHTML = '<div style="position:fixed;top:50%;left:50%;background:white;padding:20px;border-radius:10px;z-index:10000;"><i class="fa fa-spinner fa-spin"></i> Generating report...</div>'; document.body.appendChild(loadingDiv);
+    try {
+      const result = await callServer("generateEvaluationReport", { empCode: empCode });
+      const loadingElem = document.getElementById('printLoading'); if (loadingElem) loadingElem.remove();
+      if (result.success) { const printWindow = window.open('', '_blank'); printWindow.document.write(result.html); printWindow.document.close(); printWindow.onload = function() { setTimeout(function() { printWindow.print(); }, 500); }; }
+      else showToast('Error: ' + result.message, 'error');
+    } catch(error) { const loadingElem = document.getElementById('printLoading'); if (loadingElem) loadingElem.remove(); showToast('Error: ' + error.message, 'error'); }
+  }
+
+  // ==================== REGISTRATION ====================
+  let currentRegistrationEmpCode = null;
+  let currentRegistrationEmpData = null;
+
+  async function loadEmployeeFromMaster() {
+    const empCode = document.getElementById('emp_code_input').value.trim();
+    if (!empCode) { showToast('Please enter employee code', 'error'); return; }
+    showToast('Loading employee data...', 'info');
+    try {
+      const result = await callServer("getEmployeeFromMaster", { empCode: empCode });
+      if (result.success && result.employee) {
+        const emp = result.employee;
+        const employeeInfoHtml = `<div class="panel panel-default"><div class="panel-heading" style="background-color: #1e3c72; color: white;"><strong><i class="fa fa-info-circle"></i> Employee Information</strong></div><div class="panel-body"><div class="row"><div class="col-md-6"><div class="form-group"><label>Employee Code</label><input type="text" class="form-control readonly-field" id="emp_code_display" value="${escapeHtml(emp.code)}" readonly></div></div><div class="col-md-6"><div class="form-group"><label>Full Name</label><input type="text" class="form-control readonly-field" id="full_name_display" value="${escapeHtml(emp.name)}" readonly></div></div></div><div class="row"><div class="col-md-6"><div class="form-group"><label>Designation</label><input type="text" class="form-control readonly-field" id="designation_display" value="${escapeHtml(emp.designation)}" readonly></div></div><div class="col-md-6"><div class="form-group"><label>Mobile No.</label><input type="text" class="form-control readonly-field" id="mobile_display" value="${escapeHtml(emp.mobile)}" readonly></div></div></div><div class="row"><div class="col-md-6"><div class="form-group"><label>Unit (Centre)</label><input type="text" class="form-control readonly-field" id="unit_display" value="${escapeHtml(emp.unit)}" readonly></div></div><div class="col-md-6"><div class="form-group"><label>Work Place</label><input type="text" class="form-control readonly-field" id="workplace_display" value="${escapeHtml(emp.workplace)}" readonly></div></div></div><div class="row"><div class="col-md-12"><div class="form-group"><label>Reporting Authority</label><input type="text" class="form-control readonly-field" id="reporting_auth_display" value="${escapeHtml(emp.reporting_authority)}" readonly></div></div></div></div></div>`;
+        document.getElementById('employeeInfoSection').innerHTML = employeeInfoHtml;
+        document.getElementById('employeeInfoSection').style.display = 'block';
+        const icdStatus = await callServer("checkIfICDUserWithStatus", { empCode: empCode });
+        if (icdStatus.isICD === true) {
+          if (icdStatus.teamWorkloadSaved === 'Yes') { document.getElementById('teamWorkloadSection').style.display = 'none'; showToast('ICD user with existing team workload configuration.', 'info'); }
+          else { document.getElementById('teamWorkloadSection').style.display = 'block'; generateTeamWorkloadForms(icdStatus.editions); }
+        } else document.getElementById('teamWorkloadSection').style.display = 'none';
+        document.getElementById('registrationActions').style.display = 'block';
+      } else showToast(result.message || 'Employee not found', 'error');
+    } catch(error) { showToast('Error: ' + error.message, 'error'); }
+  }
+
+  function generateTeamWorkloadForms(editionsList) {
+    if (!editionsList || editionsList.length === 0) { document.getElementById('teamWorkloadFormsContainer').innerHTML = '<p class="text-muted">No editions configured for this ICD user.</p>'; return; }
+    let html = '';
+    for (let i = 0; i < editionsList.length; i++) {
+      const edition = editionsList[i].trim();
+      if (edition === '') continue;
+      const safeKey = edition.replace(/[^a-zA-Z0-9]/g, '_');
+      const helloPagesLabel = getHelloPagesLabel(edition);
+      html += `<div class="subcentre-workload-box" style="background: #fff3e0; padding: 15px; margin-bottom: 15px; border-radius: 8px;"><div class="subcentre-title"><i class="fa fa-newspaper-o"></i> Edition: ${escapeHtml(edition)}</div><div class="row"><div class="col-md-6"><div class="form-group"><label><i class="fa fa-file-text-o"></i> Main Pages:</label><input type="number" class="form-control page-input workload-input" id="main_pages_${safeKey}" min="0" max="99" value="0" placeholder="00"></div></div><div class="col-md-6"><div class="form-group"><label><i class="fa fa-file-image-o"></i> ${helloPagesLabel}:</label><input type="number" class="form-control page-input workload-input" id="hello_pages_${safeKey}" min="0" max="99" value="0" placeholder="00"></div></div></div></div>`;
+    }
+    document.getElementById('teamWorkloadFormsContainer').innerHTML = html;
+  }
+
+  async function registerEmployee() {
+    const empCode = document.getElementById('emp_code_display').value;
+    if (!empCode) { showToast('Please load employee data first', 'error'); return; }
+    let teamWorkloads = null;
+    const isICD = document.getElementById('teamWorkloadSection').style.display === 'block';
+    if (isICD) {
+      teamWorkloads = {};
+      const editionBoxes = document.querySelectorAll('#teamWorkloadFormsContainer .subcentre-workload-box');
+      for (let i = 0; i < editionBoxes.length; i++) {
+        const box = editionBoxes[i];
+        const titleElem = box.querySelector('.subcentre-title');
+        const edition = titleElem.innerText.replace('Edition:', '').trim();
+        const safeKey = edition.replace(/[^a-zA-Z0-9]/g, '_');
+        const mainPages = parseInt(document.getElementById('main_pages_' + safeKey).value) || 0;
+        const helloPages = parseInt(document.getElementById('hello_pages_' + safeKey).value) || 0;
+        teamWorkloads[edition] = { main_pages: mainPages, hello_pages: helloPages };
+      }
+    }
+    showToast('Registering...', 'info');
+    try {
+      const result = await callServer("registerEmployeeFromMaster", { emp_code: empCode, team_workloads: teamWorkloads });
+      if (result.success) {
+        showToast(result.message, 'success');
+        setTimeout(function() { $('.nav-pills a[href="#self"]').tab('show'); document.getElementById('self_emp_code').value = empCode; setTimeout(function() { openSelfEvaluationFromSelfTab(); }, 500); }, 1500);
+      } else showToast(result.message, 'error');
+    } catch(error) { showToast('Error: ' + error.message, 'error'); }
+  }
+
+  function showRegistrationModal(empCode) {
+    currentRegistrationEmpCode = empCode;
+    document.getElementById('registrationModalBody').innerHTML = '<div class="loading"><i class="fa fa-spinner fa-spin"></i> Loading employee data...</div>';
+    $('#registrationModal').modal('show');
+    Promise.all([callServer("getEmployeeFromMaster", { empCode: empCode }), callServer("checkIfICDUser", { empCode: empCode })]).then(function(results) {
+      const empResult = results[0];
+      const icdResult = results[1];
+      if (empResult.success && empResult.employee) {
+        currentRegistrationEmpData = empResult.employee;
+        if (icdResult.isICD && icdResult.editions) renderRegistrationModalContent(empResult.employee, icdResult.editions);
+        else renderRegistrationModalContent(empResult.employee, []);
+      } else document.getElementById('registrationModalBody').innerHTML = '<div class="alert alert-danger">Error loading employee data</div>';
+    }).catch(function(error) { document.getElementById('registrationModalBody').innerHTML = '<div class="alert alert-danger">Error: ' + error.message + '</div>'; });
+  }
+
+  function renderRegistrationModalContent(employee, editionsList) {
+    let teamWorkloadHtml = '';
+    if (editionsList && editionsList.length > 0) {
+      teamWorkloadHtml = `<div class="panel panel-default"><div class="panel-heading" style="background-color: #ff9800; color: white;"><strong><i class="fa fa-calendar"></i> Team Workload Configuration</strong></div><div class="panel-body" id="regModalTeamWorkloadContainer">`;
+      for (let i = 0; i < editionsList.length; i++) {
+        const edition = editionsList[i].trim();
+        if (edition === '') continue;
+        const safeKey = edition.replace(/[^a-zA-Z0-9]/g, '_');
+        const helloPagesLabel = getHelloPagesLabel(edition);
+        teamWorkloadHtml += `<div class="subcentre-workload-box"><div class="subcentre-title"><i class="fa fa-newspaper-o"></i> Edition: ${escapeHtml(edition)}</div><div class="row"><div class="col-md-6"><div class="form-group"><label>Main Pages:</label><input type="number" class="form-control workload-input" id="reg_main_pages_${safeKey}" min="0" max="99" value="0"></div></div><div class="col-md-6"><div class="form-group"><label>${helloPagesLabel}:</label><input type="number" class="form-control workload-input" id="reg_hello_pages_${safeKey}" min="0" max="99" value="0"></div></div></div></div>`;
+      }
+      teamWorkloadHtml += `</div></div>`;
+    } else teamWorkloadHtml = '<div class="alert alert-info">No editions configured. Please contact administrator.</div>';
+    const modalHtml = `<div class="employee-info-card"><div class="row"><div class="col-md-6"><div class="form-group"><label>Employee Code</label><input type="text" class="form-control" value="${escapeHtml(employee.code || '')}" readonly></div></div><div class="col-md-6"><div class="form-group"><label>Full Name</label><input type="text" class="form-control" value="${escapeHtml(employee.name || '')}" readonly></div></div></div><div class="row"><div class="col-md-6"><div class="form-group"><label>Designation</label><input type="text" class="form-control" value="${escapeHtml(employee.designation || '')}" readonly></div></div><div class="col-md-6"><div class="form-group"><label>Unit</label><input type="text" class="form-control" value="${escapeHtml(employee.unit || '')}" readonly></div></div></div></div>${teamWorkloadHtml}`;
+    document.getElementById('registrationModalBody').innerHTML = modalHtml;
+  }
+
+  async function saveRegistrationFromModal() {
+    if (!currentRegistrationEmpCode) return;
+    let teamWorkloads = {};
+    const editionBoxes = document.querySelectorAll('#regModalTeamWorkloadContainer .subcentre-workload-box');
+    for (let i = 0; i < editionBoxes.length; i++) {
+      const box = editionBoxes[i];
+      const titleElem = box.querySelector('.subcentre-title');
+      const edition = titleElem.innerText.replace('Edition:', '').trim();
+      const safeKey = edition.replace(/[^a-zA-Z0-9]/g, '_');
+      const mainPages = parseInt(document.getElementById('reg_main_pages_' + safeKey).value) || 0;
+      const helloPages = parseInt(document.getElementById('reg_hello_pages_' + safeKey).value) || 0;
+      teamWorkloads[edition] = { main_pages: mainPages, hello_pages: helloPages };
+    }
+    showToast('Registering...', 'info');
+    try {
+      const result = await callServer("registerEmployeeFromMaster", { emp_code: currentRegistrationEmpCode, team_workloads: teamWorkloads });
+      if (result.success) {
+        showToast(result.message, 'success');
+        $('#registrationModal').modal('hide');
+        setTimeout(function() { openSelfEvaluationModal(currentRegistrationEmpCode, currentRegistrationEmpData ? currentRegistrationEmpData.name : currentRegistrationEmpCode, true, false); }, 500);
+      } else showToast('Registration failed: ' + result.message, 'error');
+    } catch(error) { showToast('Error: ' + error.message, 'error'); }
+  }
+
+  // ==================== UNIT HEAD AUTHENTICATION ====================
+  async function authenticateUnitHead() {
+    const email = document.getElementById('unithead_email').value;
+    const secretCode = document.getElementById('unithead_secret_code').value;
+    if(!email || !secretCode) { showToast('Please enter email and secret code', 'error'); return; }
+    try {
+      const result = await callServer("authenticateUser", { email: email, secretCode: secretCode });
+      if(result.success && result.position === 'Unit Head') {
+        authenticatedUnitHead = result;
+        document.getElementById('unitHeadProtectedContent').style.display = 'block';
+        document.getElementById('unitHeadAuthSection').style.display = 'none';
+        showToast(result.message, 'success');
+        updateLogoutButton();
+        loadEmployeesForUnitHead(result.unit);
+      } else showToast(result.success ? 'Access denied. Unit Head access only.' : result.message, 'error');
+    } catch(error) { showToast('Authentication failed: ' + error.message, 'error'); }
+  }
+
+  async function loadEmployeesForUnitHead(unitPrefix) {
+    const teamListDiv = document.getElementById('unitHeadTeamList');
+    teamListDiv.innerHTML = '<div class="loading"><i class="fa fa-spinner fa-spin"></i> Loading employees...</div>';
+    try {
+      const result = await callServer("getEmployeesByUnitPrefix", { unitPrefix: unitPrefix, unitHeadName: authenticatedUnitHead.name });
+      if(result.success && result.employees && result.employees.length > 0) {
+        unitHeadEmployeesCache = result.employees;
+        displayUnitHeadEmployeeCards(result.employees, '');
+      } else teamListDiv.innerHTML = '<div class="alert alert-info">No employees found reporting to you in unit: ' + unitPrefix + '</div>';
+    } catch(error) { teamListDiv.innerHTML = '<div class="alert alert-danger">Error loading employees: ' + error.message + '</div>'; }
+  }
+
+  function displayUnitHeadEmployeeCards(employees, workplaceFilter) {
+    const teamListDiv = document.getElementById('unitHeadTeamList');
+    let filteredEmployees = employees;
+    if (workplaceFilter && workplaceFilter !== '') filteredEmployees = employees.filter(function(emp) { return emp.workplace === workplaceFilter; });
+    if (filteredEmployees.length === 0) { teamListDiv.innerHTML = '<div class="alert alert-info">No employees found' + (workplaceFilter ? ' for workplace: ' + workplaceFilter : '') + '</div>'; return; }
+    let html = '<h4>Team Members <span class="badge">' + filteredEmployees.length + '</span></h4>';
+    for (let i = 0; i < filteredEmployees.length; i++) {
+      const member = filteredEmployees[i];
+      const statusClass = member.completion === 'Yes' ? 'status-submitted' : 'status-pending';
+      const statusText = member.completion === 'Yes' ? '✓ Self Evaluation Submitted' : '📝 Draft';
+      const dailyWorkloadHtml = generateDailyWorkloadHTML(member.dailyWorkload);
+      const hodComplete = member.hodRatings && member.hodRatings.page_layout > 0;
+      const unitHeadStatusText = (member.status === "Assessed-UH") ? '✓ Approved' : ((member.status === "Assessed") ? '⏳ Pending Approval' : '⏳ Pending');
+      const unitHeadStatusClass = (member.status === "Assessed-UH") ? 'status-complete' : 'status-pending';
+      let buttonHtml = '';
+      if (member.status === "Assessed") buttonHtml = '<button class="btn btn-sm btn-success" onclick="approveUnitHeadEvaluation(\'' + member.code + '\')" style="margin-right: 8px;"><i class="fa fa-check-circle"></i> Approve</button>';
+      html += `<div class="team-member-card"><div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; margin-bottom: 10px;"><div style="flex: 1;"><strong style="font-size: 16px;"><i class="fa fa-user"></i> ${escapeHtml(member.name)}</strong><br><small><i class="fa fa-briefcase"></i> ${escapeHtml(member.designation || 'N/A')} | <i class="fa fa-building"></i> ${escapeHtml(member.unit)}</small><br><small><i class="fa fa-map-marker"></i> Workplace: ${escapeHtml(member.workplace || 'N/A')} | <i class="fa fa-id-card"></i> Code: ${escapeHtml(member.code)}</small></div><div style="text-align: right;"><span class="remark-badge ${statusClass}">${statusText}</span><span class="remark-badge ${hodComplete ? 'status-complete' : 'status-pending'}">HOD: ${hodComplete ? '✓ Complete' : '⏳ Pending'}</span><span class="remark-badge ${unitHeadStatusClass}">Unit Head: ${unitHeadStatusText}</span></div></div>${dailyWorkloadHtml}<div style="margin-top: 15px; text-align: right; border-top: 1px solid #eee; padding-top: 12px;">${buttonHtml}</div></div>`;
+    }
+    teamListDiv.innerHTML = html;
+  }
+
+  async function approveUnitHeadEvaluation(empCode) {
+    showToast('Approving...', 'info');
+    try {
+      const result = await callServer("saveUnitHeadApproval", { emp_code: empCode });
+      if (result.success) { showToast(result.message, 'success'); if (authenticatedUnitHead && authenticatedUnitHead.unit) loadEmployeesForUnitHead(authenticatedUnitHead.unit); }
+      else showToast('Error: ' + result.message, 'error');
+    } catch(error) { showToast('Error: ' + error.message, 'error'); }
+  }
+
+  // ==================== VERTICAL HEAD AUTHENTICATION ====================
+  async function authenticateVerticalHead() {
+    const email = document.getElementById('vh_email').value;
+    const secretCode = document.getElementById('vh_secret_code').value;
+    if(!email || !secretCode) { showToast('Please enter email and secret code', 'error'); return; }
+    try {
+      const result = await callServer("authenticateUser", { email: email, secretCode: secretCode });
+      if(result.success && result.position === 'Vertical Head') {
+        authenticatedUser = result;
+        document.getElementById('vhProtectedContent').style.display = 'block';
+        document.getElementById('vhAuthSection').style.display = 'none';
+        showToast(result.message, 'success');
+        updateLogoutButton();
+        generateCentreButtons();
+      } else { showToast('Access denied. Only Vertical Head can access this tab.', 'error'); }
+    } catch(error) { showToast('Authentication failed: ' + error.message, 'error'); }
+  }
+
+  async function generateCentreButtons() {
+    const container = document.getElementById('centreButtonsContainer');
+    container.innerHTML = '<div class="loading"><i class="fa fa-spinner fa-spin"></i> Loading centres...</div>';
+    const centresWithCounts = [];
+    for (let c = 0; c < CENTRES.length; c++) {
+      const centre = CENTRES[c];
+      try {
+        const result = await callServer("getCentreEmployeeCountsWithTotal", { centre: centre });
+        const total = result.totalCount || 0;
+        const completed = result.completedCount || 0;
+        centresWithCounts.push({ centre: centre, total: total, completed: completed });
+      } catch(err) { centresWithCounts.push({ centre: centre, total: 0, completed: 0 }); }
+    }
+    renderCentreButtons(centresWithCounts);
+  }
+
+  function renderCentreButtons(centresWithCounts) {
+    const container = document.getElementById('centreButtonsContainer');
+    let html = '';
+    for (let i = 0; i < centresWithCounts.length; i++) {
+      const item = centresWithCounts[i];
+      const centre = item.centre;
+      const total = item.total;
+      const completed = item.completed;
+      const displayText = total > 0 ? centre + ' (' + completed + '/' + total + ')' : centre;
+      html += '<button class="btn btn-default filter-btn centre-btn" onclick="selectCentre(\'' + centre.replace(/'/g, "\\'") + '\')"><i class="fa fa-building"></i> ' + displayText + '</button>';
+    }
+    container.innerHTML = html;
+  }
+
+  async function selectCentre(centre) {
+    currentSelectedCentre = centre;
+    currentSelectedWorkplace = null;
+    try {
+      loadEmployeesByCentre(centre, '');
+    } catch(error) { showToast('Error loading employees: ' + error.message, 'error'); }
+  }
+
+  async function loadEmployeesByCentre(centre, workplaceFilter) {
+    const employeeListDiv = document.getElementById('employeeList');
+    employeeListDiv.innerHTML = '<div class="loading"><i class="fa fa-spinner fa-spin"></i> Loading employees...</div>';
+    try {
+      const result = await callServer("getEmployeesByCentre", { centre: centre });
+      if (result.success && result.employees && result.employees.length > 0) {
+        displayVHEmployeeCards(result.employees, workplaceFilter);
+      } else employeeListDiv.innerHTML = '<div class="alert alert-info">No employees with completed evaluation for centre: ' + centre + '</div>';
+    } catch(error) { employeeListDiv.innerHTML = '<div class="alert alert-danger">Error loading employees: ' + error.message + '</div>'; }
+  }
+
+  function displayVHEmployeeCards(employees, workplaceFilter) {
+    let filteredByWorkplace = employees;
+    if (workplaceFilter && workplaceFilter !== '') filteredByWorkplace = employees.filter(function(emp) { return emp.workplace === workplaceFilter; });
+    const completeEmployees = filteredByWorkplace.filter(function(emp) { return emp.status === "Assessed-UH"; });
+    const totalEmployees = filteredByWorkplace.length;
+    if (completeEmployees.length === 0) {
+      document.getElementById('employeeList').innerHTML = '<div class="alert alert-info">No employees with completed evaluation (Assessed-UH) found. (Total: ' + totalEmployees + ' employees have submitted self evaluation).</div>';
+      return;
+    }
+    let html = '<div class="panel panel-default"><div class="panel-heading"><strong><i class="fa fa-building"></i> Centre: ' + currentSelectedCentre + '</strong> <span class="badge pull-right">Completed: ' + completeEmployees.length + ' / ' + totalEmployees + '</span></div><div class="panel-body">';
+    for (let i = 0; i < completeEmployees.length; i++) {
+      const emp = completeEmployees[i];
+      const hodTotal = (emp.hodRatings.page_layout||0)+(emp.hodRatings.deadline_adherence||0)+(emp.hodRatings.quality_accuracy||0)+(emp.hodRatings.advertising_integration||0)+(emp.hodRatings.platform_adaptation||0)+(emp.hodRatings.collaboration||0);
+      const performanceOutOf10 = Math.round((hodTotal / 30) * 10 * 10) / 10;
+      let levelText = '', levelColor = '';
+      if (emp.hodOverallLevel === 'DE') { levelText = 'Distinguished Expert'; levelColor = '#28a745'; }
+      else if (emp.hodOverallLevel === 'ME') { levelText = 'Meets Expectations'; levelColor = '#ffc107'; }
+      else if (emp.hodOverallLevel === 'NI') { levelText = 'Needs Improvement'; levelColor = '#dc3545'; }
+      else { levelText = 'Not Assessed'; levelColor = '#6c757d'; }
+      html += `<div class="employee-card" style="margin-bottom: 20px; padding: 15px;"><div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; margin-bottom: 12px;"><div><strong style="font-size: 16px;"><i class="fa fa-user-circle"></i> ${escapeHtml(emp.name)}</strong><br><small><i class="fa fa-map-marker"></i> ${escapeHtml(emp.workplace || 'N/A')} | <i class="fa fa-id-card"></i> ${escapeHtml(emp.code)}</small></div><div><button class="btn btn-sm btn-info" onclick="openSelfEvaluationModal('${emp.code}', '${escapeHtml(emp.name)}', true, false)"><i class="fa fa-star"></i> Self-Evaluation</button></div></div><div style="background: #f8fafc; border-radius: 8px; padding: 12px;"><div><strong>⭐ HOD Score: ${performanceOutOf10}/10</strong> <span style="background: ${levelColor}; color: white; padding: 2px 10px; border-radius: 20px; font-size: 11px;">${levelText}</span></div><div style="margin-top: 8px;"><strong>💬 Comments:</strong> ${emp.hodComments ? escapeHtml(emp.hodComments) : 'No comments'}</div></div></div>`;
+    }
+    html += '</div></div>';
+    document.getElementById('employeeList').innerHTML = html;
+  }
+
+  // Make functions available globally
+  window.authenticateHOD = authenticateHOD;
+  window.authenticateUnitHead = authenticateUnitHead;
+  window.authenticateVerticalHead = authenticateVerticalHead;
+  window.loadEmployeeFromMaster = loadEmployeeFromMaster;
+  window.registerEmployee = registerEmployee;
+  window.openSelfEvaluationFromSelfTab = openSelfEvaluationFromSelfTab;
+  window.saveSelfEvaluationFromModal = saveSelfEvaluationFromModal;
+  window.saveHODEvaluationFromModal = saveHODEvaluationFromModal;
+  window.updateSelfModalLiveScore = updateSelfModalLiveScore;
+  window.openHODEvalForHODTab = openHODEvalForHODTab;
+  window.openHODEvalForVerticalHead = openHODEvalForVerticalHead;
+  window.printEvaluationReport = printEvaluationReport;
+  window.selectCentre = selectCentre;
+  window.approveUnitHeadEvaluation = approveUnitHeadEvaluation;
+  window.logoutCurrentUser = logoutCurrentUser;
+  window.showRegistrationModal = showRegistrationModal;
+  window.saveRegistrationFromModal = saveRegistrationFromModal;
+  </script>
 </body>
 </html>
