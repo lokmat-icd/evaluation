@@ -1,10 +1,12 @@
 // ==================== CONFIGURATION ====================
-// IMPORTANT: Replace this URL with your actual deployed Apps Script URL (from GS-Code.txt)
-const API_URL = "https://script.google.com/macros/s/AKfycbzYU5git5k7dNyIz0z2ALPtmCkhSWmXTf9XfZ1A4F1IBm27Vsi26Z14lCj7r18q_mBg/exec";
+// IMPORTANT: Replace this URL with your ACTUAL deployed Apps Script URL
+// After deploying your GS-Code.txt as a Web App, copy the URL here
+const API_URL = "https://script.google.com/macros/s/AKfycby82A7Wg2JdxXZ4w3Vydiv2OcwvKmuAo8zNCrTYwm3sTf0Z-23NknfyZ9V99_dve7sW/exec";
 
 // ==================== GLOBAL VARIABLES ====================
 let authenticatedUser = null;      // For ICD/Head/Vertical Head
 let authenticatedUnitHead = null;  // For Unit Head
+let currentEvalEmp = null;
 let currentSelectedCentre = null;
 let currentSelectedWorkplace = null;
 let currentSelectedHODWorkplace = null;
@@ -33,14 +35,27 @@ const CENTRES = ['Akola', 'Nagpur(LS)','Nagpur(LM)','Nagpur(LT)','Chh. Sambhajin
 
 // ==================== API HELPER ====================
 async function callServer(action, params) {
-  const response = await fetch(API_URL, {
-    method: "POST",
-    mode: "cors",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ action: action, params: params })
-  });
-  if (!response.ok) throw new Error(`HTTP ${response.status}`);
-  return await response.json();
+  try {
+    console.log(`Calling ${action} with params:`, params);
+    const response = await fetch(API_URL, {
+      method: "POST",
+      mode: "cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: action, params: params || {} })
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+    
+    const result = await response.json();
+    console.log(`Response from ${action}:`, result);
+    return result;
+  } catch (error) {
+    console.error(`API call failed for ${action}:`, error);
+    showToast(`Connection error: ${error.message}`, 'error');
+    throw error;
+  }
 }
 
 // ==================== HELPER FUNCTIONS ====================
@@ -150,4 +165,53 @@ function updateLogoutButton() {
   if (logoutBtn) {
     logoutBtn.style.display = (authenticatedUser || authenticatedUnitHead) ? 'inline-block' : 'none';
   }
+}
+
+// Global logout function
+async function logoutCurrentUser() {
+  authenticatedUser = null;
+  authenticatedUnitHead = null;
+  showToast('Logged out successfully', 'success');
+  
+  // Reset UI
+  const hodAuthSection = document.getElementById('hodAuthSection');
+  const hodProtected = document.getElementById('hodProtectedContent');
+  const unitHeadAuth = document.getElementById('unitHeadAuthSection');
+  const unitHeadProtected = document.getElementById('unitHeadProtectedContent');
+  const vhAuth = document.getElementById('vhAuthSection');
+  const vhProtected = document.getElementById('vhProtectedContent');
+  
+  if (hodAuthSection) hodAuthSection.style.display = 'block';
+  if (hodProtected) hodProtected.style.display = 'none';
+  if (unitHeadAuth) unitHeadAuth.style.display = 'block';
+  if (unitHeadProtected) unitHeadProtected.style.display = 'none';
+  if (vhAuth) vhAuth.style.display = 'block';
+  if (vhProtected) vhProtected.style.display = 'none';
+  
+  // Clear displayed data
+  const hodTeamList = document.getElementById('hodTeamList');
+  const unitHeadTeamList = document.getElementById('unitHeadTeamList');
+  const employeeList = document.getElementById('employeeList');
+  if (hodTeamList) hodTeamList.innerHTML = '';
+  if (unitHeadTeamList) unitHeadTeamList.innerHTML = '';
+  if (employeeList) employeeList.innerHTML = '';
+  
+  // Clear auth inputs
+  const hodEmail = document.getElementById('hod_email');
+  const hodSecret = document.getElementById('hod_secret_code');
+  const unitEmail = document.getElementById('unithead_email');
+  const unitSecret = document.getElementById('unithead_secret_code');
+  const vhEmail = document.getElementById('vh_email');
+  const vhSecret = document.getElementById('vh_secret_code');
+  
+  if (hodEmail) hodEmail.value = '';
+  if (hodSecret) hodSecret.value = '';
+  if (unitEmail) unitEmail.value = '';
+  if (unitSecret) unitSecret.value = '';
+  if (vhEmail) vhEmail.value = '';
+  if (vhSecret) vhSecret.value = '';
+  
+  updateLogoutButton();
+  // Switch to self tab
+  $('.nav-pills a[href="#self"]').tab('show');
 }

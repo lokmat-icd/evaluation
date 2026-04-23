@@ -107,7 +107,15 @@
             <div class="col-md-4"><button class="btn btn-primary load-btn" onclick="loadEmployeeFromMaster()" style="margin-top: 25px;"><i class="fa fa-download"></i> Load Employee Data</button></div>
           </div>
           <div id="employeeInfoSection" style="display: none;"></div>
-          <div id="teamWorkloadSection" style="display: none;"></div>
+          <div id="teamWorkloadSection" style="display: none;">
+		  <div class="panel panel-default">
+			<div class="panel-heading" style="background-color: #ff9800; color: white;">
+			  <strong><i class="fa fa-tasks"></i> Team Workload Configuration (ICD Only)</strong>
+			</div>
+			<div class="panel-body" id="teamWorkloadFormsContainer">
+			</div>
+		  </div>
+		</div>
           <div id="registrationActions" style="display: none;"><button class="btn btn-primary btn-lg" onclick="registerEmployee()"><i class="fa fa-save"></i> Register & Continue to Self Evaluation</button></div>
           <div id="regMessage" class="alert"></div>
         </div>
