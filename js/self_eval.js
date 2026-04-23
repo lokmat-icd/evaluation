@@ -12,6 +12,9 @@ function openSelfEvaluationModal(empCode, empName, isEditable, isSubmitted) {
 
   const saveBtn = document.getElementById('selfEvalSaveBtn');
   if (saveBtn) saveBtn.style.display = currentSelfEvalIsEditable ? 'inline-block' : 'none';
+  
+  const draftBtn = document.getElementById('selfEvalDraftBtn');
+  if (draftBtn) draftBtn.style.display = currentSelfEvalIsEditable ? 'inline-block' : 'none';
 
   $('#selfEvalModal').modal('show');
 
@@ -24,19 +27,23 @@ function openSelfEvaluationModal(empCode, empName, isEditable, isSubmitted) {
     renderSelfEvalModalContent(latest, employeeMaster);
   }).catch(error => {
     console.error('Error loading self evaluation data:', error);
+    showToast('Error loading data: ' + error.message, 'error');
     renderSelfEvalModalContent(null, null);
   });
 }
 
 function renderSelfEvalModalContent(evalData, employeeMasterData) {
-  const disabledAttr = currentSelfEvalIsEditable ? '' : 'disabled';
-  const isDraftMode = (evalData && evalData.status === 'Draft');
-  if (isDraftMode && !currentSelfEvalIsEditable) {
-    currentSelfEvalIsEditable = true;
-    // We'll re-render with enabled fields, but for simplicity just use disabledAttr as empty.
-    // The function will be called again after state change? Better to re-call openSelfEvaluationModal.
-    // But here we just adjust the attribute.
+  // Determine if editable - check if status is "Complete" or "Assessed" or "Assessed-UH"
+  let isLocked = false;
+  if (evalData && evalData.status) {
+    // If evaluation is already completed/assessed, lock it unless it's a draft
+    if (evalData.status === "Complete" || evalData.status === "Assessed" || evalData.status === "Assessed-UH") {
+      isLocked = true;
+    }
   }
+  
+  const disabledAttr = (currentSelfEvalIsEditable && !isLocked) ? '' : 'disabled';
+  const isDraftMode = (evalData && evalData.status === 'Draft');
 
   const empName = employeeMasterData ? employeeMasterData.name : '';
   const empCode = employeeMasterData ? employeeMasterData.code : currentSelfEvalEmpCode;
@@ -60,7 +67,10 @@ function renderSelfEvalModalContent(evalData, employeeMasterData) {
 
   let kraHtml = '';
   for (const kra of kraDefinitions) {
-    const ratingValue = (evalData && evalData.kraRatings && evalData.kraRatings[kra.id]) ? evalData.kraRatings[kra.id] : defaultRating;
+    let ratingValue = defaultRating;
+    if (evalData && evalData.kraRatings && evalData.kraRatings[kra.id]) {
+      ratingValue = evalData.kraRatings[kra.id];
+    }
     let optionsHtml = '';
     ratingOptions.forEach(opt => {
       optionsHtml += `<option value="${opt}" ${opt == ratingValue ? 'selected' : ''}>${opt}</option>`;
@@ -136,7 +146,6 @@ function renderSelfEvalModalContent(evalData, employeeMasterData) {
     <div class="panel panel-default">
       <div class="panel-heading" style="background-color: #1e3c72; color: white;"><strong><i class="fa fa-calendar"></i> 📊 Daily Workload</strong></div>
       <div class="panel-body">
-        <!-- Main Edition -->
         <div class="panel panel-default"><div class="panel-heading" style="background-color: #2a5298; color: white;"><strong><i class="fa fa-newspaper-o"></i> 1. Main Edition</strong></div>
         <div class="panel-body"><div class="row">
           <div class="col-xs-12 col-sm-6 col-md-3"><label>Full Page Design</label><input type="number" class="form-control" id="modal_main_full_page_design" value="${dw.main_full_page_design || 0}" min="0" ${disabledAttr} onfocus="this.select()"></div>
@@ -144,7 +153,6 @@ function renderSelfEvalModalContent(evalData, employeeMasterData) {
           <div class="col-xs-12 col-sm-6 col-md-3"><label>Page Alter (News Update)</label><input type="number" class="form-control" id="modal_main_page_alter_news_update" value="${dw.main_page_alter_news_update || 0}" min="0" ${disabledAttr} onfocus="this.select()"></div>
           <div class="col-xs-12 col-sm-6 col-md-3"><label>Infographic/Info-Story</label><input type="number" class="form-control" id="modal_main_infographic" value="${dw.main_infographic || 0}" min="0" ${disabledAttr} onfocus="this.select()"></div>
         </div></div></div>
-        <!-- Hello Edition -->
         <div class="panel panel-default"><div class="panel-heading" style="background-color: #2a5298; color: white;"><strong><i class="fa fa-file-text-o"></i> 2. Hello Edition</strong></div>
         <div class="panel-body"><div class="row">
           <div class="col-xs-12 col-sm-6 col-md-3"><label>Full Page Design</label><input type="number" class="form-control" id="modal_hello_full_page_design" value="${dw.hello_full_page_design || 0}" min="0" ${disabledAttr} onfocus="this.select()"></div>
@@ -152,7 +160,6 @@ function renderSelfEvalModalContent(evalData, employeeMasterData) {
           <div class="col-xs-12 col-sm-6 col-md-3"><label>Page Alter (News Update)</label><input type="number" class="form-control" id="modal_hello_page_alter_news_update" value="${dw.hello_page_alter_news_update || 0}" min="0" ${disabledAttr} onfocus="this.select()"></div>
           <div class="col-xs-12 col-sm-6 col-md-3"><label>Infographic/Info-Story</label><input type="number" class="form-control" id="modal_hello_infographic" value="${dw.hello_infographic || 0}" min="0" ${disabledAttr} onfocus="this.select()"></div>
         </div></div></div>
-        <!-- Other Tasks -->
         <div class="panel panel-default"><div class="panel-heading" style="background-color: #2a5298; color: white;"><strong><i class="fa fa-tasks"></i> 3. Common Tasks & Projects</strong></div>
         <div class="panel-body"><div class="row">
           <div class="col-xs-12 col-sm-6 col-md-3"><label>Notice/Display Ad Design</label><input type="number" class="form-control" id="modal_display_ad_design" value="${dw.display_ad_design || 0}" min="0" ${disabledAttr} onfocus="this.select()"></div>
@@ -177,6 +184,20 @@ function renderSelfEvalModalContent(evalData, employeeMasterData) {
   `;
 
   document.getElementById('selfEvalModalBody').innerHTML = modalHtml;
+  
+  // Show warning if locked
+  if (isLocked && !isDraftMode) {
+    const warningDiv = document.createElement('div');
+    warningDiv.className = 'alert alert-warning';
+    warningDiv.innerHTML = '<i class="fa fa-lock"></i> This evaluation has been completed and cannot be edited.';
+    document.getElementById('selfEvalModalBody').insertBefore(warningDiv, document.getElementById('selfEvalModalBody').firstChild);
+  } else if (isDraftMode) {
+    const infoDiv = document.createElement('div');
+    infoDiv.className = 'alert alert-info';
+    infoDiv.innerHTML = '<i class="fa fa-pencil-square-o"></i> This is a DRAFT. You can edit and save again. Click "Save Changes" when ready to submit for evaluation.';
+    document.getElementById('selfEvalModalBody').insertBefore(infoDiv, document.getElementById('selfEvalModalBody').firstChild);
+  }
+  
   updateSelfModalLiveScore();
 }
 
@@ -307,23 +328,36 @@ async function openSelfEvaluationFromSelfTab() {
     showToast('Please enter employee code', 'error');
     return;
   }
+  
   showToast('Loading employee data...', 'info');
+  
   try {
+    // First check if employee exists in master data
     const checkResult = await callServer("checkEmployeeExists", { empCode: empCode });
-    if (checkResult.exists) {
-      const icdStatus = await callServer("checkIfICDUserWithStatus", { empCode: empCode });
-      if (icdStatus.isICD && icdStatus.teamWorkloadSaved !== 'Yes') {
-        showRegistrationModal(empCode);
-      } else {
-        const isCompleted = checkResult.completion === 'Yes';
-        const empInfo = await callServer("getEmployeeBasicInfo", { empCode: empCode });
-        const empName = empInfo.success ? empInfo.name : empCode;
-        openSelfEvaluationModal(empCode, empName, true, isCompleted);
-      }
-    } else {
+    
+    if (!checkResult.exists) {
       showToast('Employee code not found. Please contact HR.', 'warning');
+      return;
     }
+    
+    // Check if ICD and needs registration
+    const icdStatus = await callServer("checkIfICDUserWithStatus", { empCode: empCode });
+    
+    if (icdStatus.isICD && icdStatus.teamWorkloadSaved !== 'Yes') {
+      // Show registration modal for ICD users who haven't configured workload
+      showRegistrationModal(empCode);
+      return;
+    }
+    
+    // Get employee name for modal title
+    const empInfo = await callServer("getEmployeeBasicInfo", { empCode: empCode });
+    const empName = empInfo.success ? empInfo.name : empCode;
+    const isCompleted = checkResult.completion === 'Yes';
+    
+    openSelfEvaluationModal(empCode, empName, true, isCompleted);
+    
   } catch(error) {
-    showToast(`Error checking employee: ${error.message}`, 'error');
+    console.error('Error in openSelfEvaluationFromSelfTab:', error);
+    showToast(`Error: ${error.message}`, 'error');
   }
 }

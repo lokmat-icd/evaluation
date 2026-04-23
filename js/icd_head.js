@@ -1,44 +1,100 @@
 // ==================== HOD / ICD AUTHENTICATION ====================
 async function authenticateHOD() {
-  var email = document.getElementById('hod_email').value;
-  var secretCode = document.getElementById('hod_secret_code').value;
-  if(!email || !secretCode) { showToast('Please enter email and secret code', 'error'); return; }
+  const email = document.getElementById('hod_email').value;
+  const secretCode = document.getElementById('hod_secret_code').value;
+  
+  if (!email || !secretCode) {
+    showToast('Please enter email and secret code', 'error');
+    return;
+  }
+  
+  // Disable button to prevent multiple clicks
+  const authBtn = document.querySelector('#hodAuthSection .btn-primary');
+  const originalText = authBtn.innerHTML;
+  authBtn.disabled = true;
+  authBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Authenticating...';
+  
   try {
-    var result = await callServer("authenticateUser", { email: email, secretCode: secretCode });
-    if(result.success) {
+    console.log("Authenticating with email:", email);
+    const result = await callServer("authenticateUser", { email: email, secretCode: secretCode });
+    
+    if (result.success) {
       authenticatedUser = result;
       document.getElementById('hodProtectedContent').style.display = 'block';
       document.getElementById('hodAuthSection').style.display = 'none';
       showToast(result.message, 'success');
       updateLogoutButton();
-      if(result.position === 'ICD') loadEmployeesForICD(result.unit, result.editions);
-      else if(result.position === 'Head') loadTeamMembersForHead(result.name);
-      else { showToast('Access denied. Only ICD and Head can access this tab.', 'error'); document.getElementById('hodProtectedContent').style.display = 'none'; document.getElementById('hodAuthSection').style.display = 'block'; }
-    } else showToast(result.message, 'error');
-  } catch(error) { showToast('Error: ' + error.message, 'error'); }
+      
+      if (result.position === 'ICD') {
+        await loadEmployeesForICD(result.unit, result.editions);
+      } else if (result.position === 'Head') {
+        await loadTeamMembersForHead(result.name);
+      } else {
+        showToast('Access denied. Only ICD and Head can access this tab.', 'error');
+        document.getElementById('hodProtectedContent').style.display = 'none';
+        document.getElementById('hodAuthSection').style.display = 'block';
+      }
+    } else {
+      showToast(result.message || 'Authentication failed', 'error');
+    }
+  } catch (error) {
+    console.error('Authentication error:', error);
+    showToast('Authentication failed: ' + error.message, 'error');
+  } finally {
+    // Re-enable button
+    authBtn.disabled = false;
+    authBtn.innerHTML = originalText;
+  }
 }
 
 async function loadEmployeesForICD(unit, editionsList) {
-  var teamListDiv = document.getElementById('hodTeamList');
+  const teamListDiv = document.getElementById('hodTeamList');
   teamListDiv.innerHTML = '<div class="loading"><i class="fa fa-spinner fa-spin"></i> Loading employees...</div>';
-  var icdEmpCode = authenticatedUser ? authenticatedUser.empCode : null;
+  const icdEmpCode = authenticatedUser ? authenticatedUser.empCode : null;
+  
   try {
-    var workplacesResult = await callServer("getWorkplacesByUnitWithTotal", { unit: unit });
-    if(workplacesResult.success && workplacesResult.workplaces.length > 0) {
-      var filterDiv = document.getElementById('hodWorkplaceFilters');
+    // Load workplaces first
+    const workplacesResult = await callServer("getWorkplacesByUnitWithTotal", { unit: unit });
+    
+    if (workplacesResult.success && workplacesResult.workplaces && workplacesResult.workplaces.length > 0) {
+      const filterDiv = document.getElementById('hodWorkplaceFilters');
       filterDiv.style.display = 'flex';
-      var totalCompleted=0, totalEmployees=0;
-      for(var i=0;i<workplacesResult.workplaces.length;i++) { totalCompleted+=workplacesResult.workplaces[i].completed; totalEmployees+=workplacesResult.workplaces[i].total; }
-      var filterHtml = '<button class="btn btn-default filter-btn active-filter" onclick="filterHODByWorkplace(\'\')"><i class="fa fa-list"></i> All Workplaces ('+totalCompleted+'/'+totalEmployees+')</button>';
-      for(var i=0;i<workplacesResult.workplaces.length;i++) { var wp=workplacesResult.workplaces[i]; filterHtml += '<button class="btn btn-default filter-btn" onclick="filterHODByWorkplace(\''+wp.name.replace(/'/g, "\\'")+'\')"><i class="fa fa-location-arrow"></i> '+wp.name+' ('+wp.completed+'/'+wp.total+')</button>'; }
+      
+      let totalCompleted = 0, totalEmployees = 0;
+      for (let i = 0; i < workplacesResult.workplaces.length; i++) {
+        totalCompleted += workplacesResult.workplaces[i].completed || 0;
+        totalEmployees += workplacesResult.workplaces[i].total || 0;
+      }
+      
+      let filterHtml = `<button class="btn btn-default filter-btn active-filter" onclick="filterHODByWorkplace('')">
+                          <i class="fa fa-list"></i> All Workplaces (${totalCompleted}/${totalEmployees})
+                        </button>`;
+      
+      for (let i = 0; i < workplacesResult.workplaces.length; i++) {
+        const wp = workplacesResult.workplaces[i];
+        filterHtml += `<button class="btn btn-default filter-btn" onclick="filterHODByWorkplace('${wp.name.replace(/'/g, "\\'")}')">
+                          <i class="fa fa-location-arrow"></i> ${wp.name} (${wp.completed}/${wp.total})
+                        </button>`;
+      }
       filterDiv.innerHTML = filterHtml;
       currentSelectedHODWorkplace = '';
-    } else document.getElementById('hodWorkplaceFilters').style.display = 'none';
+    } else {
+      document.getElementById('hodWorkplaceFilters').style.display = 'none';
+    }
     
-    var employeesResult = await callServer("getEmployeesByUnit", { unit: unit, excludeEmpCode: icdEmpCode });
-    if(employeesResult.success && employeesResult.employees.length > 0) displayHODEmployeeCards(employeesResult.employees, '');
-    else teamListDiv.innerHTML = '<div class="alert alert-info">No employees have submitted self evaluation yet for unit: '+unit+'</div>';
-  } catch(error) { teamListDiv.innerHTML = '<div class="alert alert-danger">Error loading employees: '+error.message+'</div>'; }
+    // Load employees
+    const employeesResult = await callServer("getEmployeesByUnit", { unit: unit, excludeEmpCode: icdEmpCode });
+    
+    if (employeesResult.success && employeesResult.employees && employeesResult.employees.length > 0) {
+      displayHODEmployeeCards(employeesResult.employees, '');
+    } else {
+      teamListDiv.innerHTML = `<div class="alert alert-info">No employees have submitted self evaluation yet for unit: ${unit}</div>`;
+    }
+    
+  } catch (error) {
+    console.error('Error loading employees:', error);
+    teamListDiv.innerHTML = `<div class="alert alert-danger">Error loading employees: ${error.message}</div>`;
+  }
 }
 
 async function loadTeamMembersForHead(headName) {
