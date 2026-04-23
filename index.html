@@ -11,77 +11,308 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   
   <style>
-    /* ========== ALL YOUR EXISTING STYLES (same as original) ========== */
-    .modal-footer { display: flex; justify-content: center !important; align-items: center; gap: 10px; }
-    .modal-footer { border-top: none; padding: 15px; }
-    .workload-chip { background: #eef2ff; padding: 4px 10px; border-radius: 20px; font-size: 11px; display: inline-block; margin: 2px; }
-    .employee-card { transition: all 0.3s ease; }
-    .employee-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); transform: translateY(-2px); }
-    .workload-line { background: #e8f4fd; padding: 4px 10px; border-radius: 15px; font-size: 11px; display: inline-block; }
-    body { background: #f4f6f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    .header { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; padding: 20px; margin-bottom: 30px; border-radius: 0 0 10px 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-    .tab-content { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-top: 20px; min-height: 500px; }
-    .nav-pills > li > a { color: #1e3c72; font-weight: 600; transition: all 0.3s; }
-    .nav-pills > li.active > a { background-color: #1e3c72; color: white; }
-    .nav-pills > li > a:hover { background-color: #e0e4e8; }
-    .form-group { margin-bottom: 20px; }
-    .btn-primary { background-color: #1e3c72; border-color: #1e3c72; }
-    .btn-primary:hover { background-color: #2a5298; border-color: #2a5298; }
-    .alert { margin-top: 20px; display: none; }
-    .kra-box { background: #f8f9fa; padding: 15px; margin-bottom: 15px; border-radius: 8px; border-left: 4px solid #1e3c72; }
-    .team-member-card { background: #f8f9fa; padding: 15px; margin-bottom: 10px; border-radius: 8px; transition: all 0.3s; border-left: 4px solid #1e3c72; }
-    .team-member-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.1); transform: translateX(5px); }
-    .employee-card { background: white; border: 1px solid #e0e0e0; padding: 15px; margin-bottom: 10px; border-radius: 8px; transition: all 0.3s; }
-    .employee-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-    .remark-badge { padding: 5px 10px; border-radius: 4px; font-size: 12px; font-weight: bold; display: inline-block; margin: 2px; }
-    .status-complete { background-color: #d4edda; color: #155724; }
-    .status-pending { background-color: #fff3cd; color: #856404; }
-    .status-submitted { background-color: #cce5ff; color: #004085; }
-    .modal-content { border-radius: 10px; }
-    .rating-select { width: 80px; display: inline-block; margin-top: 10px; }
-    .filter-buttons-group { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
-    .filter-btn { margin-bottom: 5px; transition: all 0.3s; }
-    .filter-btn:hover { transform: translateY(-2px); }
-    .filter-btn.active-filter { background-color: #1e3c72; color: white; border-color: #1e3c72; }
-    .loading { text-align: center; padding: 20px; }
-    @media (max-width: 768px) { .tab-content { padding: 15px; } .team-member-card > div { flex-direction: column; text-align: center; } .team-member-card button { margin-top: 10px; } }
-    .workload-line { background: #e8f4fd; padding: 6px 12px; border-radius: 6px; font-size: 12px; margin: 8px 0; display: inline-block; }
-    .subcentre-workload-box { background: #fff3e0; padding: 15px; margin-bottom: 20px; border-radius: 8px; border-left: 4px solid #ff9800; }
-    .subcentre-title { font-size: 16px; font-weight: bold; color: #e68a00; margin-bottom: 15px; }
-    .readonly-field { background-color: #e9ecef; cursor: not-allowed; }
-    .page-input { width: 80px !important; display: inline-block !important; text-align: center; }
-    .edition-label { font-weight: 600; margin-right: 10px; min-width: 180px; display: inline-block; }
-    .custom-toast { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); min-width: 320px; max-width: 450px; padding: 18px 24px; border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.25); z-index: 10000; font-size: 15px; font-weight: 500; display: flex; align-items: center; gap: 14px; text-align: center; justify-content: center; }
+
+.modal-footer {
+  display: flex;
+  justify-content: center !important;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Remove the default border and padding if needed */
+.modal-footer {
+  border-top: none;
+  padding: 15px;
+}
+
+    .workload-chip {
+      background: #eef2ff;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      display: inline-block;
+      margin: 2px;
+    }
+    .employee-card {
+      transition: all 0.3s ease;
+    }
+    .employee-card:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      transform: translateY(-2px);
+    }
+    .workload-line {
+      background: #e8f4fd;
+      padding: 4px 10px;
+      border-radius: 15px;
+      font-size: 11px;
+      display: inline-block;
+    }
+    body {
+      background: #f4f6f9;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .header {
+      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+      color: white;
+      padding: 20px;
+      margin-bottom: 30px;
+      border-radius: 0 0 10px 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .tab-content {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      margin-top: 20px;
+      min-height: 500px;
+    }
+    .nav-pills > li > a {
+      color: #1e3c72;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+    .nav-pills > li.active > a {
+      background-color: #1e3c72;
+      color: white;
+    }
+    .nav-pills > li > a:hover {
+      background-color: #e0e4e8;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .btn-primary {
+      background-color: #1e3c72;
+      border-color: #1e3c72;
+    }
+    .btn-primary:hover {
+      background-color: #2a5298;
+      border-color: #2a5298;
+    }
+    .alert {
+      margin-top: 20px;
+      display: none;
+    }
+    .kra-box {
+      background: #f8f9fa;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 8px;
+      border-left: 4px solid #1e3c72;
+    }
+    .team-member-card {
+      background: #f8f9fa;
+      padding: 15px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      transition: all 0.3s;
+      border-left: 4px solid #1e3c72;
+    }
+    .team-member-card:hover {
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      transform: translateX(5px);
+    }
+    .employee-card {
+      background: white;
+      border: 1px solid #e0e0e0;
+      padding: 15px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      transition: all 0.3s;
+    }
+    .employee-card:hover {
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .remark-badge {
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: bold;
+      display: inline-block;
+      margin: 2px;
+    }
+    .status-complete {
+      background-color: #d4edda;
+      color: #155724;
+    }
+    .status-pending {
+      background-color: #fff3cd;
+      color: #856404;
+    }
+    .status-submitted {
+      background-color: #cce5ff;
+      color: #004085;
+    }
+    .modal-content {
+      border-radius: 10px;
+    }
+    .rating-select {
+      width: 80px;
+      display: inline-block;
+      margin-top: 10px;
+    }
+    .filter-buttons-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .filter-btn {
+      margin-bottom: 5px;
+      transition: all 0.3s;
+    }
+    .filter-btn:hover {
+      transform: translateY(-2px);
+    }
+    .filter-btn.active-filter {
+      background-color: #1e3c72;
+      color: white;
+      border-color: #1e3c72;
+    }
+    .loading {
+      text-align: center;
+      padding: 20px;
+    }
+    @media (max-width: 768px) {
+      .tab-content {
+        padding: 15px;
+      }
+      .team-member-card > div {
+        flex-direction: column;
+        text-align: center;
+      }
+      .team-member-card button {
+        margin-top: 10px;
+      }
+    }
+    .workload-line {
+      background: #e8f4fd;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      margin: 8px 0;
+      display: inline-block;
+    }
+    .subcentre-workload-box {
+      background: #fff3e0;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      border-left: 4px solid #ff9800;
+    }
+    .subcentre-title {
+      font-size: 16px;
+      font-weight: bold;
+      color: #e68a00;
+      margin-bottom: 15px;
+    }
+    .readonly-field {
+      background-color: #e9ecef;
+      cursor: not-allowed;
+    }
+    .page-input {
+      width: 80px !important;
+      display: inline-block !important;
+      text-align: center;
+    }
+    .edition-label {
+      font-weight: 600;
+      margin-right: 10px;
+      min-width: 180px;
+      display: inline-block;
+    }
+    .custom-toast {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      min-width: 320px;
+      max-width: 450px;
+      padding: 18px 24px;
+      border-radius: 12px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+      z-index: 10000;
+      font-size: 15px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      text-align: center;
+      justify-content: center;
+    }
     .toast-success { background: #28a745; color: white; }
     .toast-error { background: #dc3545; color: white; }
     .toast-info { background: #17a2b8; color: white; }
     .toast-warning { background: #ffc107; color: #333; }
-    .emp-code-input { font-size: 18px; font-weight: bold; text-align: center; }
-    .time-input { width: 70px !important; display: inline-block !important; text-align: center; }
-    .ampm-select { width: 80px !important; display: inline-block !important; margin-left: 5px; }
-    .employee-info-card { background: #e8f4fd; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #1e3c72; }
-    .info-row-flex { display: flex; flex-wrap: wrap; margin-bottom: 12px; gap: 15px; }
-    .info-field { flex: 1; min-width: 200px; }
-    .info-label { font-weight: 600; color: #1e3c72; margin-right: 8px; }
-    .info-value { color: #333; }
-    .duty-time-group { display: inline-flex; align-items: center; gap: 5px; flex-wrap: wrap; }
-    .logout-btn { background-color: #dc3545; color: white; border: none; margin-left: 15px; }
-    .logout-btn:hover { background-color: #c82333; }
-    .user-info { display: inline-block; margin-left: 15px; font-size: 14px; }
+    .emp-code-input {
+      font-size: 18px;
+      font-weight: bold;
+      text-align: center;
+    }
+    .time-input {
+      width: 70px !important;
+      display: inline-block !important;
+      text-align: center;
+    }
+    .ampm-select {
+      width: 80px !important;
+      display: inline-block !important;
+      margin-left: 5px;
+    }
+    .employee-info-card {
+      background: #e8f4fd;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      border-left: 4px solid #1e3c72;
+    }
+    .info-row-flex {
+      display: flex;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+      gap: 15px;
+    }
+    .info-field {
+      flex: 1;
+      min-width: 200px;
+    }
+    .info-label {
+      font-weight: 600;
+      color: #1e3c72;
+      margin-right: 8px;
+    }
+    .info-value {
+      color: #333;
+    }
+    .duty-time-group {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      flex-wrap: wrap;
+    }
   </style>
 </head>
+
 <body>
   <div class="container-fluid">
     <div class="header" style="position: relative; overflow: hidden;">
       <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; max-width: 1150px; margin: 0 auto;">
-        <img src="https://lh3.googleusercontent.com/d/1uLdST5g0rbVFpAV_i7qJXAI1nZJo20lQ" alt="LOKMAT Logo" style="width: auto; height: auto; max-width: 100%; object-fit: contain;">
-        <p style="margin: 20px 20px 5px 20px; font-size: 2rem; opacity: 0.9; text-align: center;">Task | Execution | Delivery</p>
-        <p style="margin: 0 20px 20px 20px; font-size: 2.2rem; opacity: 0.8; text-align: center;">ICD Unified Performance Evaluation System</p>
+        <img src="https://lh3.googleusercontent.com/d/1uLdST5g0rbVFpAV_i7qJXAI1nZJo20lQ" 
+            alt="LOKMAT Logo" 
+            style="width: auto; height: auto; max-width: 100%; object-fit: contain;">
+        <p style="margin: 20px 20px 5px 20px; font-size: 2rem; opacity: 0.9; text-align: center;">
+          Task | Execution | Delivery
+        </p>
+        <p style="margin: 0 20px 20px 20px; font-size: 2.2rem; opacity: 0.8; text-align: center;">
+          ICD Unified Performance Evaluation System
+        </p>
         <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-top: 5px; padding: 0 20px;">
-          <div style="font-size: 1.5rem; opacity: 0.7; text-align: left;">Concept : Sanjeev Nair</div>
-          <div style="display: flex; align-items: center;">
-            <span style="font-size: 1.3rem; opacity: 0.7;">App Development : Mahaveer Vibhute</span>
-            <button id="globalLogoutBtn" class="btn btn-sm logout-btn" style="display: none;" onclick="logoutCurrentUser()"><i class="fa fa-sign-out"></i> Logout</button>
+          <div style="font-size: 1.5rem; opacity: 0.7; text-align: left;">
+            Concept : Sanjeev Nair
+          </div>
+          <div style="font-size: 1.3rem; opacity: 0.7; text-align: right;">
+            App Development : Mahaveer Vibhute
           </div>
         </div>
       </div>
@@ -89,7 +320,7 @@
           
     <div class="container">
       <!-- Tabs Navigation -->
-      <ul class="nav nav-pills" id="mainTabs">
+      <ul class="nav nav-pills">
         <li class="active"><a href="#self" data-toggle="tab"><i class="fa fa-star"></i> Self Evaluation</a></li>
         <li><a href="#hod" data-toggle="tab"><i class="fa fa-users"></i> ICD/Branch Head</a></li>
         <li><a href="#unithead" data-toggle="tab"><i class="fa fa-check-circle"></i> Unit Head</a></li>
@@ -102,21 +333,98 @@
         <div id="registration" class="tab-pane fade">
           <h3><i class="fa fa-user-plus"></i> Employee Registration</h3>
           <hr>
+          
           <div class="row">
-            <div class="col-md-8"><div class="form-group"><label>Employee Code *</label><input type="text" class="form-control emp-code-input" id="emp_code_input" placeholder="Enter your employee code"><small class="text-muted">Enter your employee code as provided by HR</small></div></div>
-            <div class="col-md-4"><button class="btn btn-primary load-btn" onclick="loadEmployeeFromMaster()" style="margin-top: 25px;"><i class="fa fa-download"></i> Load Employee Data</button></div>
+            <div class="col-md-8">
+              <div class="form-group">
+                <label>Employee Code *</label>
+                <input type="text" class="form-control emp-code-input" id="emp_code_input" placeholder="Enter your employee code">
+                <small class="text-muted">Enter your employee code as provided by HR</small>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <button class="btn btn-primary load-btn" onclick="loadEmployeeFromMaster()" style="margin-top: 25px;">
+                <i class="fa fa-download"></i> Load Employee Data
+              </button>
+            </div>
           </div>
-          <div id="employeeInfoSection" style="display: none;"></div>
+          
+          <div id="employeeInfoSection" style="display: none;">
+            <div class="panel panel-default">
+              <div class="panel-heading" style="background-color: #1e3c72; color: white;">
+                <strong><i class="fa fa-info-circle"></i> Employee Information (from Master Data)</strong>
+              </div>
+              <div class="panel-body">
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label>Employee Code</label>
+                      <input type="text" class="form-control readonly-field" id="emp_code_display" readonly>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label>Full Name</label>
+                      <input type="text" class="form-control readonly-field" id="full_name_display" readonly>
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label>Designation</label>
+                      <input type="text" class="form-control readonly-field" id="designation_display" readonly>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label>Mobile No.</label>
+                      <input type="text" class="form-control readonly-field" id="mobile_display" readonly>
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label>Unit (Centre)</label>
+                      <input type="text" class="form-control readonly-field" id="unit_display" readonly>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label>Work Place (Sub-Centre)</label>
+                      <input type="text" class="form-control readonly-field" id="workplace_display" readonly>
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-12">
+                    <div class="form-group">
+                      <label>Reporting Authority</label>
+                      <input type="text" class="form-control readonly-field" id="reporting_auth_display" readonly>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
           <div id="teamWorkloadSection" style="display: none;">
-		  <div class="panel panel-default">
-			<div class="panel-heading" style="background-color: #ff9800; color: white;">
-			  <strong><i class="fa fa-tasks"></i> Team Workload Configuration (ICD Only)</strong>
-			</div>
-			<div class="panel-body" id="teamWorkloadFormsContainer">
-			</div>
-		  </div>
-		</div>
-          <div id="registrationActions" style="display: none;"><button class="btn btn-primary btn-lg" onclick="registerEmployee()"><i class="fa fa-save"></i> Register & Continue to Self Evaluation</button></div>
+            <div class="panel panel-default">
+              <div class="panel-heading" style="background-color: #ff9800; color: white;">
+                <strong><i class="fa fa-tasks"></i> Team Workload Configuration (ICD Only)</strong>
+              </div>
+              <div class="panel-body" id="teamWorkloadFormsContainer">
+              </div>
+            </div>
+          </div>
+          
+          <div id="registrationActions" style="display: none;">
+            <button class="btn btn-primary btn-lg" onclick="registerEmployee()">
+              <i class="fa fa-save"></i> Register & Continue to Self Evaluation
+            </button>
+          </div>
+          
           <div id="regMessage" class="alert"></div>
         </div>
         
@@ -124,113 +432,206 @@
         <div id="self" class="tab-pane fade in active">
           <h3><i class="fa fa-star"></i> Self Evaluation (To be filled by Employee)</h3>
           <hr>
-          <div class="row"><div class="col-md-8"><div class="form-group"><label>Enter Your Employee Code</label><input type="text" class="form-control" id="self_emp_code" placeholder="Employee Code"></div></div>
-          <div class="col-md-4"><button class="btn btn-primary" style="margin-top: 25px;" onclick="openSelfEvaluationFromSelfTab()"><i class="fa fa-download"></i> Load My Data</button></div></div>
+          
+          <div class="row">
+            <div class="col-md-8">
+              <div class="form-group">
+                <label>Enter Your Employee Code</label>
+                <input type="text" class="form-control" id="self_emp_code" placeholder="Employee Code">
+              </div>
+            </div>
+            <div class="col-md-4">
+              <button class="btn btn-primary" style="margin-top: 25px;" onclick="openSelfEvaluationFromSelfTab()">
+                <i class="fa fa-download"></i> Load My Data
+              </button>
+            </div>
+          </div>
+          
           <div id="selfMessage" class="alert"></div>
         </div>
         
         <!-- HOD EVALUATION TAB -->
         <div id="hod" class="tab-pane fade">
-          <h3><i class="fa fa-users"></i> Evaluation by ICD/Branch Head</h3>
-          <hr>
-          <div id="hodAuthSection"><div class="row"><div class="col-md-6"><div class="form-group"><label>Enter Your Email Address</label><input type="email" class="form-control" id="hod_email" placeholder="Your Email Address"></div></div>
-          <div class="col-md-4"><div class="form-group"><label>Enter Secret Code</label><input type="password" class="form-control" id="hod_secret_code" placeholder="Secret Code"></div></div>
-          <div class="col-md-2"><button class="btn btn-primary" style="margin-top: 25px;" onclick="authenticateHOD()"><i class="fa fa-lock"></i> Authenticate</button></div></div>
-          <div id="hodAuthMessage" class="alert"></div></div>
-          <div id="hodProtectedContent" style="display: none;"><div id="hodWorkplaceFilters" class="filter-buttons-group" style="display: none;"></div><div id="hodTeamList"></div><div id="hodMessage" class="alert"></div></div>
+        <h3><i class="fa fa-users"></i> Evaluation by ICD/Branch Head</h3>
+        <hr>
+        
+        <div id="hodAuthSection">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label>Enter Your Email Address</label>
+                <input type="email" class="form-control" id="hod_email" placeholder="Your Email Address">
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group">
+                <label>Enter Secret Code</label>
+                <input type="password" class="form-control" id="hod_secret_code" placeholder="Secret Code">
+              </div>
+            </div>
+            <div class="col-md-2">
+              <button class="btn btn-primary" style="margin-top: 25px;" onclick="authenticateHOD()">
+                <i class="fa fa-lock"></i> Authenticate
+              </button>
+            </div>
+          </div>
+          <div id="hodAuthMessage" class="alert"></div>
         </div>
         
-        <!-- UNIT HEAD TAB -->
-        <div id="unithead" class="tab-pane fade">
-          <h3><i class="fa fa-check-circle"></i> Approval by Unit Head</h3>
-          <hr>
-          <div id="unitHeadAuthSection"><div class="row"><div class="col-md-6"><div class="form-group"><label>Enter Your Email Address</label><input type="email" class="form-control" id="unithead_email" placeholder="Your Email Address"></div></div>
-          <div class="col-md-4"><div class="form-group"><label>Enter Secret Code</label><input type="password" class="form-control" id="unithead_secret_code" placeholder="Secret Code"></div></div>
-          <div class="col-md-2"><button class="btn btn-primary" style="margin-top: 25px;" onclick="authenticateUnitHead()"><i class="fa fa-lock"></i> Authenticate</button></div></div>
-          <div id="unitHeadAuthMessage" class="alert"></div></div>
-          <div id="unitHeadProtectedContent" style="display: none;"><div id="unitHeadWorkplaceFilters" class="filter-buttons-group" style="display: none;"></div><div id="unitHeadTeamList"></div><div id="unitHeadMessage" class="alert"></div></div>
+        <div id="hodProtectedContent" style="display: none;">
+          <div id="hodWorkplaceFilters" class="filter-buttons-group" style="display: none;"></div>
+          <div id="hodTeamList"></div>
+          <div id="hodMessage" class="alert"></div>
+        </div>
+      </div>
+      
+      <!-- UNIT HEAD EVALUATION TAB (Separate) -->
+      <div id="unithead" class="tab-pane fade">
+        <h3><i class="fa fa-check-circle"></i> Approval by Unit Head</h3>
+        <hr>
+        
+        <div id="unitHeadAuthSection">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label>Enter Your Email Address</label>
+                <input type="email" class="form-control" id="unithead_email" placeholder="Your Email Address">
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group">
+                <label>Enter Secret Code</label>
+                <input type="password" class="form-control" id="unithead_secret_code" placeholder="Secret Code">
+              </div>
+            </div>
+            <div class="col-md-2">
+              <button class="btn btn-primary" style="margin-top: 25px;" onclick="authenticateUnitHead()">
+                <i class="fa fa-lock"></i> Authenticate
+              </button>
+            </div>
+          </div>
+          <div id="unitHeadAuthMessage" class="alert"></div>
         </div>
         
+        <div id="unitHeadProtectedContent" style="display: none;">
+          <div id="unitHeadWorkplaceFilters" class="filter-buttons-group" style="display: none;"></div>
+          <div id="unitHeadTeamList"></div>
+          <div id="unitHeadMessage" class="alert"></div>
+        </div>
+      </div>
+          
         <!-- VERTICAL HEAD TAB -->
         <div id="vh" class="tab-pane fade">
           <h3><i class="fa fa-flag"></i> Evaluation by Vertical Head</h3>
           <hr>
-          <div id="vhAuthSection"><div class="row"><div class="col-md-6"><div class="form-group"><label>Enter Your Email Address</label><input type="email" class="form-control" id="vh_email" placeholder="Your Email Address"></div></div>
-          <div class="col-md-4"><div class="form-group"><label>Enter Secret Code</label><input type="password" class="form-control" id="vh_secret_code" placeholder="Secret Code"></div></div>
-          <div class="col-md-2"><button class="btn btn-primary" style="margin-top: 25px;" onclick="authenticateVerticalHead()"><i class="fa fa-lock"></i> Authenticate</button></div></div>
-          <div id="vhAuthMessage" class="alert"></div></div>
-          <div id="vhProtectedContent" style="display: none;"><div id="centreButtonsContainer" class="filter-buttons-group"></div><div id="vhWorkplaceFilters" class="filter-buttons-group" style="display: none;"></div><div id="employeeList"></div><div id="vhMessage" class="alert"></div></div>
+          
+          <div id="vhAuthSection">
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>Enter Your Email Address</label>
+                  <input type="email" class="form-control" id="vh_email" placeholder="Your Email Address">
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label>Enter Secret Code</label>
+                  <input type="password" class="form-control" id="vh_secret_code" placeholder="Secret Code">
+                </div>
+              </div>
+              <div class="col-md-2">
+                <button class="btn btn-primary" style="margin-top: 25px;" onclick="authenticateVerticalHead()">
+                  <i class="fa fa-lock"></i> Authenticate
+                </button>
+              </div>
+            </div>
+            <div id="vhAuthMessage" class="alert"></div>
+          </div>
+          
+          <div id="vhProtectedContent" style="display: none;">
+            <div id="centreButtonsContainer" class="filter-buttons-group"></div>
+            <div id="vhWorkplaceFilters" class="filter-buttons-group" style="display: none;"></div>
+            <div id="employeeList"></div>
+            <div id="vhMessage" class="alert"></div>
+          </div>
+        </div>
+    </div>
+  </div>
+
+<!-- Registration Modal -->
+<div id="registrationModal" class="modal fade" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title"><i class="fa fa-calendar"></i> Team Workload Configuration</h4>
+      </div>
+      <div class="modal-body" id="registrationModalBody"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" onclick="saveRegistrationFromModal()"><i class="fa fa-save"></i> Save & Continue</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <!-- ==================== COMMON MODALS ==================== -->
+  
+  <!-- Self Evaluation Modal (Common - used by Self Tab and Vertical Head) -->
+  <div id="selfEvalModal" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title" id="selfEvalModalTitle">Self Evaluation</h4>
+        </div>
+        <div class="modal-body" id="selfEvalModalBody"></div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-warning" id="selfEvalDraftBtn" onclick="saveSelfEvaluationFromModal(true)"><i class="fa fa-save"></i> Save as Draft</button>
+          <button type="button" class="btn btn-primary" id="selfEvalSaveBtn" onclick="saveSelfEvaluationFromModal(false)">Save Changes</button>
         </div>
       </div>
     </div>
   </div>
-
-  <!-- MODALS (same as original) -->
-  <div id="registrationModal" class="modal fade" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal">&times;</button><h4 class="modal-title"><i class="fa fa-calendar"></i> Team Workload Configuration</h4></div><div class="modal-body" id="registrationModalBody"></div><div class="modal-footer"><button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button><button type="button" class="btn btn-primary" onclick="saveRegistrationFromModal()"><i class="fa fa-save"></i> Save & Continue</button></div></div></div></div>
   
-  <div id="selfEvalModal" class="modal fade" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal">&times;</button><h4 class="modal-title" id="selfEvalModalTitle">Self Evaluation</h4></div><div class="modal-body" id="selfEvalModalBody"></div><div class="modal-footer"><button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button><button type="button" class="btn btn-warning" id="selfEvalDraftBtn" onclick="saveSelfEvaluationFromModal(true)"><i class="fa fa-save"></i> Save as Draft</button><button type="button" class="btn btn-primary" id="selfEvalSaveBtn" onclick="saveSelfEvaluationFromModal(false)">Save Changes</button></div></div></div></div>
+  <!-- HOD Evaluation Modal (Common - used by HOD Tab and Vertical Head) -->
+  <div id="hodEvalModal" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title" id="hodEvalModalTitle">Evaluation by ICD/Branch Head</h4>
+        </div>
+        <div class="modal-body" id="hodEvalModalBody"></div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" id="hodEvalSaveBtn" onclick="saveHODEvaluationFromModal()">Save Evaluation</button>
+        </div>
+      </div>
+    </div>
+  </div>
   
-  <div id="hodEvalModal" class="modal fade" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal">&times;</button><h4 class="modal-title" id="hodEvalModalTitle">Evaluation by ICD/Branch Head</h4></div><div class="modal-body" id="hodEvalModalBody"></div><div class="modal-footer"><button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button><button type="button" class="btn btn-primary" id="hodEvalSaveBtn" onclick="saveHODEvaluationFromModal()">Save Evaluation</button></div></div></div></div>
-
+  <!-- Legacy HOD Modal (kept for HOD/ICD from their tab) -->
+  <div id="hodModal" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">Evaluation by HOD/Unit Head</h4>
+        </div>
+        <div class="modal-body" id="hodModalBody"></div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
   
-  <!-- ========== SPLIT JAVASCRIPT FILES ========== -->
-  <script src="js/common.js"></script>
-  <script src="js/self_eval.js"></script>
-  <script src="js/icd_head.js"></script>
-  <script src="js/unit_head.js"></script>
-  <script src="js/vertical_head.js"></script>
-  <script src="js/registration.js"></script>
-  
-  <script>
-    // Initialize any page-load behavior
-    $(document).ready(function() {
-      $('#registrationTabLi').hide();
-      // Check for existing session and show logout button if any user logged in
-      // (session is stored in global variables: authenticatedUser, authenticatedUnitHead)
-      updateLogoutButton();
-    });
-    
-    function updateLogoutButton() {
-      const logoutBtn = document.getElementById('globalLogoutBtn');
-      if (logoutBtn) {
-        logoutBtn.style.display = (authenticatedUser || authenticatedUnitHead) ? 'inline-block' : 'none';
-      }
-    }
-    
-    async function logoutCurrentUser() {
-      // Clear all authentication globals
-      authenticatedUser = null;
-      authenticatedUnitHead = null;
-      // Optionally clear any stored data
-      showToast('Logged out successfully', 'success');
-      
-      // Reset UI: show auth sections, hide protected content
-      document.getElementById('hodAuthSection').style.display = 'block';
-      document.getElementById('hodProtectedContent').style.display = 'none';
-      document.getElementById('unitHeadAuthSection').style.display = 'block';
-      document.getElementById('unitHeadProtectedContent').style.display = 'none';
-      document.getElementById('vhAuthSection').style.display = 'block';
-      document.getElementById('vhProtectedContent').style.display = 'none';
-      
-      // Clear any displayed data
-      document.getElementById('hodTeamList').innerHTML = '';
-      document.getElementById('unitHeadTeamList').innerHTML = '';
-      document.getElementById('employeeList').innerHTML = '';
-      
-      // Clear auth input fields
-      document.getElementById('hod_email').value = '';
-      document.getElementById('hod_secret_code').value = '';
-      document.getElementById('unithead_email').value = '';
-      document.getElementById('unithead_secret_code').value = '';
-      document.getElementById('vh_email').value = '';
-      document.getElementById('vh_secret_code').value = '';
-      
-      updateLogoutButton();
-      // Switch to self tab
-      $('.nav-pills a[href="#self"]').tab('show');
-    }
-  </script>
+  <!-- Include JavaScript file -->
+  <?!= include('JavaScript'); ?>
 </body>
 </html>
