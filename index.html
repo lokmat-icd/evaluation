@@ -94,6 +94,7 @@
         <li><a href="#hod" data-toggle="tab"><i class="fa fa-users"></i> ICD/Branch Head</a></li>
         <li><a href="#unithead" data-toggle="tab"><i class="fa fa-check-circle"></i> Unit Head</a></li>
         <li><a href="#vh" data-toggle="tab"><i class="fa fa-flag"></i> Vertical Head</a></li>
+        <li id="registrationTabLi" style="display: none;"><a href="#registration" data-toggle="tab"><i class="fa fa-user-plus"></i> Registration</a></li>        
       </ul>
       
       <div class="tab-content">
@@ -177,7 +178,7 @@
   <script>
     // Initialize any page-load behavior
     $(document).ready(function() {
-      //$('#registrationTabLi').hide();
+      $('#registrationTabLi').hide();
       // Check for existing session and show logout button if any user logged in
       // (session is stored in global variables: authenticatedUser, authenticatedUnitHead)
       updateLogoutButton();
