@@ -1,7 +1,7 @@
 // ==================== CONFIGURATION ====================
 // IMPORTANT: Replace this URL with your ACTUAL deployed Apps Script URL
 // After deploying your GS-Code.txt as a Web App, copy the URL here
-const API_URL = "https://script.google.com/macros/s/AKfycbzt9gA6D3diNg0ctyrPlYvRtakzDHiTxihiTY8BDSYLgHY0KCnbzWuJExb7V5cLEO3H/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbxCFBlUYHXH9PCULNbP4q1glat-_zr5oE40aRycebZ_hxYhP4doKd9AaP7wqN8Of-Op/exec";
 
 // ==================== GLOBAL VARIABLES ====================
 let authenticatedUser = null;      // For ICD/Head/Vertical Head
@@ -35,12 +35,16 @@ const CENTRES = ['Akola', 'Nagpur(LS)','Nagpur(LM)','Nagpur(LT)','Chh. Sambhajin
 
 // ==================== API HELPER ====================
 async function callServer(action, params) {
+  // Show loading indicator (optional)
+  console.log(`Calling ${action} with params:`, params);
+  
   try {
-    console.log(`Calling ${action} with params:`, params);
     const response = await fetch(API_URL, {
       method: "POST",
       mode: "cors",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json"
+      },
       body: JSON.stringify({ action: action, params: params || {} })
     });
     
@@ -51,9 +55,17 @@ async function callServer(action, params) {
     const result = await response.json();
     console.log(`Response from ${action}:`, result);
     return result;
+    
   } catch (error) {
     console.error(`API call failed for ${action}:`, error);
-    showToast(`Connection error: ${error.message}`, 'error');
+    
+    // Show user-friendly error message
+    let errorMessage = error.message;
+    if (error.message === "Failed to fetch") {
+      errorMessage = "Cannot connect to server. Please check:\n1. Your internet connection\n2. The Apps Script is deployed\n3. CORS is enabled";
+    }
+    
+    showToast(`Connection error: ${errorMessage}`, 'error');
     throw error;
   }
 }
