@@ -1,7 +1,7 @@
 // ==================== CONFIGURATION ====================
 // IMPORTANT: Replace this URL with your ACTUAL deployed Apps Script URL
 // After deploying your GS-Code.txt as a Web App, copy the URL here
-const API_URL = "https://script.google.com/macros/s/AKfycbx23IC95oWfaoREj106mJ-lAeEvxgwzQ-4qIJoz0xayuBvVXhoj0Xqp0ImVFxFplIJw/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbya5qDx8YD4qTgw_ghFjVzHCLaXVnKjlc6YAx5qRfUT8ZncZEomsUEP-9YkzNGJ7pd5/exec";
 
 // ==================== GLOBAL VARIABLES ====================
 let authenticatedUser = null;      // For ICD/Head/Vertical Head
@@ -33,18 +33,17 @@ const ratingOptions = [1, 2, 3, 3.5, 4, 4.5, 5];
 const defaultRating = 2;
 const CENTRES = ['Akola', 'Nagpur(LS)','Nagpur(LM)','Nagpur(LT)','Chh. Sambhajinagar(LM)', 'Chh. Sambhajinagar(LS)', 'Goa', 'Jalgaon', 'Kolhapur', 'Mumbai', 'Nashik', 'Pune', 'Solapur'];
 
-// ==================== API HELPER (JSONP VERSION - NO CORS) ====================
-async function callServer(action, params) {
+// ==================== API HELPER (JSONP VERSION) ====================
+function callServer(action, params) {
   console.log(`Calling ${action} with params:`, params);
   
   return new Promise((resolve, reject) => {
     // Create a unique callback name
-    const callbackName = `jsonp_callback_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const callbackName = 'jsonp_cb_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
     
-    // Build URL with parameters
+    // Build URL
     let url = `${API_URL}?action=${encodeURIComponent(action)}&callback=${callbackName}`;
     
-    // Add params to URL
     if (params) {
       url += `&params=${encodeURIComponent(JSON.stringify(params))}`;
     }
@@ -53,17 +52,29 @@ async function callServer(action, params) {
     const script = document.createElement('script');
     script.src = url;
     
-    // Define callback function globally
-    window[callbackName] = function(data) {
+    // Set timeout
+    const timeout = setTimeout(() => {
+      cleanup();
+      reject(new Error(`Request timeout for ${action}`));
+    }, 30000);
+    
+    // Cleanup function
+    function cleanup() {
+      clearTimeout(timeout);
+      if (script.parentNode) script.parentNode.removeChild(script);
       delete window[callbackName];
-      document.body.removeChild(script);
+    }
+    
+    // Define callback
+    window[callbackName] = function(data) {
+      cleanup();
+      console.log(`Response from ${action}:`, data);
       resolve(data);
     };
     
-    // Handle errors
+    // Error handler
     script.onerror = function() {
-      delete window[callbackName];
-      document.body.removeChild(script);
+      cleanup();
       reject(new Error(`JSONP request failed for ${action}`));
     };
     
