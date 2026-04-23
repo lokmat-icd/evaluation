@@ -1542,6 +1542,68 @@ function updateAssessmentLevel(empCode) {
   levelHidden.value = level;
 }
 
+function openHODEvalForVerticalHead(empCode, empName) {
+  window.currentUserRole = 'Vertical Head';
+  callServer("getEmployeeForHODEval", { empCode: empCode }).then(function(empData) {
+    if (empData.exists) {
+      callServer("getHODEvaluation", { empCode: empCode }).then(function(hodResult) {
+        var existingRatings = {};
+        var existingComments = '';
+        var existingOverallLevel = '';
+        if (hodResult.evaluations && hodResult.evaluations.length > 0) {
+          existingRatings = hodResult.evaluations[0].kraRatings || {};
+          existingComments = hodResult.evaluations[0].comments || '';
+          existingOverallLevel = hodResult.evaluations[0].overallLevel || '';
+        }
+        openHODEvaluationModal(empCode, empName, true, existingRatings, existingComments, existingOverallLevel, empData.selfRatings, false);
+      }).catch(function(error) {
+        showToast('Error loading HOD evaluation: ' + error.message, 'error');
+      });
+    }
+  }).catch(function(error) {
+    showToast('Error loading employee data: ' + error.message, 'error');
+  });
+}
+
+function logoutCurrentUser() {
+  authenticatedUser = null;
+  authenticatedUnitHead = null;
+  showToast('Logged out successfully', 'success');
+  
+  // Reset UI elements
+  var hodAuthSection = document.getElementById('hodAuthSection');
+  var hodProtected = document.getElementById('hodProtectedContent');
+  var unitHeadAuth = document.getElementById('unitHeadAuthSection');
+  var unitHeadProtected = document.getElementById('unitHeadProtectedContent');
+  var vhAuth = document.getElementById('vhAuthSection');
+  var vhProtected = document.getElementById('vhProtectedContent');
+  
+  if (hodAuthSection) hodAuthSection.style.display = 'block';
+  if (hodProtected) hodProtected.style.display = 'none';
+  if (unitHeadAuth) unitHeadAuth.style.display = 'block';
+  if (unitHeadProtected) unitHeadProtected.style.display = 'none';
+  if (vhAuth) vhAuth.style.display = 'block';
+  if (vhProtected) vhProtected.style.display = 'none';
+  
+  // Clear inputs
+  var hodEmail = document.getElementById('hod_email');
+  var hodSecret = document.getElementById('hod_secret_code');
+  var unitEmail = document.getElementById('unithead_email');
+  var unitSecret = document.getElementById('unithead_secret_code');
+  var vhEmail = document.getElementById('vh_email');
+  var vhSecret = document.getElementById('vh_secret_code');
+  
+  if (hodEmail) hodEmail.value = '';
+  if (hodSecret) hodSecret.value = '';
+  if (unitEmail) unitEmail.value = '';
+  if (unitSecret) unitSecret.value = '';
+  if (vhEmail) vhEmail.value = '';
+  if (vhSecret) vhSecret.value = '';
+  
+  // Switch to self tab
+  $('.nav-pills a[href="#self"]').tab('show');
+}
+
 function saveVHEvaluation(empCode) {
   var performanceSelect = document.getElementById('vh_performance_' + empCode);
   var performanceRating = performanceSelect ? performanceSelect.value : '';
@@ -1591,6 +1653,36 @@ function printEvaluationReport(empCode, empName) {
 $(document).ready(function() {
   $('#registrationTabLi').hide();
 });
+
+// ==================== EXPOSE FUNCTIONS GLOBALLY ====================
+// Make sure all functions that are called from HTML onclick handlers are available globally
+window.openSelfEvaluationFromSelfTab = openSelfEvaluationFromSelfTab;
+window.openSelfEvaluationModal = openSelfEvaluationModal;
+window.saveSelfEvaluationFromModal = saveSelfEvaluationFromModal;
+window.updateSelfModalLiveScore = updateSelfModalLiveScore;
+window.authenticateHOD = authenticateHOD;
+window.authenticateUnitHead = authenticateUnitHead;
+window.authenticateVerticalHead = authenticateVerticalHead;
+window.loadEmployeeFromMaster = loadEmployeeFromMaster;
+window.registerEmployee = registerEmployee;
+window.saveHODEvaluationFromModal = saveHODEvaluationFromModal;
+window.updateHODModalLiveScore = updateHODModalLiveScore;
+window.openHODEvalForHODTab = openHODEvalForHODTab;
+window.openHODEvalForVerticalHead = openHODEvalForVerticalHead;
+window.printEvaluationReport = printEvaluationReport;
+window.selectCentre = selectCentre;
+window.filterHODByWorkplace = filterHODByWorkplace;
+window.filterUnitHeadByWorkplace = filterUnitHeadByWorkplace;
+window.filterVHByWorkplace = filterVHByWorkplace;
+window.approveUnitHeadEvaluation = approveUnitHeadEvaluation;
+window.openUnitHeadEval = openUnitHeadEval;
+window.showRegistrationModal = showRegistrationModal;
+window.saveRegistrationFromModal = saveRegistrationFromModal;
+window.saveVHEvaluation = saveVHEvaluation;
+window.clearVHEvaluation = clearVHEvaluation;
+window.updateAssessmentLevel = updateAssessmentLevel;
+window.logoutCurrentUser = logoutCurrentUser;
+
 </script>
   
 </body>
