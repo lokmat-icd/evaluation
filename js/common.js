@@ -33,41 +33,43 @@ const ratingOptions = [1, 2, 3, 3.5, 4, 4.5, 5];
 const defaultRating = 2;
 const CENTRES = ['Akola', 'Nagpur(LS)','Nagpur(LM)','Nagpur(LT)','Chh. Sambhajinagar(LM)', 'Chh. Sambhajinagar(LS)', 'Goa', 'Jalgaon', 'Kolhapur', 'Mumbai', 'Nashik', 'Pune', 'Solapur'];
 
-// ==================== API HELPER ====================
+// ==================== API HELPER (JSONP VERSION - NO CORS) ====================
 async function callServer(action, params) {
-  // Show loading indicator (optional)
   console.log(`Calling ${action} with params:`, params);
   
-  try {
-    const response = await fetch(API_URL, {
-      method: "POST",
-      mode: "cors",
-      headers: { 
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ action: action, params: params || {} })
-    });
+  return new Promise((resolve, reject) => {
+    // Create a unique callback name
+    const callbackName = `jsonp_callback_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    // Build URL with parameters
+    let url = `${API_URL}?action=${encodeURIComponent(action)}&callback=${callbackName}`;
+    
+    // Add params to URL
+    if (params) {
+      url += `&params=${encodeURIComponent(JSON.stringify(params))}`;
     }
     
-    const result = await response.json();
-    console.log(`Response from ${action}:`, result);
-    return result;
+    // Create script element
+    const script = document.createElement('script');
+    script.src = url;
     
-  } catch (error) {
-    console.error(`API call failed for ${action}:`, error);
+    // Define callback function globally
+    window[callbackName] = function(data) {
+      delete window[callbackName];
+      document.body.removeChild(script);
+      resolve(data);
+    };
     
-    // Show user-friendly error message
-    let errorMessage = error.message;
-    if (error.message === "Failed to fetch") {
-      errorMessage = "Cannot connect to server. Please check:\n1. Your internet connection\n2. The Apps Script is deployed\n3. CORS is enabled";
-    }
+    // Handle errors
+    script.onerror = function() {
+      delete window[callbackName];
+      document.body.removeChild(script);
+      reject(new Error(`JSONP request failed for ${action}`));
+    };
     
-    showToast(`Connection error: ${errorMessage}`, 'error');
-    throw error;
-  }
+    // Add to DOM
+    document.body.appendChild(script);
+  });
 }
 
 // ==================== HELPER FUNCTIONS ====================
