@@ -1,0 +1,1784 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TED by LOKMAT - Employee Evaluation System</title>
+  
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  
+  <style>
+
+.modal-footer {
+  display: flex;
+  justify-content: center !important;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Remove the default border and padding if needed */
+.modal-footer {
+  border-top: none;
+  padding: 15px;
+}
+
+    .workload-chip {
+      background: #eef2ff;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      display: inline-block;
+      margin: 2px;
+    }
+    .employee-card {
+      transition: all 0.3s ease;
+    }
+    .employee-card:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      transform: translateY(-2px);
+    }
+    .workload-line {
+      background: #e8f4fd;
+      padding: 4px 10px;
+      border-radius: 15px;
+      font-size: 11px;
+      display: inline-block;
+    }
+    body {
+      background: #f4f6f9;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .header {
+      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+      color: white;
+      padding: 20px;
+      margin-bottom: 30px;
+      border-radius: 0 0 10px 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .tab-content {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      margin-top: 20px;
+      min-height: 500px;
+    }
+    .nav-pills > li > a {
+      color: #1e3c72;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+    .nav-pills > li.active > a {
+      background-color: #1e3c72;
+      color: white;
+    }
+    .nav-pills > li > a:hover {
+      background-color: #e0e4e8;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .btn-primary {
+      background-color: #1e3c72;
+      border-color: #1e3c72;
+    }
+    .btn-primary:hover {
+      background-color: #2a5298;
+      border-color: #2a5298;
+    }
+    .alert {
+      margin-top: 20px;
+      display: none;
+    }
+    .kra-box {
+      background: #f8f9fa;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 8px;
+      border-left: 4px solid #1e3c72;
+    }
+    .team-member-card {
+      background: #f8f9fa;
+      padding: 15px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      transition: all 0.3s;
+      border-left: 4px solid #1e3c72;
+    }
+    .team-member-card:hover {
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      transform: translateX(5px);
+    }
+    .employee-card {
+      background: white;
+      border: 1px solid #e0e0e0;
+      padding: 15px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      transition: all 0.3s;
+    }
+    .employee-card:hover {
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .remark-badge {
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: bold;
+      display: inline-block;
+      margin: 2px;
+    }
+    .status-complete {
+      background-color: #d4edda;
+      color: #155724;
+    }
+    .status-pending {
+      background-color: #fff3cd;
+      color: #856404;
+    }
+    .status-submitted {
+      background-color: #cce5ff;
+      color: #004085;
+    }
+    .modal-content {
+      border-radius: 10px;
+    }
+    .rating-select {
+      width: 80px;
+      display: inline-block;
+      margin-top: 10px;
+    }
+    .filter-buttons-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .filter-btn {
+      margin-bottom: 5px;
+      transition: all 0.3s;
+    }
+    .filter-btn:hover {
+      transform: translateY(-2px);
+    }
+    .filter-btn.active-filter {
+      background-color: #1e3c72;
+      color: white;
+      border-color: #1e3c72;
+    }
+    .loading {
+      text-align: center;
+      padding: 20px;
+    }
+    @media (max-width: 768px) {
+      .tab-content {
+        padding: 15px;
+      }
+      .team-member-card > div {
+        flex-direction: column;
+        text-align: center;
+      }
+      .team-member-card button {
+        margin-top: 10px;
+      }
+    }
+    .workload-line {
+      background: #e8f4fd;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      margin: 8px 0;
+      display: inline-block;
+    }
+    .subcentre-workload-box {
+      background: #fff3e0;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      border-left: 4px solid #ff9800;
+    }
+    .subcentre-title {
+      font-size: 16px;
+      font-weight: bold;
+      color: #e68a00;
+      margin-bottom: 15px;
+    }
+    .readonly-field {
+      background-color: #e9ecef;
+      cursor: not-allowed;
+    }
+    .page-input {
+      width: 80px !important;
+      display: inline-block !important;
+      text-align: center;
+    }
+    .edition-label {
+      font-weight: 600;
+      margin-right: 10px;
+      min-width: 180px;
+      display: inline-block;
+    }
+    .custom-toast {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      min-width: 320px;
+      max-width: 450px;
+      padding: 18px 24px;
+      border-radius: 12px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+      z-index: 10000;
+      font-size: 15px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      text-align: center;
+      justify-content: center;
+    }
+    .toast-success { background: #28a745; color: white; }
+    .toast-error { background: #dc3545; color: white; }
+    .toast-info { background: #17a2b8; color: white; }
+    .toast-warning { background: #ffc107; color: #333; }
+    .emp-code-input {
+      font-size: 18px;
+      font-weight: bold;
+      text-align: center;
+    }
+    .time-input {
+      width: 70px !important;
+      display: inline-block !important;
+      text-align: center;
+    }
+    .ampm-select {
+      width: 80px !important;
+      display: inline-block !important;
+      margin-left: 5px;
+    }
+    .employee-info-card {
+      background: #e8f4fd;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      border-left: 4px solid #1e3c72;
+    }
+    .info-row-flex {
+      display: flex;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+      gap: 15px;
+    }
+    .info-field {
+      flex: 1;
+      min-width: 200px;
+    }
+    .info-label {
+      font-weight: 600;
+      color: #1e3c72;
+      margin-right: 8px;
+    }
+    .info-value {
+      color: #333;
+    }
+    .duty-time-group {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      flex-wrap: wrap;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container-fluid">
+    <div class="header" style="position: relative; overflow: hidden;">
+      <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; max-width: 1150px; margin: 0 auto;">
+        <img src="https://lh3.googleusercontent.com/d/1uLdST5g0rbVFpAV_i7qJXAI1nZJo20lQ" 
+            alt="LOKMAT Logo" 
+            style="width: auto; height: auto; max-width: 100%; object-fit: contain;">
+        <p style="margin: 20px 20px 5px 20px; font-size: 2rem; opacity: 0.9; text-align: center;">
+          Task | Execution | Delivery
+        </p>
+        <p style="margin: 0 20px 20px 20px; font-size: 2.2rem; opacity: 0.8; text-align: center;">
+          ICD Unified Performance Evaluation System
+        </p>
+        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-top: 5px; padding: 0 20px;">
+          <div style="font-size: 1.5rem; opacity: 0.7; text-align: left;">
+            Concept : Sanjeev Nair
+          </div>
+          <div style="font-size: 1.3rem; opacity: 0.7; text-align: right;">
+            App Development : Mahaveer Vibhute
+          </div>
+        </div>
+      </div>
+    </div>
+          
+    <div class="container">
+      <!-- Tabs Navigation -->
+      <ul class="nav nav-pills">
+        <li class="active"><a href="#self" data-toggle="tab"><i class="fa fa-star"></i> Self Evaluation</a></li>
+        <li><a href="#hod" data-toggle="tab"><i class="fa fa-users"></i> ICD/Branch Head</a></li>
+        <li><a href="#unithead" data-toggle="tab"><i class="fa fa-check-circle"></i> Unit Head</a></li>
+        <li><a href="#vh" data-toggle="tab"><i class="fa fa-flag"></i> Vertical Head</a></li>
+        <li id="registrationTabLi" style="display: none;"><a href="#registration" data-toggle="tab"><i class="fa fa-user-plus"></i> Registration</a></li>        
+      </ul>
+      
+      <div class="tab-content">
+        <!-- REGISTRATION TAB -->
+        <div id="registration" class="tab-pane fade">
+          <h3><i class="fa fa-user-plus"></i> Employee Registration</h3>
+          <hr>
+          
+          <div class="row">
+            <div class="col-md-8">
+              <div class="form-group">
+                <label>Employee Code *</label>
+                <input type="text" class="form-control emp-code-input" id="emp_code_input" placeholder="Enter your employee code">
+                <small class="text-muted">Enter your employee code as provided by HR</small>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <button class="btn btn-primary load-btn" onclick="loadEmployeeFromMaster()" style="margin-top: 25px;">
+                <i class="fa fa-download"></i> Load Employee Data
+              </button>
+            </div>
+          </div>
+          
+          <div id="employeeInfoSection" style="display: none;">
+            <div class="panel panel-default">
+              <div class="panel-heading" style="background-color: #1e3c72; color: white;">
+                <strong><i class="fa fa-info-circle"></i> Employee Information (from Master Data)</strong>
+              </div>
+              <div class="panel-body">
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label>Employee Code</label>
+                      <input type="text" class="form-control readonly-field" id="emp_code_display" readonly>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label>Full Name</label>
+                      <input type="text" class="form-control readonly-field" id="full_name_display" readonly>
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label>Designation</label>
+                      <input type="text" class="form-control readonly-field" id="designation_display" readonly>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label>Mobile No.</label>
+                      <input type="text" class="form-control readonly-field" id="mobile_display" readonly>
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label>Unit (Centre)</label>
+                      <input type="text" class="form-control readonly-field" id="unit_display" readonly>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label>Work Place (Sub-Centre)</label>
+                      <input type="text" class="form-control readonly-field" id="workplace_display" readonly>
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-12">
+                    <div class="form-group">
+                      <label>Reporting Authority</label>
+                      <input type="text" class="form-control readonly-field" id="reporting_auth_display" readonly>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div id="teamWorkloadSection" style="display: none;">
+            <div class="panel panel-default">
+              <div class="panel-heading" style="background-color: #ff9800; color: white;">
+                <strong><i class="fa fa-tasks"></i> Team Workload Configuration (ICD Only)</strong>
+              </div>
+              <div class="panel-body" id="teamWorkloadFormsContainer">
+              </div>
+            </div>
+          </div>
+          
+          <div id="registrationActions" style="display: none;">
+            <button class="btn btn-primary btn-lg" onclick="registerEmployee()">
+              <i class="fa fa-save"></i> Register & Continue to Self Evaluation
+            </button>
+          </div>
+          
+          <div id="regMessage" class="alert"></div>
+        </div>
+        
+        <!-- SELF EVALUATION TAB -->
+        <div id="self" class="tab-pane fade in active">
+          <h3><i class="fa fa-star"></i> Self Evaluation (To be filled by Employee)</h3>
+          <hr>
+          
+          <div class="row">
+            <div class="col-md-8">
+              <div class="form-group">
+                <label>Enter Your Employee Code</label>
+                <input type="text" class="form-control" id="self_emp_code" placeholder="Employee Code">
+              </div>
+            </div>
+            <div class="col-md-4">
+              <button class="btn btn-primary" style="margin-top: 25px;" onclick="openSelfEvaluationFromSelfTab()">
+                <i class="fa fa-download"></i> Load My Data
+              </button>
+            </div>
+          </div>
+          
+          <div id="selfMessage" class="alert"></div>
+        </div>
+        
+        <!-- HOD EVALUATION TAB -->
+        <div id="hod" class="tab-pane fade">
+        <h3><i class="fa fa-users"></i> Evaluation by ICD/Branch Head</h3>
+        <hr>
+        
+        <div id="hodAuthSection">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label>Enter Your Email Address</label>
+                <input type="email" class="form-control" id="hod_email" placeholder="Your Email Address">
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group">
+                <label>Enter Secret Code</label>
+                <input type="password" class="form-control" id="hod_secret_code" placeholder="Secret Code">
+              </div>
+            </div>
+            <div class="col-md-2">
+              <button class="btn btn-primary" style="margin-top: 25px;" onclick="authenticateHOD()">
+                <i class="fa fa-lock"></i> Authenticate
+              </button>
+            </div>
+          </div>
+          <div id="hodAuthMessage" class="alert"></div>
+        </div>
+        
+        <div id="hodProtectedContent" style="display: none;">
+          <div id="hodWorkplaceFilters" class="filter-buttons-group" style="display: none;"></div>
+          <div id="hodTeamList"></div>
+          <div id="hodMessage" class="alert"></div>
+        </div>
+      </div>
+      
+      <!-- UNIT HEAD EVALUATION TAB (Separate) -->
+      <div id="unithead" class="tab-pane fade">
+        <h3><i class="fa fa-check-circle"></i> Approval by Unit Head</h3>
+        <hr>
+        
+        <div id="unitHeadAuthSection">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label>Enter Your Email Address</label>
+                <input type="email" class="form-control" id="unithead_email" placeholder="Your Email Address">
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group">
+                <label>Enter Secret Code</label>
+                <input type="password" class="form-control" id="unithead_secret_code" placeholder="Secret Code">
+              </div>
+            </div>
+            <div class="col-md-2">
+              <button class="btn btn-primary" style="margin-top: 25px;" onclick="authenticateUnitHead()">
+                <i class="fa fa-lock"></i> Authenticate
+              </button>
+            </div>
+          </div>
+          <div id="unitHeadAuthMessage" class="alert"></div>
+        </div>
+        
+        <div id="unitHeadProtectedContent" style="display: none;">
+          <div id="unitHeadWorkplaceFilters" class="filter-buttons-group" style="display: none;"></div>
+          <div id="unitHeadTeamList"></div>
+          <div id="unitHeadMessage" class="alert"></div>
+        </div>
+      </div>
+          
+        <!-- VERTICAL HEAD TAB -->
+        <div id="vh" class="tab-pane fade">
+          <h3><i class="fa fa-flag"></i> Evaluation by Vertical Head</h3>
+          <hr>
+          
+          <div id="vhAuthSection">
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>Enter Your Email Address</label>
+                  <input type="email" class="form-control" id="vh_email" placeholder="Your Email Address">
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label>Enter Secret Code</label>
+                  <input type="password" class="form-control" id="vh_secret_code" placeholder="Secret Code">
+                </div>
+              </div>
+              <div class="col-md-2">
+                <button class="btn btn-primary" style="margin-top: 25px;" onclick="authenticateVerticalHead()">
+                  <i class="fa fa-lock"></i> Authenticate
+                </button>
+              </div>
+            </div>
+            <div id="vhAuthMessage" class="alert"></div>
+          </div>
+          
+          <div id="vhProtectedContent" style="display: none;">
+            <div id="centreButtonsContainer" class="filter-buttons-group"></div>
+            <div id="vhWorkplaceFilters" class="filter-buttons-group" style="display: none;"></div>
+            <div id="employeeList"></div>
+            <div id="vhMessage" class="alert"></div>
+          </div>
+        </div>
+    </div>
+  </div>
+
+<!-- Registration Modal -->
+<div id="registrationModal" class="modal fade" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title"><i class="fa fa-calendar"></i> Team Workload Configuration</h4>
+      </div>
+      <div class="modal-body" id="registrationModalBody"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" onclick="saveRegistrationFromModal()"><i class="fa fa-save"></i> Save & Continue</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <!-- ==================== COMMON MODALS ==================== -->
+  
+  <!-- Self Evaluation Modal (Common - used by Self Tab and Vertical Head) -->
+  <div id="selfEvalModal" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title" id="selfEvalModalTitle">Self Evaluation</h4>
+        </div>
+        <div class="modal-body" id="selfEvalModalBody"></div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-warning" id="selfEvalDraftBtn" onclick="saveSelfEvaluationFromModal(true)"><i class="fa fa-save"></i> Save as Draft</button>
+          <button type="button" class="btn btn-primary" id="selfEvalSaveBtn" onclick="saveSelfEvaluationFromModal(false)">Save Changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- HOD Evaluation Modal (Common - used by HOD Tab and Vertical Head) -->
+  <div id="hodEvalModal" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title" id="hodEvalModalTitle">Evaluation by ICD/Branch Head</h4>
+        </div>
+        <div class="modal-body" id="hodEvalModalBody"></div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" id="hodEvalSaveBtn" onclick="saveHODEvaluationFromModal()">Save Evaluation</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Legacy HOD Modal (kept for HOD/ICD from their tab) -->
+  <div id="hodModal" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">Evaluation by HOD/Unit Head</h4>
+        </div>
+        <div class="modal-body" id="hodModalBody"></div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+  
+  <script>
+// ==================== CONFIGURATION ====================
+const API_URL = "https://script.google.com/macros/s/AKfycbwZxICn7VFEFU7TXWEuuTzLvNrJs597hArn9lYUd_5feqhA0ZX57EGEKpSCskpSO9Lp/exec";
+
+// ==================== GLOBAL VARIABLES ====================
+var currentEvalEmp = null;
+var authenticatedUser = null;
+var authenticatedUnitHead = null;
+var currentSelectedCentre = null;
+var currentSelectedWorkplace = null;
+var currentSelectedHODWorkplace = null;
+var currentSelectedUnitHeadWorkplace = null;
+var currentSelfEvalEmpCode = null;
+var currentSelfEvalIsEditable = true;
+var currentSelfEvalIsSubmitted = false;
+var currentHODEvalEmpCode = null;
+var currentHODEvalIsEditable = true;
+var currentUnitHeadEvalEmpCode = null;
+var currentUnitHeadEvalIsEditable = true;
+var unitHeadEmployeesCache = null;
+
+// KRA Definitions
+var kraDefinitions = [
+  { id: "page_layout", name: "Page Layout & Editorial Design", kpi: "Design, Layout, Visual Appeal, Readability, Brand guidelines", target: "100% adherence to typography, grid structures, color profiles" },
+  { id: "deadline_adherence", name: "Deadline Adherence & Speed", kpi: "Punctuality in sending pages to press", target: "Streamlining Processes for Better Deadline Management" },
+  { id: "quality_accuracy", name: "Quality, Accuracy & Print Readiness", kpi: "Error‑free output, proper formatting, proper photo scanning", target: "Error free ready to print PDF" },
+  { id: "advertising_integration", name: "Advertising & Content Integration", kpi: "Designing various kinds of advertisements, Ad Placement", target: "100% accuracy making advertisements within schedule" },
+  { id: "platform_adaptation", name: "Various Platforms / E‑Paper Adaptation", kpi: "Convert Print Assets for digital or vice versa", target: "Timely delivery for web/mobile/print formats" },
+  { id: "collaboration", name: "Collaboration & Communication", kpi: "Teamwork with Vertical/Unit Heads/Editors/Reporters & Team", target: "Proactive communication" }
+];
+
+var ratingOptions = [1, 2, 3, 3.5, 4, 4.5, 5];
+var defaultRating = 2;
+var CENTRES = ['Akola', 'Nagpur(LS)','Nagpur(LM)','Nagpur(LT)','Chh. Sambhajinagar(LM)', 'Chh. Sambhajinagar(LS)', 'Goa', 'Jalgaon', 'Kolhapur', 'Mumbai', 'Nashik', 'Pune', 'Solapur'];
+
+// ==================== API HELPER (JSONP) ====================
+function callServer(action, params) {
+  console.log("Calling " + action, params);
+  return new Promise(function(resolve, reject) {
+    var callbackName = 'jsonp_cb_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    var url = API_URL + '?action=' + encodeURIComponent(action) + '&callback=' + callbackName;
+    if (params) url += '&params=' + encodeURIComponent(JSON.stringify(params));
+    var script = document.createElement('script');
+    script.src = url;
+    var timeout = setTimeout(function() { cleanup(); reject(new Error("Request timeout for " + action)); }, 30000);
+    function cleanup() { clearTimeout(timeout); if (script.parentNode) script.parentNode.removeChild(script); delete window[callbackName]; }
+    window[callbackName] = function(data) { cleanup(); resolve(data); };
+    script.onerror = function() { cleanup(); reject(new Error("JSONP request failed for " + action)); };
+    document.body.appendChild(script);
+  });
+}
+
+// ==================== HELPER FUNCTIONS ====================
+function getHelloPagesLabel(editionName) {
+  if (!editionName) return "Hello Pages";
+  var lowerEdition = editionName.toLowerCase();
+  if (lowerEdition.indexOf("samachar") !== -1) return "Apna Pages";
+  if (lowerEdition.indexOf("times") !== -1) return "FIRST Pages";
+  return "Hello Pages";
+}
+
+function showToast(message, type) {
+  var existingToast = document.querySelector('.custom-toast');
+  if (existingToast) existingToast.remove();
+  var toast = document.createElement('div');
+  toast.className = 'custom-toast toast-' + type;
+  var icon = type === 'success' ? '✓' : (type === 'error' ? '✗' : (type === 'warning' ? '⚠' : 'ℹ'));
+  toast.innerHTML = '<span class="toast-icon">' + icon + '</span><span class="toast-message">' + message + '</span>';
+  document.body.appendChild(toast);
+  setTimeout(function() { toast.remove(); }, 3000);
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+function formatTeamWorkloadDisplay(teamWorkload) {
+  if (!teamWorkload || Object.keys(teamWorkload).length === 0) return '';
+  var parts = [];
+  var grandTotal = 0;
+  for (var edition in teamWorkload) {
+    var wl = teamWorkload[edition];
+    if (wl && (wl.main_pages || wl.hello_pages)) {
+      var mainPages = wl.main_pages || 0;
+      var helloPages = wl.hello_pages || 0;
+      var editionTotal = mainPages + helloPages;
+      grandTotal += editionTotal;
+      var helloLabel = getHelloPagesLabel(edition);
+      parts.push(edition + ': Main(' + mainPages + ')+' + helloLabel + '(' + helloPages + ')=' + editionTotal);
+    }
+  }
+  return parts.length ? '📊 Team Workload: ' + parts.join(' | ') + ' | <strong>Total: ' + grandTotal + ' pages</strong>' : '';
+}
+
+function generateDailyWorkloadHTML(dailyWorkload) {
+  if (!dailyWorkload || Object.keys(dailyWorkload).length === 0) {
+    return '<div style="background: #f8f9fa; padding: 10px; margin: 10px 0; border-radius: 6px;"><strong><i class="fa fa-calendar"></i> 📋 Daily Workload:</strong><div>No data</div></div>';
+  }
+  var items = [];
+  if (dailyWorkload.main_full_page_design) items.push(dailyWorkload.main_full_page_design + ' Full Page Design (Main)');
+  if (dailyWorkload.main_page_alter_ad_schedule) items.push(dailyWorkload.main_page_alter_ad_schedule + ' Page Alter - Ad Schedule (Main)');
+  if (dailyWorkload.main_page_alter_news_update) items.push(dailyWorkload.main_page_alter_news_update + ' Page Alter - News Update (Main)');
+  if (dailyWorkload.main_infographic) items.push(dailyWorkload.main_infographic + ' Infographic/Info-Story (Main)');
+  if (dailyWorkload.hello_full_page_design) items.push(dailyWorkload.hello_full_page_design + ' Full Page Design (Hello)');
+  if (dailyWorkload.hello_page_alter_ad_schedule) items.push(dailyWorkload.hello_page_alter_ad_schedule + ' Page Alter - Ad Schedule (Hello)');
+  if (dailyWorkload.hello_page_alter_news_update) items.push(dailyWorkload.hello_page_alter_news_update + ' Page Alter - News Update (Hello)');
+  if (dailyWorkload.hello_infographic) items.push(dailyWorkload.hello_infographic + ' Infographic/Info-Story (Hello)');
+  if (dailyWorkload.display_ad_design) items.push(dailyWorkload.display_ad_design + ' Display Ad Design');
+  if (dailyWorkload.event_creative) items.push(dailyWorkload.event_creative + ' Event Creative');
+  if (dailyWorkload.supplement_design) items.push(dailyWorkload.supplement_design + ' Supplement Design');
+  if (dailyWorkload.ai_image) items.push(dailyWorkload.ai_image + ' AI Image');
+  if (dailyWorkload.photo_correction) items.push(dailyWorkload.photo_correction + ' Photo Correction');
+  if (dailyWorkload.pdf_quality_check) items.push(dailyWorkload.pdf_quality_check + ' PDF Quality Check');
+  if (dailyWorkload.epaper_page_upload) items.push(dailyWorkload.epaper_page_upload + ' Epaper Page Upload');
+  if (dailyWorkload.news_article_typing) items.push(dailyWorkload.news_article_typing + ' Words-News/Article Typing');
+  if (items.length === 0) return '<div style="background: #f8f9fa; padding: 10px; margin: 10px 0; border-radius: 6px;"><strong><i class="fa fa-calendar"></i> 📋 Daily Workload:</strong><div>No data</div></div>';
+  var itemsHtml = '<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 5px 15px; margin-top: 5px;">';
+  for (var i = 0; i < items.length; i++) itemsHtml += '<div><i class="fa fa-check-circle-o" style="color: #1e3c72; font-size: 12px;"></i> ' + items[i] + '</div>';
+  itemsHtml += '</div>';
+  return '<div style="background: #f8f9fa; padding: 10px; margin: 10px 0; border-radius: 6px;"><strong><i class="fa fa-calendar"></i> 📋 Daily Workload:</strong>' + itemsHtml + '</div>';
+}
+
+function calculatePaginationScore(dailyWorkload) {
+  if (!dailyWorkload) return 0;
+  var score = 0;
+  score += (parseInt(dailyWorkload.main_full_page_design) || 0) * 1;
+  score += (parseInt(dailyWorkload.main_page_alter_ad_schedule) || 0) * 0.5;
+  score += (parseInt(dailyWorkload.main_page_alter_news_update) || 0) * 0.5;
+  score += (parseInt(dailyWorkload.hello_full_page_design) || 0) * 1;
+  score += (parseInt(dailyWorkload.hello_page_alter_ad_schedule) || 0) * 0.5;
+  score += (parseInt(dailyWorkload.hello_page_alter_news_update) || 0) * 0.5;
+  score += (parseInt(dailyWorkload.supplement_design) || 0) * 0.14;
+  return score;
+}
+
+function calculateOtherWorkScore(dailyWorkload) {
+  if (!dailyWorkload) return 0;
+  var score = 0;
+  score += (parseInt(dailyWorkload.main_infographic) || 0) * 0.2;
+  score += (parseInt(dailyWorkload.hello_infographic) || 0) * 0.2;
+  score += (parseInt(dailyWorkload.display_ad_design) || 0) * 0.3;
+  score += (parseInt(dailyWorkload.event_creative) || 0) * 0.4;
+  score += (parseInt(dailyWorkload.ai_image) || 0) * 0.2;
+  score += (parseInt(dailyWorkload.photo_correction) || 0) * 0.01;
+  score += (parseInt(dailyWorkload.pdf_quality_check) || 0) * 0.1;
+  score += (parseInt(dailyWorkload.epaper_page_upload) || 0) * 0.05;
+  score += (parseInt(dailyWorkload.news_article_typing) || 0) * 0.002;
+  return score;
+}
+
+// ==================== SELF EVALUATION ====================
+function openSelfEvaluationFromSelfTab() {
+  var empCode = document.getElementById('self_emp_code').value;
+  if (!empCode) { showToast('Please enter employee code', 'error'); return; }
+  showToast('Loading employee data...', 'info');
+  
+  callServer("checkEmployeeExists", { empCode: empCode }).then(function(checkResult) {
+    if (checkResult.exists) {
+      callServer("checkIfICDUserWithStatus", { empCode: empCode }).then(function(icdStatus) {
+        if (icdStatus.isICD && icdStatus.teamWorkloadSaved !== 'Yes') {
+          showRegistrationModal(empCode);
+        } else {
+          var isCompleted = checkResult.completion === 'Yes';
+          callServer("getEmployeeBasicInfo", { empCode: empCode }).then(function(empInfo) {
+            var empName = empInfo.success ? empInfo.name : empCode;
+            openSelfEvaluationModal(empCode, empName, true, isCompleted);
+          }).catch(function() { openSelfEvaluationModal(empCode, empCode, true, isCompleted); });
+        }
+      }).catch(function() { openSelfEvaluationModal(empCode, empCode, true, checkResult.completion === 'Yes'); });
+    } else {
+      showToast('Employee code not found. Please contact HR.', 'warning');
+    }
+  }).catch(function(error) { showToast('Error checking employee: ' + error.message, 'error'); });
+}
+
+function openSelfEvaluationModal(empCode, empName, isEditable, isSubmitted) {
+  currentSelfEvalEmpCode = empCode;
+  currentSelfEvalIsEditable = isEditable && !isSubmitted;
+  currentSelfEvalIsSubmitted = isSubmitted;
+  window.currentUserRole = authenticatedUser ? authenticatedUser.position : null;
+  document.getElementById('selfEvalModalTitle').innerHTML = 'Self Evaluation - ' + escapeHtml(empName);
+  document.getElementById('selfEvalModalBody').innerHTML = '<div class="loading"><i class="fa fa-spinner fa-spin"></i> Loading self evaluation data...</div>';
+  var saveBtn = document.getElementById('selfEvalSaveBtn');
+  if (saveBtn) saveBtn.style.display = currentSelfEvalIsEditable ? 'inline-block' : 'none';
+  var draftBtn = document.getElementById('selfEvalDraftBtn');
+  if (draftBtn) draftBtn.style.display = currentSelfEvalIsEditable ? 'inline-block' : 'none';
+  $('#selfEvalModal').modal('show');
+  
+  Promise.all([callServer("getSelfEvaluation", { empCode: empCode }), callServer("getEmployeeFromMaster", { empCode: empCode })]).then(function(results) {
+    var dataResult = results[0];
+    var masterResult = results[1];
+    var latest = (dataResult.evaluations && dataResult.evaluations.length > 0) ? dataResult.evaluations[dataResult.evaluations.length - 1] : null;
+    var employeeMaster = masterResult.success ? masterResult.employee : null;
+    renderSelfEvalModalContent(latest, employeeMaster);
+  }).catch(function(error) { console.error(error); renderSelfEvalModalContent(null, null); });
+}
+
+function renderSelfEvalModalContent(evalData, employeeMasterData) {
+  var disabledAttr = currentSelfEvalIsEditable ? '' : 'disabled';
+  var isDraftMode = (evalData && evalData.status === 'Draft');
+  if (isDraftMode && currentSelfEvalIsEditable === false) { currentSelfEvalIsEditable = true; disabledAttr = ''; }
+  var empName = employeeMasterData ? employeeMasterData.name : '';
+  var empCode = employeeMasterData ? employeeMasterData.code : currentSelfEvalEmpCode;
+  var empDesignation = employeeMasterData ? employeeMasterData.designation : '';
+  var empMobile = employeeMasterData ? employeeMasterData.mobile : '';
+  var empUnit = employeeMasterData ? employeeMasterData.unit : '';
+  var empWorkplace = employeeMasterData ? employeeMasterData.workplace : '';
+  var empEmail = employeeMasterData ? employeeMasterData.email : '';
+  var empDutyTimings = employeeMasterData ? employeeMasterData.duty_timings : '';
+  var jobDescription = '', specialProjectsText = '';
+  if (evalData && evalData.specialProjectsText) {
+    try { var mColumnData = JSON.parse(evalData.specialProjectsText); jobDescription = mColumnData.job_description || ''; specialProjectsText = mColumnData.special_projects || ''; } catch(e) { specialProjectsText = evalData.specialProjectsText || ''; }
+  }
+  var kraHtml = '';
+  for (var i = 0; i < kraDefinitions.length; i++) {
+    var kra = kraDefinitions[i];
+    var ratingValue = (evalData && evalData.kraRatings && evalData.kraRatings[kra.id]) ? evalData.kraRatings[kra.id] : defaultRating;
+    var optionsHtml = '';
+    ratingOptions.forEach(function(opt) { optionsHtml += '<option value="' + opt + '" ' + (opt == ratingValue ? 'selected' : '') + '>' + opt + '</option>'; });
+    kraHtml += '<div class="col-md-6"><div class="kra-box"><div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;"><h5 style="margin: 0;"><strong>' + kra.name + '</strong></h5><select id="modal_kra_' + kra.id + '" class="form-control rating-select" style="width: 65px;" ' + disabledAttr + ' onchange="updateSelfModalLiveScore()" onfocus="this.select()">' + optionsHtml + '</select></div><div style="font-size: 11px; color: #666; margin-top: 8px;"><div><strong>KPI:</strong> ' + kra.kpi + '</div><div><strong>Target:</strong> ' + kra.target + '</div></div></div></div>';
+  }
+  var dw = (evalData && evalData.dailyWorkload) ? evalData.dailyWorkload : {};
+  var dutyHour = '', dutyMinute = '', dutyAmpm = 'PM';
+  if (empDutyTimings) { var dutyMatch = empDutyTimings.toString().match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i); if (dutyMatch) { dutyHour = dutyMatch[1]; dutyMinute = dutyMatch[2]; dutyAmpm = dutyMatch[3].toUpperCase(); } }
+  var modalHtml = '<div class="employee-info-card" style="background: #e8f4fd; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #1e3c72;"><div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 15px;"><div><span class="info-label"><i class="fa fa-user"></i> Name:</span> <span class="info-value">' + escapeHtml(empName) + '</span></div><div><span class="info-label"><i class="fa fa-id-card"></i> Employee Code:</span> <span class="info-value">' + escapeHtml(empCode) + '</span></div><div><span class="info-label"><i class="fa fa-briefcase"></i> Designation:</span> <span class="info-value">' + escapeHtml(empDesignation) + '</span></div><div><span class="info-label"><i class="fa fa-phone"></i> Mobile No.:</span> <span class="info-value">' + escapeHtml(empMobile) + '</span></div><div><span class="info-label"><i class="fa fa-building"></i> Unit (Centre):</span> <span class="info-value">' + escapeHtml(empUnit) + '</span></div><div><span class="info-label"><i class="fa fa-map-marker"></i> Work Place:</span> <span class="info-value">' + escapeHtml(empWorkplace) + '</span></div></div><div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding-top: 10px; border-top: 1px dashed #cce5ff;"><div><span class="info-label"><i class="fa fa-envelope"></i> Email *:</span><input type="email" class="form-control" id="modal_self_email" style="width: 100%; margin-top: 5px;" placeholder="Enter your email" value="' + escapeHtml(empEmail) + '" ' + disabledAttr + ' onfocus="this.select()"></div><div><span class="info-label"><i class="fa fa-clock-o"></i> Duty In Time *:</span><div class="duty-time-group" style="display: flex; align-items: center; gap: 5px; margin-top: 5px; flex-wrap: wrap;"><input type="text" class="form-control time-input" id="modal_self_duty_hour" placeholder="HH" maxlength="2" value="' + dutyHour + '" style="width: 70px;" ' + disabledAttr + ' onfocus="this.select()"><span>:</span><input type="text" class="form-control time-input" id="modal_self_duty_minute" placeholder="MM" maxlength="2" value="' + dutyMinute + '" style="width: 70px;" ' + disabledAttr + ' onfocus="this.select()"><select class="form-control ampm-select" id="modal_self_duty_ampm" style="width: 85px;" ' + disabledAttr + ' onfocus="this.select()"><option value="AM" ' + (dutyAmpm === 'AM' ? 'selected' : '') + '>AM</option><option value="PM" ' + (dutyAmpm === 'PM' ? 'selected' : '') + '>PM</option></select></div></div></div></div><div class="panel panel-default"><div class="panel-heading" style="background-color: #1e3c72; color: white; display: flex; justify-content: space-between; align-items: center;"><strong><i class="fa fa-star"></i> KRA Performance Ratings (1-5 Scale)</strong><div><span id="modalSelfLiveScoreDisplay" style="background: #ffc107; color: #1e3c72; padding: 3px 10px; border-radius: 15px; font-size: 12px;">Score: 0.0/10</span><span id="modalSelfLiveLevelDisplay" style="background: #6c757d; color: white; padding: 3px 10px; border-radius: 15px; font-size: 12px; margin-left: 5px;">Level: Not Assessed</span></div></div><div class="panel-body"><div class="row">' + kraHtml + '</div></div></div><div class="panel panel-default"><div class="panel-heading" style="background-color: #1e3c72; color: white;"><strong><i class="fa fa-calendar"></i> 📊 Daily Workload</strong></div><div class="panel-body"><div class="panel panel-default"><div class="panel-heading" style="background-color: #2a5298; color: white;"><strong><i class="fa fa-newspaper-o"></i> 1. Main Edition</strong></div><div class="panel-body"><div class="row"><div class="col-xs-12 col-sm-6 col-md-3"><label>Full Page Design</label><input type="number" class="form-control" id="modal_main_full_page_design" value="' + (dw.main_full_page_design || 0) + '" min="0" ' + disabledAttr + ' onfocus="this.select()"></div><div class="col-xs-12 col-sm-6 col-md-3"><label>Page Alter (Ad Schedule)</label><input type="number" class="form-control" id="modal_main_page_alter_ad_schedule" value="' + (dw.main_page_alter_ad_schedule || 0) + '" min="0" ' + disabledAttr + ' onfocus="this.select()"></div><div class="col-xs-12 col-sm-6 col-md-3"><label>Page Alter (News Update)</label><input type="number" class="form-control" id="modal_main_page_alter_news_update" value="' + (dw.main_page_alter_news_update || 0) + '" min="0" ' + disabledAttr + ' onfocus="this.select()"></div><div class="col-xs-12 col-sm-6 col-md-3"><label>Infographic/Info-Story</label><input type="number" class="form-control" id="modal_main_infographic" value="' + (dw.main_infographic || 0) + '" min="0" ' + disabledAttr + ' onfocus="this.select()"></div></div></div></div><div class="panel panel-default"><div class="panel-heading" style="background-color: #2a5298; color: white;"><strong><i class="fa fa-file-text-o"></i> 2. Hello Edition</strong></div><div class="panel-body"><div class="row"><div class="col-xs-12 col-sm-6 col-md-3"><label>Full Page Design</label><input type="number" class="form-control" id="modal_hello_full_page_design" value="' + (dw.hello_full_page_design || 0) + '" min="0" ' + disabledAttr + ' onfocus="this.select()"></div><div class="col-xs-12 col-sm-6 col-md-3"><label>Page Alter (Ad Schedule)</label><input type="number" class="form-control" id="modal_hello_page_alter_ad_schedule" value="' + (dw.hello_page_alter_ad_schedule || 0) + '" min="0" ' + disabledAttr + ' onfocus="this.select()"></div><div class="col-xs-12 col-sm-6 col-md-3"><label>Page Alter (News Update)</label><input type="number" class="form-control" id="modal_hello_page_alter_news_update" value="' + (dw.hello_page_alter_news_update || 0) + '" min="0" ' + disabledAttr + ' onfocus="this.select()"></div><div class="col-xs-12 col-sm-6 col-md-3"><label>Infographic/Info-Story</label><input type="number" class="form-control" id="modal_hello_infographic" value="' + (dw.hello_infographic || 0) + '" min="0" ' + disabledAttr + ' onfocus="this.select()"></div></div></div></div><div class="panel panel-default"><div class="panel-heading" style="background-color: #2a5298; color: white;"><strong><i class="fa fa-tasks"></i> 3. Common Tasks & Projects</strong></div><div class="panel-body"><div class="row"><div class="col-xs-12 col-sm-6 col-md-3"><label>Notice/Display Ad Design</label><input type="number" class="form-control" id="modal_display_ad_design" value="' + (dw.display_ad_design || 0) + '" min="0" ' + disabledAttr + ' onfocus="this.select()"></div><div class="col-xs-12 col-sm-6 col-md-3"><label>Event Creative</label><input type="number" class="form-control" id="modal_event_creative" value="' + (dw.event_creative || 0) + '" min="0" ' + disabledAttr + ' onfocus="this.select()"></div><div class="col-xs-12 col-sm-6 col-md-3"><label>Supplement Design</label><input type="number" class="form-control" id="modal_supplement_design" value="' + (dw.supplement_design || 0) + '" min="0" ' + disabledAttr + ' onfocus="this.select()"></div><div class="col-xs-12 col-sm-6 col-md-3"><label>AI Image</label><input type="number" class="form-control" id="modal_ai_image" value="' + (dw.ai_image || 0) + '" min="0" ' + disabledAttr + ' onfocus="this.select()"></div><div class="col-xs-12 col-sm-6 col-md-3"><label>Photo Correction</label><input type="number" class="form-control" id="modal_photo_correction" value="' + (dw.photo_correction || 0) + '" min="0" ' + disabledAttr + ' onfocus="this.select()"></div><div class="col-xs-12 col-sm-6 col-md-3"><label>PDF Quality Check</label><input type="number" class="form-control" id="modal_pdf_quality_check" value="' + (dw.pdf_quality_check || 0) + '" min="0" ' + disabledAttr + ' onfocus="this.select()"></div><div class="col-xs-12 col-sm-6 col-md-3"><label>Epaper Page Upload</label><input type="number" class="form-control" id="modal_epaper_page_upload" value="' + (dw.epaper_page_upload || 0) + '" min="0" ' + disabledAttr + ' onfocus="this.select()"></div><div class="col-xs-12 col-sm-6 col-md-3"><label>Text Typing (Total words)</label><input type="number" class="form-control" id="modal_news_article_typing" value="' + (dw.news_article_typing || 0) + '" min="0" ' + disabledAttr + ' onfocus="this.select()"></div></div></div></div></div></div><div class="panel panel-default"><div class="panel-heading" style="background-color: #1e3c72; color: white;"><strong><i class="fa fa-file-text"></i> Job Description</strong></div><div class="panel-body"><textarea class="form-control" id="modal_job_description" rows="3" ' + disabledAttr + ' placeholder="Describe your job responsibilities, key duties, and daily tasks..." onfocus="this.select()">' + escapeHtml(jobDescription) + '</textarea></div></div><div class="panel panel-default"><div class="panel-heading" style="background-color: #1e3c72; color: white;"><strong><i class="fa fa-rocket"></i> Special Projects & Initiatives</strong></div><div class="panel-body"><textarea class="form-control" id="modal_special_projects" rows="3" ' + disabledAttr + ' placeholder="Describe any special projects, achievements, or initiatives..." onfocus="this.select()">' + escapeHtml(specialProjectsText) + '</textarea></div></div>';
+  if (currentSelfEvalIsSubmitted && !isDraftMode) modalHtml = '<div class="alert alert-warning"><i class="fa fa-lock"></i> This evaluation has already been submitted. You cannot make changes.</div>' + modalHtml;
+  else if (isDraftMode) modalHtml = '<div class="alert alert-info"><i class="fa fa-pencil-square-o"></i> This is a DRAFT. You can edit and save again. Click "Save Changes" when ready to submit for evaluation.</div>' + modalHtml;
+  document.getElementById('selfEvalModalBody').innerHTML = modalHtml;
+  var saveChangesBtn = document.getElementById('selfEvalSaveBtn');
+  var saveDraftBtn = document.getElementById('selfEvalDraftBtn');
+  if (currentSelfEvalIsSubmitted && !isDraftMode) { if (saveChangesBtn) saveChangesBtn.style.display = 'none'; if (saveDraftBtn) saveDraftBtn.style.display = 'none'; }
+  else { if (saveChangesBtn) saveChangesBtn.style.display = 'inline-block'; if (saveDraftBtn) saveDraftBtn.style.display = 'inline-block'; }
+  updateSelfModalLiveScore();
+}
+
+function updateSelfModalLiveScore() {
+  var kraIds = ['page_layout','deadline_adherence','quality_accuracy','advertising_integration','platform_adaptation','collaboration'];
+  var selfTotal = 0;
+  for (var i = 0; i < kraIds.length; i++) { var select = document.getElementById('modal_kra_' + kraIds[i]); selfTotal += select ? parseFloat(select.value) || 0 : 0; }
+  var percentage = (selfTotal / 30) * 100;
+  var scoreOutOf10 = Math.round((percentage / 100) * 10 * 10) / 10;
+  var assessmentLevel = '', levelColor = '';
+  if (percentage >= 80) { assessmentLevel = 'DE - Distinguished Expert'; levelColor = '#28a745'; }
+  else if (percentage >= 50) { assessmentLevel = 'ME - Meets Expectations'; levelColor = '#ffc107'; }
+  else { assessmentLevel = 'NI - Needs Improvement'; levelColor = '#dc3545'; }
+  var scoreDisplay = document.getElementById('modalSelfLiveScoreDisplay');
+  if (scoreDisplay) { scoreDisplay.innerHTML = '⭐ Score: ' + scoreOutOf10 + '/10'; scoreDisplay.style.background = levelColor; }
+  var levelDisplay = document.getElementById('modalSelfLiveLevelDisplay');
+  if (levelDisplay) { levelDisplay.innerHTML = '📊 Level: ' + assessmentLevel; levelDisplay.style.background = levelColor; }
+}
+
+function saveSelfEvaluationFromModal(isDraft) {
+  if (!currentSelfEvalIsEditable) { showToast('This evaluation is locked and cannot be edited.', 'warning'); return; }
+  if (!currentSelfEvalEmpCode) return;
+  var kraValues = {};
+  kraDefinitions.forEach(function(kra) { var select = document.getElementById('modal_kra_' + kra.id); kraValues[kra.id] = select ? parseFloat(select.value) || 0 : 0; });
+  var email = document.getElementById('modal_self_email') ? document.getElementById('modal_self_email').value : '';
+  var dutyHour = document.getElementById('modal_self_duty_hour') ? document.getElementById('modal_self_duty_hour').value : '';
+  var dutyMinute = document.getElementById('modal_self_duty_minute') ? document.getElementById('modal_self_duty_minute').value : '';
+  var dutyAmpm = document.getElementById('modal_self_duty_ampm') ? document.getElementById('modal_self_duty_ampm').value : 'PM';
+  var dutyTimings = (dutyHour && dutyMinute) ? dutyHour + ':' + dutyMinute.toString().padStart(2, '0') + ' ' + dutyAmpm : '';
+  var jobDescription = document.getElementById('modal_job_description') ? document.getElementById('modal_job_description').value : '';
+  var specialProjectsText = document.getElementById('modal_special_projects') ? document.getElementById('modal_special_projects').value : '';
+  var mColumnData = JSON.stringify({ job_description: jobDescription, special_projects: specialProjectsText });
+  var isFromSelfTab = (!authenticatedUser && !authenticatedUnitHead);
+  if (!isDraft && isFromSelfTab) { if (!email) { showToast('Please enter your email address', 'error'); return; } }
+  if (!isDraft) { var allRatingsValid = true; for (var key in kraValues) { if (kraValues[key] < 1 || kraValues[key] > 5) { allRatingsValid = false; break; } } if (!allRatingsValid) { showToast('Please provide self ratings (1-5) for all 6 KRAs', 'error'); return; } }
+  var userRole = window.currentUserRole || (authenticatedUser ? authenticatedUser.position : null);
+  var isFromVH = (userRole === 'Vertical Head');
+  var status = isDraft ? "Draft" : "Pending";
+  if (isFromVH && !isDraft) status = null;
+  var formObject = { emp_code: currentSelfEvalEmpCode, email: email, duty_timings: dutyTimings, status: status, comments: "", m_column_data: mColumnData, page_layout: kraValues.page_layout, deadline_adherence: kraValues.deadline_adherence, quality_accuracy: kraValues.quality_accuracy, advertising_integration: kraValues.advertising_integration, platform_adaptation: kraValues.platform_adaptation, collaboration: kraValues.collaboration, main_full_page_design: parseInt(document.getElementById('modal_main_full_page_design')?.value) || 0, main_page_alter_ad_schedule: parseInt(document.getElementById('modal_main_page_alter_ad_schedule')?.value) || 0, main_page_alter_news_update: parseInt(document.getElementById('modal_main_page_alter_news_update')?.value) || 0, main_infographic: parseInt(document.getElementById('modal_main_infographic')?.value) || 0, hello_full_page_design: parseInt(document.getElementById('modal_hello_full_page_design')?.value) || 0, hello_page_alter_ad_schedule: parseInt(document.getElementById('modal_hello_page_alter_ad_schedule')?.value) || 0, hello_page_alter_news_update: parseInt(document.getElementById('modal_hello_page_alter_news_update')?.value) || 0, hello_infographic: parseInt(document.getElementById('modal_hello_infographic')?.value) || 0, display_ad_design: parseInt(document.getElementById('modal_display_ad_design')?.value) || 0, event_creative: parseInt(document.getElementById('modal_event_creative')?.value) || 0, supplement_design: parseInt(document.getElementById('modal_supplement_design')?.value) || 0, ai_image: parseInt(document.getElementById('modal_ai_image')?.value) || 0, photo_correction: parseInt(document.getElementById('modal_photo_correction')?.value) || 0, pdf_quality_check: parseInt(document.getElementById('modal_pdf_quality_check')?.value) || 0, epaper_page_upload: parseInt(document.getElementById('modal_epaper_page_upload')?.value) || 0, news_article_typing: parseInt(document.getElementById('modal_news_article_typing')?.value) || 0 };
+  var serverFunction = isFromVH ? 'updateSelfEvaluation' : 'saveSelfEvaluation';
+  if (serverFunction === 'updateSelfEvaluation') delete formObject.status;
+  callServer(serverFunction, formObject).then(function(result) {
+    if (result.success) { showToast(result.message, 'success'); $('#selfEvalModal').modal('hide'); if (!isDraft) { currentSelfEvalIsSubmitted = true; currentSelfEvalIsEditable = false; } if (currentSelectedCentre) loadEmployeesByCentre(currentSelectedCentre, currentSelectedWorkplace || ''); }
+    else showToast('Error: ' + result.message, 'error');
+  }).catch(function(error) { showToast('Error: ' + error.message, 'error'); });
+}
+
+// ==================== HOD AUTHENTICATION ====================
+function authenticateHOD() {
+  var email = document.getElementById('hod_email').value;
+  var secretCode = document.getElementById('hod_secret_code').value;
+  if (!email || !secretCode) { showToast('Please enter email and secret code', 'error'); return; }
+  var authBtn = document.querySelector('#hodAuthSection .btn-primary');
+  var originalText = authBtn.innerHTML;
+  authBtn.disabled = true;
+  authBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Authenticating...';
+  callServer("authenticateUser", { email: email, secretCode: secretCode }).then(function(result) {
+    if (result.success) {
+      authenticatedUser = result;
+      document.getElementById('hodProtectedContent').style.display = 'block';
+      document.getElementById('hodAuthSection').style.display = 'none';
+      showToast(result.message, 'success');
+      if (result.position === 'ICD') { loadEmployeesForICD(result.unit, result.editions); }
+      else if (result.position === 'Head') { loadTeamMembersForHead(result.name); }
+      else { showToast('Access denied. Only ICD and Head can access this tab.', 'error'); document.getElementById('hodProtectedContent').style.display = 'none'; document.getElementById('hodAuthSection').style.display = 'block'; }
+    } else { showToast(result.message || 'Authentication failed', 'error'); }
+  }).catch(function(error) { showToast('Authentication failed: ' + error.message, 'error'); }).finally(function() { authBtn.disabled = false; authBtn.innerHTML = originalText; });
+}
+
+function loadEmployeesForICD(unit, editionsList) {
+  var teamListDiv = document.getElementById('hodTeamList');
+  teamListDiv.innerHTML = '<div class="loading"><i class="fa fa-spinner fa-spin"></i> Loading employees...</div>';
+  var icdEmpCode = authenticatedUser ? authenticatedUser.empCode : null;
+  
+  callServer("getWorkplacesByUnitWithTotal", { unit: unit }).then(function(workplacesResult) {
+    if (workplacesResult.success && workplacesResult.workplaces.length > 0) {
+      var filterDiv = document.getElementById('hodWorkplaceFilters');
+      filterDiv.style.display = 'flex';
+      var totalCompleted = 0, totalEmployees = 0;
+      for (var i = 0; i < workplacesResult.workplaces.length; i++) { totalCompleted += workplacesResult.workplaces[i].completed; totalEmployees += workplacesResult.workplaces[i].total; }
+      var filterHtml = '<button class="btn btn-default filter-btn active-filter" onclick="filterHODByWorkplace(\'\')"><i class="fa fa-list"></i> All Workplaces (' + totalCompleted + '/' + totalEmployees + ')</button>';
+      for (var i = 0; i < workplacesResult.workplaces.length; i++) {
+        var wp = workplacesResult.workplaces[i];
+        filterHtml += '<button class="btn btn-default filter-btn" onclick="filterHODByWorkplace(\'' + wp.name.replace(/'/g, "\\'") + '\')"><i class="fa fa-location-arrow"></i> ' + wp.name + ' (' + wp.completed + '/' + wp.total + ')</button>';
+      }
+      filterDiv.innerHTML = filterHtml;
+      currentSelectedHODWorkplace = '';
+    } else { document.getElementById('hodWorkplaceFilters').style.display = 'none'; }
+  }).catch(function() {});
+  
+  callServer("getEmployeesByUnit", { unit: unit, excludeEmpCode: icdEmpCode }).then(function(result) {
+    var allEmployees = result.success && result.employees ? result.employees : [];
+    if (icdEmpCode) {
+      callServer("getEmployeeRowData", { empCode: icdEmpCode }).then(function(icdData) {
+        if (icdData.success && icdData.employee) {
+          var alreadyExists = allEmployees.some(function(emp) { return emp.code === icdEmpCode; });
+          if (!alreadyExists) { var icdEmployee = icdData.employee; icdEmployee.isICD = true; icdEmployee.isSelfCard = true; allEmployees.unshift(icdEmployee); }
+        }
+        displayHODEmployeeCards(allEmployees, '');
+      }).catch(function() { displayHODEmployeeCards(allEmployees, ''); });
+    } else { displayHODEmployeeCards(allEmployees, ''); }
+  }).catch(function(error) { teamListDiv.innerHTML = '<div class="alert alert-danger">Error loading employees: ' + error.message + '</div>'; });
+}
+
+function loadTeamMembersForHead(headName) {
+  var teamListDiv = document.getElementById('hodTeamList');
+  teamListDiv.innerHTML = '<div class="loading"><i class="fa fa-spinner fa-spin"></i> Loading team members...</div>';
+  document.getElementById('hodWorkplaceFilters').style.display = 'none';
+  callServer("getTeamMembersByReportingAuthority", { reportingAuth: headName }).then(function(result) {
+    if (result.success && result.team && result.team.length > 0) displayHODEmployeeCards(result.team, '');
+    else teamListDiv.innerHTML = '<div class="alert alert-info">No team members have submitted self evaluation yet reporting to ' + headName + '</div>';
+  }).catch(function(error) { teamListDiv.innerHTML = '<div class="alert alert-danger">Error loading team: ' + error.message + '</div>'; });
+}
+
+function filterHODByWorkplace(workplace) {
+  currentSelectedHODWorkplace = workplace;
+  var buttons = document.querySelectorAll('#hodWorkplaceFilters .filter-btn');
+  for (var i = 0; i < buttons.length; i++) {
+    buttons[i].classList.remove('active-filter');
+    var btnText = buttons[i].innerText.trim();
+    if (workplace === '' && btnText.startsWith('All Workplaces')) buttons[i].classList.add('active-filter');
+    else if (workplace !== '' && btnText.startsWith(workplace)) buttons[i].classList.add('active-filter');
+  }
+  if (authenticatedUser && authenticatedUser.unit) {
+    var icdEmpCode = authenticatedUser ? authenticatedUser.empCode : null;
+    callServer("getEmployeesByUnit", { unit: authenticatedUser.unit, excludeEmpCode: icdEmpCode }).then(function(result) {
+      if (result.success && result.employees) displayHODEmployeeCards(result.employees, workplace);
+    }).catch(function(error) { console.error(error); });
+  }
+}
+
+function displayHODEmployeeCards(employees, workplaceFilter) {
+  var teamListDiv = document.getElementById('hodTeamList');
+  var filteredEmployees = employees;
+  if (workplaceFilter && workplaceFilter !== '') filteredEmployees = employees.filter(function(emp) { return emp.workplace === workplaceFilter; });
+  if (filteredEmployees.length === 0) { teamListDiv.innerHTML = '<div class="alert alert-info">No employees found' + (workplaceFilter ? ' for workplace: ' + workplaceFilter : '') + '</div>'; return; }
+  var html = '<h4>Team Members <span class="badge">' + filteredEmployees.length + '</span></h4>';
+  var loggedInEmpCode = authenticatedUser ? authenticatedUser.empCode : null;
+  var isICDUser = (authenticatedUser && authenticatedUser.position === 'ICD');
+  for (var i = 0; i < filteredEmployees.length; i++) {
+    var member = filteredEmployees[i];
+    var isSelfCard = (isICDUser && loggedInEmpCode === member.code);
+    var statusClass = member.completion === 'Yes' ? 'status-submitted' : 'status-pending';
+    var statusText = member.completion === 'Yes' ? '✓ Self Evaluation Submitted' : '📝 Draft';
+    var workloadDisplay = formatTeamWorkloadDisplay(member.teamWorkload);
+    var workloadHtml = workloadDisplay ? '<div class="workload-line"><i class="fa fa-tasks"></i> ' + workloadDisplay + '</div>' : '';
+    var dailyWorkloadHtml = generateDailyWorkloadHTML(member.dailyWorkload);
+    var jobDescription = '', specialProjectsText = '';
+    if (member.specialProjects) {
+      if (typeof member.specialProjects === 'object') { jobDescription = member.specialProjects.job_description || ''; specialProjectsText = member.specialProjects.special_projects || ''; }
+      else if (typeof member.specialProjects === 'string') { try { var parsed = JSON.parse(member.specialProjects); jobDescription = parsed.job_description || ''; specialProjectsText = parsed.special_projects || ''; } catch(e) { specialProjectsText = member.specialProjects; } }
+    }
+    var jobDescriptionHtml = jobDescription ? '<div style="background: #f0f7ff; padding: 10px; margin: 10px 0; border-radius: 6px; border-left: 3px solid #1e3c72;"><strong><i class="fa fa-file-text"></i> 📋 Job Description:</strong><div style="white-space: pre-wrap; margin-top: 5px; font-size: 13px;">' + escapeHtml(jobDescription) + '</div></div>' : '';
+    var specialProjectsHtml = specialProjectsText ? '<div style="background: #e8f4fd; padding: 10px; margin: 10px 0; border-radius: 6px; border-left: 3px solid #ff9800;"><strong><i class="fa fa-rocket"></i> 🚀 Special Projects:</strong><div style="white-space: pre-wrap; margin-top: 5px; font-size: 13px;">' + escapeHtml(specialProjectsText) + '</div></div>' : '';
+    var hodComplete = member.hodRatings && member.hodRatings.page_layout > 0 && member.hodRatings.deadline_adherence > 0 && member.hodRatings.quality_accuracy > 0 && member.hodRatings.advertising_integration > 0 && member.hodRatings.platform_adaptation > 0 && member.hodRatings.collaboration > 0;
+    var unitHeadApproved = (member.status === "Assessed-UH");
+    var unitHeadStatusText = unitHeadApproved ? '✓ Approved' : '⏳ Pending';
+    var unitHeadStatusClass = unitHeadApproved ? 'status-complete' : 'status-pending';
+    var vhComplete = member.vhEvaluation && member.vhEvaluation.performance_rating && member.vhEvaluation.performance_rating !== '';
+    var canPrintPdf = vhComplete;
+    var buttonHtml = isSelfCard ? '<button class="btn btn-sm btn-info" onclick="openHODEvalForHODTab(\'' + escapeHtml(member.code) + '\', \'' + escapeHtml(member.name) + '\', true)"><i class="fa fa-eye"></i> View My Evaluation</button>' : '<button class="btn btn-sm btn-primary" onclick="openHODEvalForHODTab(\'' + escapeHtml(member.code) + '\', \'' + escapeHtml(member.name) + '\', false)"><i class="fa fa-star"></i> Evaluate</button>';
+    html += '<div class="team-member-card" ' + (isSelfCard ? 'style="background: #f0f7ff; border-left: 4px solid #ff9800;"' : '') + '><div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; margin-bottom: 10px;"><div style="flex: 1;"><strong style="font-size: 16px;"><i class="fa fa-user"></i> ' + escapeHtml(member.name) + '</strong>' + (isSelfCard ? '<span class="label label-warning" style="margin-left: 10px;"><i class="fa fa-user-circle"></i> You (ICD)</span>' : '') + (!isSelfCard && member.isICD ? '<span class="label label-info" style="margin-left: 10px; background-color: #ff9800;"><i class="fa fa-users"></i> ICD</span>' : '') + '<br><small><i class="fa fa-briefcase"></i> ' + escapeHtml(member.designation || 'N/A') + ' | <i class="fa fa-building"></i> ' + escapeHtml(member.unit) + '</small><br><small><i class="fa fa-map-marker"></i> Workplace: ' + escapeHtml(member.workplace || 'N/A') + ' | <i class="fa fa-id-card"></i> Code: ' + escapeHtml(member.code) + '</small>' + workloadHtml + '</div><div style="text-align: right;"><span class="remark-badge ' + statusClass + '">' + statusText + '</span><span class="remark-badge ' + (hodComplete ? 'status-complete' : 'status-pending') + '">HOD: ' + (hodComplete ? '✓ Complete' : '⏳ Pending') + '</span><span class="remark-badge ' + unitHeadStatusClass + '">Unit Head: ' + unitHeadStatusText + '</span><span class="remark-badge ' + (vhComplete ? 'status-complete' : 'status-pending') + '">VH: ' + (vhComplete ? '✓ Complete' : '⏳ Pending') + '</span></div></div>' + dailyWorkloadHtml + jobDescriptionHtml + specialProjectsHtml + '<div style="margin-top: 15px; text-align: right; border-top: 1px solid #eee; padding-top: 12px;">' + buttonHtml + (canPrintPdf ? '<button class="btn btn-sm btn-info" onclick="printEvaluationReport(\'' + escapeHtml(member.code) + '\', \'' + escapeHtml(member.name) + '\')"><i class="fa fa-print"></i> PDF Report</button>' : '<button class="btn btn-sm btn-default" disabled style="opacity: 0.5;" title="VH evaluation required first">PDF Report</button>') + '</div></div>';
+  }
+  teamListDiv.innerHTML = html;
+}
+
+function openHODEvalForHODTab(empCode, empName, isReadOnly) {
+  currentEvalEmp = empCode;
+  var isICDUser = (authenticatedUser && authenticatedUser.position === 'ICD');
+  var loggedInEmpCode = authenticatedUser ? authenticatedUser.empCode : null;
+  var isSelfCard = (isICDUser && loggedInEmpCode === empCode);
+  var viewOnly = isReadOnly || isSelfCard;
+  window.currentUserRole = authenticatedUser ? authenticatedUser.position : null;
+  callServer("getEmployeeForHODEval", { empCode: empCode }).then(function(empData) {
+    if (empData.exists) {
+      var overallStatus = empData.overallStatus || "Pending";
+      var hodComplete = empData.hodComplete || false;
+      var canEdit = false;
+      var isHeadUser = (authenticatedUser && authenticatedUser.position !== 'ICD');
+      if (isHeadUser) canEdit = !hodComplete && !viewOnly;
+      else if (isICDUser && !isSelfCard) canEdit = (overallStatus !== "Complete") && !viewOnly;
+      else if (isICDUser && isSelfCard) canEdit = false;
+      callServer("getHODEvaluation", { empCode: empCode }).then(function(hodResult) {
+        var existingRatings = {}, existingComments = '', existingOverallLevel = '';
+        if (hodResult.evaluations && hodResult.evaluations.length > 0) {
+          existingRatings = hodResult.evaluations[0].kraRatings || {};
+          existingComments = hodResult.evaluations[0].comments || '';
+          existingOverallLevel = hodResult.evaluations[0].overallLevel || '';
+        }
+        openHODEvaluationModal(empCode, empName, canEdit, existingRatings, existingComments, existingOverallLevel, empData.selfRatings, viewOnly);
+      }).catch(function(error) { showToast('Error: ' + error.message, 'error'); });
+    }
+  }).catch(function(error) { showToast('Error: ' + error.message, 'error'); });
+}
+
+function openHODEvaluationModal(empCode, empName, isEditable, existingRatings, existingComments, existingOverallLevel, selfRatings, isViewOnly) {
+  currentHODEvalEmpCode = empCode;
+  currentHODEvalIsEditable = isEditable;
+  if (isViewOnly) currentHODEvalIsEditable = false;
+  var userRole = window.currentUserRole || (authenticatedUser ? authenticatedUser.position : null);
+  var modalTitle = userRole === 'Unit Head' ? 'Unit Head Evaluation' : 'Evaluation by ICD/Branch Head';
+  document.getElementById('hodEvalModalTitle').innerHTML = modalTitle + ' - ' + escapeHtml(empName);
+  if (isViewOnly) document.getElementById('hodEvalModalTitle').innerHTML = 'View Evaluation by ICD/Branch Head - ' + escapeHtml(empName) + ' (Read Only)';
+  var disabledAttr = currentHODEvalIsEditable ? '' : 'disabled';
+  var selfRatingsHtml = selfRatings ? '<div style="background: #e8f4fd; padding: 12px; margin-bottom: 15px; border-radius: 8px;"><strong><i class="fa fa-info-circle"></i> Self Evaluation Ratings (Reference)</strong><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; font-size: 12px;"><div>📄 Page Layout: ' + (selfRatings.page_layout || 0) + '/5</div><div>⏱️ Deadline Adherence: ' + (selfRatings.deadline_adherence || 0) + '/5</div><div>✅ Quality & Accuracy: ' + (selfRatings.quality_accuracy || 0) + '/5</div><div>📢 Advertising: ' + (selfRatings.advertising_integration || 0) + '/5</div><div>💻 Platform Adaptation: ' + (selfRatings.platform_adaptation || 0) + '/5</div><div>🤝 Collaboration: ' + (selfRatings.collaboration || 0) + '/5</div></div></div>' : '';
+  var kraHtml = '';
+  for (var i = 0; i < kraDefinitions.length; i++) {
+    var kra = kraDefinitions[i];
+    var ratingValue = (existingRatings && existingRatings[kra.id]) ? existingRatings[kra.id] : defaultRating;
+    var optionsHtml = '';
+    ratingOptions.forEach(function(opt) { optionsHtml += '<option value="' + opt + '" ' + (opt == ratingValue ? 'selected' : '') + '>' + opt + '</option>'; });
+    kraHtml += '<div class="col-md-6"><div class="kra-box"><div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;"><h5 style="margin: 0;"><strong>' + kra.name + '</strong></h5><select id="modal_hod_kra_' + kra.id + '" class="form-control rating-select" style="width: 65px;" ' + disabledAttr + ' onchange="updateHODModalLiveScore()" onfocus="this.select()">' + optionsHtml + '</select></div><div style="font-size: 11px; color: #666; margin-top: 8px;"><div><strong>KPI:</strong> ' + kra.kpi + '</div><div><strong>Target:</strong> ' + kra.target + '</div></div></div></div>';
+  }
+  var viewOnlyWarning = isViewOnly ? '<div class="alert alert-info"><i class="fa fa-info-circle"></i> <strong>View Only Mode:</strong> You are viewing your own evaluation. No changes can be made.</div>' : '';
+  var modalHtml = viewOnlyWarning + selfRatingsHtml + '<div class="panel panel-default"><div class="panel-heading" style="background-color: #1e3c72; color: white; display: flex; justify-content: space-between; align-items: center;"><strong><i class="fa fa-star"></i> KRA Performance Ratings (1-5 Scale)</strong><div><span id="modalHodLiveScoreDisplay" style="background: #ffc107; color: #1e3c72; padding: 3px 10px; border-radius: 15px; font-size: 12px;">Score: 0.0/10</span><span id="modalHodLiveLevelDisplay" style="background: #6c757d; color: white; padding: 3px 10px; border-radius: 15px; font-size: 12px; margin-left: 5px;">Level: Not Assessed</span></div></div><div class="panel-body"><div class="row">' + kraHtml + '</div></div></div><div class="form-group"><label>Comments</label><textarea id="modal_hod_comments" class="form-control" rows="3" ' + disabledAttr + ' onfocus="this.select()">' + escapeHtml(existingComments) + '</textarea></div><input type="hidden" id="modal_hod_overall_level" value="' + escapeHtml(existingOverallLevel) + '">';
+  document.getElementById('hodEvalModalBody').innerHTML = modalHtml;
+  var saveBtn = document.getElementById('hodEvalSaveBtn');
+  if (saveBtn) saveBtn.style.display = (currentHODEvalIsEditable && !isViewOnly) ? 'inline-block' : 'none';
+  updateHODModalLiveScore();
+  $('#hodEvalModal').modal('show');
+}
+
+function updateHODModalLiveScore() {
+  var kraIds = ['page_layout','deadline_adherence','quality_accuracy','advertising_integration','platform_adaptation','collaboration'];
+  var hodTotal = 0;
+  for (var i = 0; i < kraIds.length; i++) { var select = document.getElementById('modal_hod_kra_' + kraIds[i]); hodTotal += select ? parseFloat(select.value) || 0 : 0; }
+  var percentage = (hodTotal / 30) * 100;
+  var scoreOutOf10 = Math.round((percentage / 100) * 10 * 10) / 10;
+  var assessmentLevel = '', levelCode = '', levelColor = '';
+  if (percentage >= 80) { assessmentLevel = 'DE - Distinguished Expert'; levelCode = 'DE'; levelColor = '#28a745'; }
+  else if (percentage >= 50) { assessmentLevel = 'ME - Meets Expectations'; levelCode = 'ME'; levelColor = '#ffc107'; }
+  else { assessmentLevel = 'NI - Needs Improvement'; levelCode = 'NI'; levelColor = '#525252'; }
+  var scoreDisplay = document.getElementById('modalHodLiveScoreDisplay');
+  if (scoreDisplay) { scoreDisplay.innerHTML = '⭐ Score: ' + scoreOutOf10 + '/10'; scoreDisplay.style.background = levelColor; }
+  var levelDisplay = document.getElementById('modalHodLiveLevelDisplay');
+  if (levelDisplay) { levelDisplay.innerHTML = '📊 Level: ' + assessmentLevel; levelDisplay.style.background = levelColor; }
+  var overallLevelInput = document.getElementById('modal_hod_overall_level');
+  if (overallLevelInput) overallLevelInput.value = levelCode;
+}
+
+function saveHODEvaluationFromModal() {
+  if (!currentHODEvalIsEditable) { showToast('This evaluation is locked and cannot be edited.', 'warning'); return; }
+  if (!currentHODEvalEmpCode) return;
+  var kraIds = ['page_layout','deadline_adherence','quality_accuracy','advertising_integration','platform_adaptation','collaboration'];
+  var allValid = true;
+  for (var i = 0; i < kraIds.length; i++) { var val = parseFloat(document.getElementById('modal_hod_kra_' + kraIds[i]).value) || 0; if (val < 1 || val > 5) allValid = false; }
+  if (!allValid) { showToast('Please provide ratings for all 6 KRAs', 'error'); return; }
+  var comments = document.getElementById('modal_hod_comments').value;
+  if (!comments.trim()) { showToast('Please enter comments', 'error'); return; }
+  var overallLevel = document.getElementById('modal_hod_overall_level') ? document.getElementById('modal_hod_overall_level').value : '';
+  var formObject = { emp_code: currentHODEvalEmpCode, comments: comments, overall_level: overallLevel };
+  kraDefinitions.forEach(function(kra) { formObject[kra.id] = parseFloat(document.getElementById('modal_hod_kra_' + kra.id).value) || 0; });
+  var userRole = window.currentUserRole || (authenticatedUser ? authenticatedUser.position : null);
+  var serverFunction = 'saveHODEvaluation';
+  if (userRole === 'Vertical Head') serverFunction = 'updateHODEvaluation';
+  if (userRole === 'Unit Head') serverFunction = 'saveUnitHeadEvaluation';
+  callServer(serverFunction, formObject).then(function(result) {
+    if (result.success) {
+      showToast(result.message, 'success');
+      $('#hodEvalModal').modal('hide');
+      
+      // Refresh the appropriate view based on user role
+      if (userRole === 'ICD' && authenticatedUser && authenticatedUser.unit) {
+        loadEmployeesForICD(authenticatedUser.unit, authenticatedUser.editions);
+      } else if (userRole === 'Head' && authenticatedUser && authenticatedUser.name) {
+        loadTeamMembersForHead(authenticatedUser.name);
+      } else if (userRole === 'Unit Head' && authenticatedUnitHead && authenticatedUnitHead.unit) {
+        // IMPORTANT: Refresh the Unit Head employee list after saving evaluation
+        loadEmployeesForUnitHead(authenticatedUnitHead.unit);
+      } else if (currentSelectedCentre) {
+        loadEmployeesByCentre(currentSelectedCentre, currentSelectedWorkplace || '');
+      }
+    } else showToast('Error: ' + result.message, 'error');
+  }).catch(function(error) { showToast('Error: ' + error.message, 'error'); });
+}
+
+// ==================== REGISTRATION FUNCTIONS ====================
+var currentRegistrationEmpCode = null;
+var currentRegistrationEmpData = null;
+
+function loadEmployeeFromMaster() {
+  var empCode = document.getElementById('emp_code_input').value.trim();
+  if (!empCode) { showToast('Please enter employee code', 'error'); return; }
+  showToast('Loading employee data...', 'info');
+  callServer("getEmployeeFromMaster", { empCode: empCode }).then(function(result) {
+    if (result.success && result.employee) {
+      var emp = result.employee;
+      document.getElementById('emp_code_display').value = emp.code || '';
+      document.getElementById('full_name_display').value = emp.name || '';
+      document.getElementById('designation_display').value = emp.designation || '';
+      document.getElementById('mobile_display').value = emp.mobile || '';
+      document.getElementById('unit_display').value = emp.unit || '';
+      document.getElementById('workplace_display').value = emp.workplace || '';
+      document.getElementById('reporting_auth_display').value = emp.reporting_authority || '';
+      document.getElementById('employeeInfoSection').style.display = 'block';
+      callServer("checkIfICDUserWithStatus", { empCode: empCode }).then(function(authResult) {
+        if (authResult.isICD === true) {
+          if (authResult.teamWorkloadSaved === 'Yes') { document.getElementById('teamWorkloadSection').style.display = 'none'; showToast('ICD user with existing team workload configuration.', 'info'); }
+          else { document.getElementById('teamWorkloadSection').style.display = 'block'; generateTeamWorkloadForms(authResult.editions); }
+        } else document.getElementById('teamWorkloadSection').style.display = 'none';
+        document.getElementById('registrationActions').style.display = 'block';
+      }).catch(function() { document.getElementById('teamWorkloadSection').style.display = 'none'; document.getElementById('registrationActions').style.display = 'block'; });
+    } else { showToast(result.message || 'Employee not found', 'error'); document.getElementById('employeeInfoSection').style.display = 'none'; document.getElementById('registrationActions').style.display = 'none'; }
+  }).catch(function(error) { showToast('Error: ' + error.message, 'error'); });
+}
+
+function generateTeamWorkloadForms(editionsList) {
+  if (!editionsList || editionsList.length === 0) { document.getElementById('teamWorkloadFormsContainer').innerHTML = '<p class="text-muted">No editions configured for this ICD user.</p>'; return; }
+  var html = '';
+  for (var i = 0; i < editionsList.length; i++) {
+    var edition = editionsList[i].trim();
+    if (edition === '') continue;
+    var safeKey = edition.replace(/[^a-zA-Z0-9]/g, '_');
+    var helloPagesLabel = getHelloPagesLabel(edition);
+    html += '<div class="subcentre-workload-box"><div class="subcentre-title"><i class="fa fa-newspaper-o"></i> Edition: ' + escapeHtml(edition) + '</div><div class="row"><div class="col-md-6"><div class="form-group"><span class="edition-label"><i class="fa fa-file-text-o"></i> Main Pages:</span><input type="number" class="form-control page-input workload-input" id="main_pages_' + safeKey + '" min="0" max="99" value="0" placeholder="00"></div></div><div class="col-md-6"><div class="form-group"><span class="edition-label"><i class="fa fa-file-image-o"></i> ' + helloPagesLabel + ':</span><input type="number" class="form-control page-input workload-input" id="hello_pages_' + safeKey + '" min="0" max="99" value="0" placeholder="00"></div></div></div></div>';
+  }
+  document.getElementById('teamWorkloadFormsContainer').innerHTML = html;
+  var workloadInputs = document.querySelectorAll('.workload-input');
+  for (var i = 0; i < workloadInputs.length; i++) { workloadInputs[i].addEventListener('focus', function() { this.select(); }); workloadInputs[i].addEventListener('click', function() { this.select(); }); }
+}
+
+function registerEmployee() {
+  var empCode = document.getElementById('emp_code_display').value;
+  if (!empCode) { showToast('Please load employee data first', 'error'); return; }
+  var teamWorkloads = null;
+  var isICD = document.getElementById('teamWorkloadSection').style.display === 'block';
+  if (isICD) {
+    teamWorkloads = {};
+    var editionBoxes = document.querySelectorAll('.subcentre-workload-box');
+    for (var i = 0; i < editionBoxes.length; i++) {
+      var box = editionBoxes[i];
+      var titleElem = box.querySelector('.subcentre-title');
+      var edition = titleElem.innerText.replace('Edition:', '').trim();
+      var safeKey = edition.replace(/[^a-zA-Z0-9]/g, '_');
+      var mainPages = parseInt(document.getElementById('main_pages_' + safeKey).value) || 0;
+      var helloPages = parseInt(document.getElementById('hello_pages_' + safeKey).value) || 0;
+      teamWorkloads[edition] = { main_pages: mainPages, hello_pages: helloPages };
+    }
+  }
+  showToast('Registering...', 'info');
+  callServer("registerEmployeeFromMaster", { emp_code: empCode, team_workloads: teamWorkloads }).then(function(result) {
+    if (result.success) {
+      showToast(result.message, 'success');
+      setTimeout(function() { $('.nav-pills a[href="#self"]').tab('show'); document.getElementById('self_emp_code').value = empCode; setTimeout(function() { openSelfEvaluationFromSelfTab(); }, 500); }, 1500);
+    } else showToast(result.message, 'error');
+  }).catch(function(error) { showToast('Error: ' + error.message, 'error'); });
+}
+
+function showRegistrationModal(empCode) {
+  currentRegistrationEmpCode = empCode;
+  document.getElementById('registrationModalBody').innerHTML = '<div class="loading"><i class="fa fa-spinner fa-spin"></i> Loading employee data...</div>';
+  $('#registrationModal').modal('show');
+  Promise.all([callServer("getEmployeeFromMaster", { empCode: empCode }), callServer("checkIfICDUser", { empCode: empCode })]).then(function(results) {
+    var empResult = results[0];
+    var icdResult = results[1];
+    if (empResult.success && empResult.employee) {
+      currentRegistrationEmpData = empResult.employee;
+      if (icdResult.isICD && icdResult.editions) renderRegistrationModalContent(empResult.employee, icdResult.editions);
+      else renderRegistrationModalContent(empResult.employee, []);
+    } else document.getElementById('registrationModalBody').innerHTML = '<div class="alert alert-danger">Error loading employee data</div>';
+  }).catch(function(error) { document.getElementById('registrationModalBody').innerHTML = '<div class="alert alert-danger">Error: ' + error.message + '</div>'; });
+}
+
+function renderRegistrationModalContent(employee, editionsList) {
+  var teamWorkloadHtml = '';
+  if (editionsList && editionsList.length > 0) {
+    teamWorkloadHtml = '<div class="panel panel-default"><div class="panel-heading" style="background-color: #ff9800; color: white;"><strong><i class="fa fa-calendar"></i> Team Workload Configuration (Required for ICD)</strong></div><div class="panel-body" id="regModalTeamWorkloadContainer">';
+    for (var i = 0; i < editionsList.length; i++) {
+      var edition = editionsList[i].trim();
+      if (edition === '') continue;
+      var safeKey = edition.replace(/[^a-zA-Z0-9]/g, '_');
+      var helloPagesLabel = getHelloPagesLabel(edition);
+      teamWorkloadHtml += '<div class="subcentre-workload-box" style="background: #fff3e0; padding: 15px; margin-bottom: 15px; border-radius: 8px; border-left: 4px solid #ff9800;"><div class="subcentre-title" style="font-size: 16px; font-weight: bold; color: #e68a00; margin-bottom: 15px;"><i class="fa fa-newspaper-o"></i> Edition: ' + escapeHtml(edition) + '</div><div class="row"><div class="col-md-6"><div class="form-group"><label><i class="fa fa-file-text-o"></i> Main Pages (per day):</label><input type="number" class="form-control page-input workload-input" id="reg_main_pages_' + safeKey + '" min="0" max="99" value="0" placeholder="00" onfocus="this.select()"></div></div><div class="col-md-6"><div class="form-group"><label><i class="fa fa-file-image-o"></i> ' + helloPagesLabel + ' (per day):</label><input type="number" class="form-control page-input workload-input" id="reg_hello_pages_' + safeKey + '" min="0" max="99" value="0" placeholder="00" onfocus="this.select()"></div></div></div></div>';
+    }
+    teamWorkloadHtml += '</div></div>';
+  } else teamWorkloadHtml = '<div class="alert alert-info">No editions configured. Please contact administrator.</div>';
+  var modalHtml = '<div class="employee-info-card" style="background: #e8f4fd; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #1e3c72;"><div class="row"><div class="col-md-6"><div class="form-group"><label>Employee Code</label><input type="text" class="form-control" value="' + escapeHtml(employee.code || '') + '" readonly></div></div><div class="col-md-6"><div class="form-group"><label>Full Name</label><input type="text" class="form-control" value="' + escapeHtml(employee.name || '') + '" readonly></div></div></div><div class="row"><div class="col-md-6"><div class="form-group"><label>Designation</label><input type="text" class="form-control" value="' + escapeHtml(employee.designation || '') + '" readonly></div></div><div class="col-md-6"><div class="form-group"><label>Unit (Centre)</label><input type="text" class="form-control" value="' + escapeHtml(employee.unit || '') + '" readonly></div></div></div><div class="row"><div class="col-md-6"><div class="form-group"><label>Work Place</label><input type="text" class="form-control" value="' + escapeHtml(employee.workplace || '') + '" readonly></div></div><div class="col-md-6"><div class="form-group"><label>Reporting Authority</label><input type="text" class="form-control" value="' + escapeHtml(employee.reporting_authority || '') + '" readonly></div></div></div></div><div class="alert alert-info"><i class="fa fa-info-circle"></i> As an ICD user, you need to configure team workload targets for each edition before proceeding to Self Evaluation.</div>' + teamWorkloadHtml;
+  document.getElementById('registrationModalBody').innerHTML = modalHtml;
+}
+
+function saveRegistrationFromModal() {
+  if (!currentRegistrationEmpCode) return;
+  var teamWorkloads = {};
+  var editionBoxes = document.querySelectorAll('#regModalTeamWorkloadContainer .subcentre-workload-box');
+  for (var i = 0; i < editionBoxes.length; i++) {
+    var box = editionBoxes[i];
+    var titleElem = box.querySelector('.subcentre-title');
+    var editionText = titleElem.innerText;
+    var edition = editionText.replace('Edition:', '').trim();
+    var safeKey = edition.replace(/[^a-zA-Z0-9]/g, '_');
+    var mainPages = parseInt(document.getElementById('reg_main_pages_' + safeKey).value) || 0;
+    var helloPages = parseInt(document.getElementById('reg_hello_pages_' + safeKey).value) || 0;
+    teamWorkloads[edition] = { main_pages: mainPages, hello_pages: helloPages };
+  }
+  showToast('Registering...', 'info');
+  callServer("registerEmployeeFromMaster", { emp_code: currentRegistrationEmpCode, team_workloads: teamWorkloads }).then(function(result) {
+    if (result.success) { showToast(result.message, 'success'); $('#registrationModal').modal('hide'); setTimeout(function() { openSelfEvaluationModal(currentRegistrationEmpCode, currentRegistrationEmpData ? currentRegistrationEmpData.name : currentRegistrationEmpCode, true, false); }, 500); }
+    else showToast('Registration failed: ' + result.message, 'error');
+  }).catch(function(error) { showToast('Error: ' + error.message, 'error'); });
+}
+
+// ==================== UNIT HEAD AUTHENTICATION ====================
+function authenticateUnitHead() {
+  var email = document.getElementById('unithead_email').value;
+  var secretCode = document.getElementById('unithead_secret_code').value;
+  if (!email || !secretCode) { showToast('Please enter email and secret code', 'error'); return; }
+  callServer("authenticateUser", { email: email, secretCode: secretCode }).then(function(result) {
+    if (result.success && result.position === 'Unit Head') {
+      authenticatedUnitHead = result;
+      document.getElementById('unitHeadProtectedContent').style.display = 'block';
+      document.getElementById('unitHeadAuthSection').style.display = 'none';
+      showToast(result.message, 'success');
+      loadEmployeesForUnitHead(result.unit);
+    } else { showToast(result.success ? 'Access denied. Unit Head access only.' : result.message, 'error'); }
+  }).catch(function(error) { showToast('Authentication failed: ' + error.message, 'error'); });
+}
+
+function loadEmployeesForUnitHead(unitPrefix) {
+  var teamListDiv = document.getElementById('unitHeadTeamList');
+  teamListDiv.innerHTML = '<div class="loading"><i class="fa fa-spinner fa-spin"></i> Loading employees...</div>';
+  var unitHeadName = authenticatedUnitHead ? authenticatedUnitHead.name : '';
+  
+  // Load workplace filters first (like ICD tab)
+  callServer("getWorkplacesByUnitWithTotal", { unit: unitPrefix }).then(function(workplacesResult) {
+    if (workplacesResult.success && workplacesResult.workplaces && workplacesResult.workplaces.length > 0) {
+      var filterDiv = document.getElementById('unitHeadWorkplaceFilters');
+      filterDiv.style.display = 'flex';
+      
+      // Calculate totals
+      var totalCompleted = 0, totalEmployees = 0;
+      for (var i = 0; i < workplacesResult.workplaces.length; i++) {
+        totalCompleted += workplacesResult.workplaces[i].completed;
+        totalEmployees += workplacesResult.workplaces[i].total;
+      }
+      
+      // Build filter buttons
+      var filterHtml = '<button class="btn btn-default filter-btn active-filter" onclick="filterUnitHeadByWorkplace(\'\')">' +
+        '<i class="fa fa-list"></i> All Workplaces (' + totalCompleted + '/' + totalEmployees + ')</button>';
+      
+      for (var i = 0; i < workplacesResult.workplaces.length; i++) {
+        var wp = workplacesResult.workplaces[i];
+        filterHtml += '<button class="btn btn-default filter-btn" onclick="filterUnitHeadByWorkplace(\'' + 
+          wp.name.replace(/'/g, "\\'") + '\')">' +
+          '<i class="fa fa-location-arrow"></i> ' + wp.name + ' (' + wp.completed + '/' + wp.total + ')</button>';
+      }
+      filterDiv.innerHTML = filterHtml;
+      currentSelectedUnitHeadWorkplace = '';
+    } else {
+      document.getElementById('unitHeadWorkplaceFilters').style.display = 'none';
+    }
+  }).catch(function(error) {
+    console.error("Error loading workplaces:", error);
+    document.getElementById('unitHeadWorkplaceFilters').style.display = 'none';
+  });
+  
+  // Then load employees
+  callServer("getEmployeesByUnitPrefix", { unitPrefix: unitPrefix, unitHeadName: unitHeadName }).then(function(result) {
+    if (result.success && result.employees && result.employees.length > 0) {
+      unitHeadEmployeesCache = result.employees;
+      displayUnitHeadEmployeeCards(result.employees, '');
+    } else {
+      teamListDiv.innerHTML = '<div class="alert alert-info">No employees found for unit: ' + unitPrefix + 
+        '<br><br>Note: Employees need to complete self evaluation first.</div>';
+    }
+  }).catch(function(error) {
+    teamListDiv.innerHTML = '<div class="alert alert-danger">Error loading employees: ' + error.message + '</div>';
+  });
+}
+
+// Update the filter function to properly filter by workplace
+function filterUnitHeadByWorkplace(workplace) {
+  currentSelectedUnitHeadWorkplace = workplace;
+  
+  // Update active button styling
+  var buttons = document.querySelectorAll('#unitHeadWorkplaceFilters .filter-btn');
+  for (var i = 0; i < buttons.length; i++) {
+    buttons[i].classList.remove('active-filter');
+    var btnText = buttons[i].innerText.trim();
+    if (workplace === '' && btnText.startsWith('All Workplaces')) {
+      buttons[i].classList.add('active-filter');
+    } else if (workplace !== '' && btnText.startsWith(workplace)) {
+      buttons[i].classList.add('active-filter');
+    }
+  }
+  
+  // Filter and display employees
+  if (unitHeadEmployeesCache) {
+    displayUnitHeadEmployeeCards(unitHeadEmployeesCache, workplace);
+  }
+}
+
+function filterUnitHeadByWorkplace(workplace) {
+  currentSelectedUnitHeadWorkplace = workplace;
+  var buttons = document.querySelectorAll('#unitHeadWorkplaceFilters .filter-btn');
+  for (var i = 0; i < buttons.length; i++) {
+    buttons[i].classList.remove('active-filter');
+    var btnText = buttons[i].innerText.trim();
+    if (workplace === '' && btnText.startsWith('All Workplaces')) buttons[i].classList.add('active-filter');
+    else if (workplace !== '' && btnText.startsWith(workplace)) buttons[i].classList.add('active-filter');
+  }
+  if (unitHeadEmployeesCache) displayUnitHeadEmployeeCards(unitHeadEmployeesCache, workplace);
+}
+
+function displayUnitHeadEmployeeCards(employees, workplaceFilter) {
+  var teamListDiv = document.getElementById('unitHeadTeamList');
+  
+  // Apply workplace filter
+  var filteredEmployees = employees;
+  if (workplaceFilter && workplaceFilter !== '') {
+    filteredEmployees = employees.filter(function(emp) {
+      return emp.workplace === workplaceFilter;
+    });
+  }
+  
+  if (filteredEmployees.length === 0) {
+    teamListDiv.innerHTML = '<div class="alert alert-info">No employees found' + 
+      (workplaceFilter ? ' for workplace: ' + workplaceFilter : '') + '</div>';
+    return;
+  }
+  var html = '<h4>Team Members <span class="badge">' + filteredEmployees.length + '</span></h4>';
+  for (var i = 0; i < filteredEmployees.length; i++) {
+    var member = filteredEmployees[i];
+    var isICDEmployee = member.isICD === true;
+    var statusClass = member.completion === 'Yes' ? 'status-submitted' : 'status-pending';
+    var statusText = member.completion === 'Yes' ? '✓ Self Evaluation Submitted' : '📝 Draft';
+    var workloadDisplay = formatTeamWorkloadDisplay(member.teamWorkload);
+    var workloadHtml = workloadDisplay ? '<div class="workload-line"><i class="fa fa-tasks"></i> ' + workloadDisplay + '</div>' : '';
+    var dailyWorkloadHtml = generateDailyWorkloadHTML(member.dailyWorkload);
+    var jobDescription = '', specialProjectsText = '';
+    if (member.specialProjects) {
+      if (typeof member.specialProjects === 'object') { jobDescription = member.specialProjects.job_description || ''; specialProjectsText = member.specialProjects.special_projects || ''; }
+      else if (typeof member.specialProjects === 'string') { try { var parsed = JSON.parse(member.specialProjects); jobDescription = parsed.job_description || ''; specialProjectsText = parsed.special_projects || ''; } catch(e) { specialProjectsText = member.specialProjects; } }
+    }
+    var hodComplete = !isICDEmployee && member.hodRatings && member.hodRatings.page_layout > 0 && member.hodRatings.deadline_adherence > 0 && member.hodRatings.quality_accuracy > 0 && member.hodRatings.advertising_integration > 0 && member.hodRatings.platform_adaptation > 0 && member.hodRatings.collaboration > 0;
+    var unitHeadStatusText = (member.status === "Assessed-UH") ? '✓ Approved' : ((member.status === "Assessed") ? '⏳ Pending Approval' : '⏳ Pending');
+    var unitHeadStatusClass = (member.status === "Assessed-UH") ? 'status-complete' : 'status-pending';
+    var vhComplete = member.vhEvaluation && member.vhEvaluation.performance_rating && member.vhEvaluation.performance_rating !== '';
+    var canPrintPdf = vhComplete;
+    var buttonHtml = '';
+    if (member.status === "Assessed") buttonHtml = '<button class="btn btn-sm btn-success" onclick="approveUnitHeadEvaluation(\'' + member.code + '\', \'' + escapeHtml(member.name) + '\')" style="margin-right: 8px;"><i class="fa fa-check-circle"></i> Approve</button><button class="btn btn-sm btn-warning" onclick="openUnitHeadEval(\'' + member.code + '\', \'' + escapeHtml(member.name) + '\')"><i class="fa fa-pencil-square-o"></i> Modify Rating</button>';
+    else if (member.status === "Assessed-UH") buttonHtml = '<button class="btn btn-sm btn-warning" onclick="openUnitHeadEval(\'' + member.code + '\', \'' + escapeHtml(member.name) + '\')"><i class="fa fa-pencil-square-o"></i> Modify Rating</button>';
+    else if (member.status === "Pending" && isICDEmployee) buttonHtml = '<button class="btn btn-sm btn-primary" onclick="openUnitHeadEval(\'' + member.code + '\', \'' + escapeHtml(member.name) + '\')"><i class="fa fa-pencil-square-o"></i> Evaluate</button>';
+    html += '<div class="team-member-card" ' + (member.status === 'Assessed-UH' ? 'style="background: #e8f8e8; border-left: 4px solid #28a745;"' : '') + '><div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; margin-bottom: 10px;"><div style="flex: 1;"><strong style="font-size: 16px;"><i class="fa fa-user"></i> ' + escapeHtml(member.name) + '</strong>' + (isICDEmployee ? '<span class="label label-info" style="margin-left: 10px; background-color: #ff9800;"><i class="fa fa-users"></i> ICD</span>' : '') + '<br><small><i class="fa fa-briefcase"></i> ' + escapeHtml(member.designation || 'N/A') + ' | <i class="fa fa-building"></i> ' + escapeHtml(member.unit) + '</small><br><small><i class="fa fa-map-marker"></i> Workplace: ' + escapeHtml(member.workplace || 'N/A') + ' | <i class="fa fa-id-card"></i> Code: ' + escapeHtml(member.code) + '</small>' + workloadHtml + '</div><div style="text-align: right;"><span class="remark-badge ' + statusClass + '">' + statusText + '</span><span class="remark-badge ' + (hodComplete ? 'status-complete' : 'status-pending') + '">HOD: ' + (hodComplete ? '✓ Complete' : '⏳ Pending') + '</span><span class="remark-badge ' + unitHeadStatusClass + '">Unit Head: ' + unitHeadStatusText + '</span><span class="remark-badge ' + (vhComplete ? 'status-complete' : 'status-pending') + '">VH: ' + (vhComplete ? '✓ Complete' : '⏳ Pending') + '</span></div></div>' + dailyWorkloadHtml + '<div style="margin-top: 15px; text-align: right; border-top: 1px solid #eee; padding-top: 12px;">' + buttonHtml + (canPrintPdf ? '<button class="btn btn-sm btn-info" onclick="printEvaluationReport(\'' + escapeHtml(member.code) + '\', \'' + escapeHtml(member.name) + '\')"><i class="fa fa-print"></i> PDF Report</button>' : '<button class="btn btn-sm btn-default" disabled style="opacity: 0.5;" title="VH evaluation required first">PDF Report</button>') + '</div></div>';
+  }
+  teamListDiv.innerHTML = html;
+}
+
+function openUnitHeadEval(empCode, empName) {
+  window.currentUserRole = 'Unit Head';
+  
+  // Store reference to refresh after modal closes
+  var unitHeadUnit = authenticatedUnitHead ? authenticatedUnitHead.unit : null;
+  
+  callServer("getEmployeeForHODEval", { empCode: empCode }).then(function(empData) {
+    if (empData.exists) {
+      callServer("getHODEvaluation", { empCode: empCode }).then(function(hodResult) {
+        var existingRatings = {}, existingComments = '', existingOverallLevel = '';
+        if (hodResult.evaluations && hodResult.evaluations.length > 0) {
+          existingRatings = hodResult.evaluations[0].kraRatings || {};
+          existingComments = hodResult.evaluations[0].comments || '';
+          existingOverallLevel = hodResult.evaluations[0].overallLevel || '';
+        }
+        
+        // Pass a callback to refresh after modal closes on save
+        openHODEvaluationModal(empCode, empName, true, existingRatings, existingComments, existingOverallLevel, empData.selfRatings, false);
+        
+        // Add event listener for modal hidden to refresh the list
+        $('#hodEvalModal').off('hidden.bs.modal').on('hidden.bs.modal', function() {
+          if (unitHeadUnit) {
+            loadEmployeesForUnitHead(unitHeadUnit);
+          }
+        });
+        
+      }).catch(function(error) { showToast('Error loading HOD evaluation: ' + error.message, 'error'); });
+    } else showToast('Employee data not found', 'error');
+  }).catch(function(error) { showToast('Error loading employee data: ' + error.message, 'error'); });
+}
+
+function approveUnitHeadEvaluation(empCode, empName) {
+  showToast('Approving...', 'info');
+  callServer("saveUnitHeadApproval", { emp_code: empCode }).then(function(result) {
+    if (result.success) { showToast(result.message, 'success'); if (authenticatedUnitHead && authenticatedUnitHead.unit) loadEmployeesForUnitHead(authenticatedUnitHead.unit); }
+    else showToast('Error: ' + result.message, 'error');
+  }).catch(function(error) { showToast('Error: ' + error.message, 'error'); });
+}
+
+// ==================== VERTICAL HEAD AUTHENTICATION ====================
+function authenticateVerticalHead() {
+  var email = document.getElementById('vh_email').value;
+  var secretCode = document.getElementById('vh_secret_code').value;
+  if (!email || !secretCode) { showToast('Please enter email and secret code', 'error'); return; }
+  callServer("authenticateUser", { email: email, secretCode: secretCode }).then(function(result) {
+    if (result.success && result.position === 'Vertical Head') {
+      authenticatedUser = result;
+      document.getElementById('vhProtectedContent').style.display = 'block';
+      document.getElementById('vhAuthSection').style.display = 'none';
+      showToast(result.message, 'success');
+      generateCentreButtons();
+    } else { showToast(result.success ? 'Access denied. Only Vertical Head can access this tab.' : result.message, 'error'); }
+  }).catch(function(error) { showToast('Authentication failed: ' + error.message, 'error'); });
+}
+
+function generateCentreButtons() {
+  var container = document.getElementById('centreButtonsContainer');
+  container.innerHTML = '<div class="loading"><i class="fa fa-spinner fa-spin"></i> Loading centres...</div>';
+  var promises = [];
+  for (var c = 0; c < CENTRES.length; c++) { promises.push(callServer("getCentreEmployeeCountsWithTotal", { centre: CENTRES[c] }).catch(function() { return { totalCount: 0, completedCount: 0 }; })); }
+  Promise.all(promises).then(function(results) {
+    var centresWithCounts = [];
+    for (var i = 0; i < CENTRES.length; i++) centresWithCounts.push({ centre: CENTRES[i], total: results[i].totalCount || 0, completed: results[i].completedCount || 0 });
+    renderCentreButtons(centresWithCounts);
+  }).catch(function() { var centresWithCounts = []; for (var i = 0; i < CENTRES.length; i++) centresWithCounts.push({ centre: CENTRES[i], total: 0, completed: 0 }); renderCentreButtons(centresWithCounts); });
+}
+
+function renderCentreButtons(centresWithCounts) {
+  var container = document.getElementById('centreButtonsContainer');
+  var html = '';
+  for (var i = 0; i < centresWithCounts.length; i++) {
+    var item = centresWithCounts[i];
+    var centre = item.centre;
+    var total = item.total;
+    var completed = item.completed;
+    var displayText = total > 0 ? centre + ' (' + completed + '/' + total + ')' : centre;
+    html += '<button class="btn btn-default filter-btn centre-btn" onclick="selectCentre(\'' + centre.replace(/'/g, "\\'") + '\')"><i class="fa fa-building"></i> ' + displayText + '</button>';
+  }
+  container.innerHTML = html;
+}
+
+function selectCentre(centre) {
+  currentSelectedCentre = centre;
+  currentSelectedWorkplace = null;
+  var buttons = document.querySelectorAll('.centre-btn');
+  for (var i = 0; i < buttons.length; i++) { buttons[i].classList.remove('active-filter'); if (buttons[i].innerText.trim().startsWith(centre)) buttons[i].classList.add('active-filter'); }
+  callServer("getWorkplacesByUnitWithTotal", { unit: centre }).then(function(result) {
+    if (result.success && result.workplaces && result.workplaces.length > 0) {
+      var filterDiv = document.getElementById('vhWorkplaceFilters');
+      filterDiv.style.display = 'flex';
+      var totalCompleted = 0, totalEmployees = 0;
+      for (var i = 0; i < result.workplaces.length; i++) { totalCompleted += result.workplaces[i].completed; totalEmployees += result.workplaces[i].total; }
+      var filterHtml = '<button class="btn btn-default filter-btn active-filter" onclick="filterVHByWorkplace(\'\')"><i class="fa fa-list"></i> All Workplaces (' + totalCompleted + '/' + totalEmployees + ')</button>';
+      for (var i = 0; i < result.workplaces.length; i++) {
+        var wp = result.workplaces[i];
+        filterHtml += '<button class="btn btn-default filter-btn" onclick="filterVHByWorkplace(\'' + wp.name.replace(/'/g, "\\'") + '\')"><i class="fa fa-location-arrow"></i> ' + wp.name + ' (' + wp.completed + '/' + wp.total + ')</button>';
+      }
+      filterDiv.innerHTML = filterHtml;
+      currentSelectedWorkplace = '';
+    } else { document.getElementById('vhWorkplaceFilters').style.display = 'none'; }
+    loadEmployeesByCentre(centre, '');
+  }).catch(function(error) { showToast('Error loading workplaces: ' + error.message, 'error'); });
+}
+
+function filterVHByWorkplace(workplace) {
+  currentSelectedWorkplace = workplace;
+  var buttons = document.querySelectorAll('#vhWorkplaceFilters .filter-btn');
+  for (var i = 0; i < buttons.length; i++) {
+    buttons[i].classList.remove('active-filter');
+    var btnText = buttons[i].innerText.trim();
+    if (workplace === '' && btnText.startsWith('All Workplaces')) buttons[i].classList.add('active-filter');
+    else if (workplace !== '' && btnText.startsWith(workplace)) buttons[i].classList.add('active-filter');
+  }
+  if (currentSelectedCentre) loadEmployeesByCentre(currentSelectedCentre, workplace);
+}
+
+function loadEmployeesByCentre(centre, workplaceFilter) {
+  var employeeListDiv = document.getElementById('employeeList');
+  employeeListDiv.innerHTML = '<div class="loading"><i class="fa fa-spinner fa-spin"></i> Loading employees...</div>';
+  callServer("getEmployeesByCentre", { centre: centre }).then(function(result) {
+    if (result.success && result.employees && result.employees.length > 0) {
+      callServer("getWorkplaceEmployeeCountsWithTotal", { centre: centre }).then(function(countsResult) {
+        var workplaceCounts = countsResult.workplaceCounts || {};
+        var totalCompleted = countsResult.totalCompleted || 0;
+        var totalEmployees = countsResult.totalEmployees || 0;
+        var filterDiv = document.getElementById('vhWorkplaceFilters');
+        if (filterDiv.style.display === 'flex') {
+          var filterHtml = '<button class="btn btn-default filter-btn ' + (currentSelectedWorkplace === '' ? 'active-filter' : '') + '" onclick="filterVHByWorkplace(\'\')"><i class="fa fa-list"></i> All Workplaces (' + totalCompleted + '/' + totalEmployees + ')</button>';
+          var workplaces = Object.keys(workplaceCounts);
+          for (var i = 0; i < workplaces.length; i++) {
+            var wp = workplaces[i];
+            var completed = workplaceCounts[wp].completed;
+            var total = workplaceCounts[wp].total;
+            filterHtml += '<button class="btn btn-default filter-btn ' + (currentSelectedWorkplace === wp ? 'active-filter' : '') + '" onclick="filterVHByWorkplace(\'' + wp.replace(/'/g, "\\'") + '\')"><i class="fa fa-location-arrow"></i> ' + wp + ' (' + completed + '/' + total + ')</button>';
+          }
+          filterDiv.innerHTML = filterHtml;
+        }
+      }).catch(function() {});
+      displayVHEmployeeCards(result.employees, workplaceFilter);
+    } else employeeListDiv.innerHTML = '<div class="alert alert-info">No employees with completed evaluation for centre: ' + centre + '</div>';
+  }).catch(function(error) { employeeListDiv.innerHTML = '<div class="alert alert-danger">Error loading employees: ' + error.message + '</div>'; });
+}
+
+function displayVHEmployeeCards(employees, workplaceFilter) {
+  var filteredByWorkplace = employees;
+  if (workplaceFilter && workplaceFilter !== '') filteredByWorkplace = employees.filter(function(emp) { return emp.workplace === workplaceFilter; });
+  var completeEmployees = filteredByWorkplace.filter(function(emp) { return emp.status === "Assessed-UH"; });
+  var totalEmployees = filteredByWorkplace.length;
+  var workplaceDisplay = workplaceFilter ? 'Workplace: ' + workplaceFilter : 'All Workplaces';
+  var teamPaginationScore = 0, teamOtherWorkScore = 0, employeeScores = [];
+  for (var i = 0; i < completeEmployees.length; i++) {
+    var emp = completeEmployees[i];
+    var pagScore = calculatePaginationScore(emp.dailyWorkload);
+    var othScore = calculateOtherWorkScore(emp.dailyWorkload);
+    employeeScores.push({ emp: emp, paginationScore: pagScore, otherWorkScore: othScore });
+    teamPaginationScore += pagScore;
+    teamOtherWorkScore += othScore;
+  }
+  if (completeEmployees.length === 0) { document.getElementById('employeeList').innerHTML = '<div class="alert alert-info">No employees with completed evaluation (Assessed-UH) found for ' + workplaceDisplay + ' (Total: ' + totalEmployees + ' employees have submitted self evaluation).</div>'; return; }
+  var html = '<div class="panel panel-default"><div class="panel-heading"><strong><i class="fa fa-building"></i> Centre: ' + currentSelectedCentre + '</strong> - ' + workplaceDisplay + ' <span class="badge pull-right">Completed: ' + completeEmployees.length + ' / ' + totalEmployees + '</span></div><div class="panel-body">';
+  for (var i = 0; i < employeeScores.length; i++) {
+    var item = employeeScores[i];
+    var emp = item.emp;
+    var pagScore = item.paginationScore;
+    var othScore = item.otherWorkScore;
+    var pagPercent = teamPaginationScore > 0 ? Math.round((pagScore / teamPaginationScore) * 100) : 0;
+    var othPercent = teamOtherWorkScore > 0 ? Math.round((othScore / teamOtherWorkScore) * 100) : 0;
+    var pagDeg = Math.round((pagPercent / 100) * 360);
+    var pagGrad = pagPercent > 0 ? 'conic-gradient(#1e3c72 0deg ' + pagDeg + 'deg, #e0e0e0 ' + pagDeg + 'deg 360deg)' : 'conic-gradient(#e0e0e0 0deg 360deg)';
+    var othDeg = Math.round((othPercent / 100) * 360);
+    var othGrad = othPercent > 0 ? 'conic-gradient(#ff9800 0deg ' + othDeg + 'deg, #e0e0e0 ' + othDeg + 'deg 360deg)' : 'conic-gradient(#e0e0e0 0deg 360deg)';
+    var hodTotal = (emp.hodRatings.page_layout||0)+(emp.hodRatings.deadline_adherence||0)+(emp.hodRatings.quality_accuracy||0)+(emp.hodRatings.advertising_integration||0)+(emp.hodRatings.platform_adaptation||0)+(emp.hodRatings.collaboration||0);
+    var performanceOutOf10 = Math.round((hodTotal / 30) * 10 * 10) / 10;
+    var levelText = '', levelColor = '';
+    if (emp.hodOverallLevel === 'DE') { levelText = 'DE - Distinguished Expert'; levelColor = '#28a745'; }
+    else if (emp.hodOverallLevel === 'ME') { levelText = 'ME - Meets Expectations'; levelColor = '#ffc107'; }
+    else if (emp.hodOverallLevel === 'NI') { levelText = 'NI - Needs Improvement'; levelColor = '#dc3545'; }
+    else { levelText = emp.hodOverallLevel || 'Not Assessed'; levelColor = '#6c757d'; }
+    var vhPerformanceRating = emp.vhEvaluation ? (emp.vhEvaluation.performance_rating || '') : '';
+    var vhOverallLevel = emp.vhEvaluation ? (emp.vhEvaluation.overall_level_text || '') : '';
+    var vhRemark = emp.vhEvaluation ? (emp.vhEvaluation.remark || '') : '';
+    var perfOptions = '';
+    for (var p = 1; p <= 10; p++) { perfOptions += '<option value="' + p + '" ' + (vhPerformanceRating == p ? 'selected' : '') + '>' + p + '</option>'; }
+    var workloadDisplay = formatTeamWorkloadDisplay(emp.teamWorkload);
+    var workloadHtml = workloadDisplay ? '<div class="workload-line" style="margin-top: 8px;"><i class="fa fa-tasks"></i> ' + workloadDisplay + '</div>' : '';
+    html += '<div class="employee-card" style="background: white; border: 1px solid #e0e0e0; border-radius: 12px; margin-bottom: 24px; padding: 18px;"><div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid #eee;"><div><strong style="font-size: 16px; color: #1e3c72;"><i class="fa fa-user-circle"></i> ' + escapeHtml(emp.name) + '</strong><span style="font-size: 12px; color: #888; margin-left: 5px;">(' + escapeHtml(emp.designation || 'N/A') + ')</span><br><small><i class="fa fa-map-marker"></i> ' + escapeHtml(emp.workplace || 'N/A') + ' | <i class="fa fa-id-card"></i> ' + escapeHtml(emp.code) + '</small>' + workloadHtml + '</div><div style="text-align: right;"><button class="btn btn-sm btn-info" onclick="openSelfEvaluationModal(\'' + emp.code + '\', \'' + escapeHtml(emp.name) + '\', true, false)" style="margin-right: 5px;"><i class="fa fa-star"></i> Self-Evaluation</button><button class="btn btn-sm btn-primary" onclick="openHODEvalForVerticalHead(\'' + emp.code + '\', \'' + escapeHtml(emp.name) + '\')"><i class="fa fa-users"></i> HOD-Evaluation</button></div></div><div style="background: #f1f5f9; border-radius: 12px; padding: 10px 14px; margin-bottom: 18px;"><div><i class="fa fa-tasks"></i> <strong>Workload:</strong> ' + (workloadDisplay ? workloadDisplay.replace('<div class="workload-line">', '').replace('</div>', '') : '—') + '</div></div><div style="display: flex; flex-wrap: wrap; gap: 20px;"><div style="flex: 1; min-width: 250px; display: flex; flex-direction: column; gap: 20px;"><div style="background: #f8fafc; border-radius: 16px; padding: 16px; border: 1px solid #e2e8f0;"><div><i class="fa fa-star" style="color:#1e3c72;"></i> <strong>📋 Evaluation by ICD/Branch Head</strong></div><div style="margin: 10px 0;"><span>⭐ Score: <strong>' + performanceOutOf10 + '/10</strong></span><span style="margin-left: 12px; background: ' + levelColor + '; color: white; padding: 2px 10px; border-radius: 20px; font-size: 11px; font-weight: bold;">' + levelText + '</span></div><div style="background: white; padding: 8px 12px; border-radius: 12px; font-size: 12px; border-left: 3px solid #1e3c72;">💬 ' + (emp.hodComments ? escapeHtml(emp.hodComments) : 'No comments yet') + '</div></div><div style="background: #f8fafc; border-radius: 16px; padding: 16px; border: 1px solid #e2e8f0;"><div><i class="fa fa-flag" style="color:#e68a00;"></i> <strong>🚩 Vertical Head Evaluation</strong></div><div style="margin-top: 10px;"><div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 12px;"><div style="display: flex; align-items: center; gap: 8px;"><span style="font-size: 12px; font-weight: 500;">🎯 Rating:</span><select id="vh_performance_' + emp.code + '" class="form-control" style="width: 65px; display: inline-block; font-size: 12px; padding: 3px 5px;" onchange="updateAssessmentLevel(\'' + emp.code + '\')"><option value="">--</option>' + perfOptions + '</select></div><div style="display: flex; align-items: center; gap: 8px;"><span style="font-size: 12px; font-weight: 500;">📊 Level:</span><input type="text" id="vh_level_display_' + emp.code + '" class="form-control" value="' + escapeHtml(vhOverallLevel) + '" readonly style="width: 160px; background-color: #eef2ff; font-size: 11px; padding: 3px 8px;"><input type="hidden" id="vh_level_' + emp.code + '" value="' + escapeHtml(vhOverallLevel) + '"></div></div><textarea id="vh_remark_' + emp.code + '" class="form-control" rows="2" style="resize: vertical; font-size: 12px; margin-bottom: 10px;" placeholder="Enter your remark...">' + escapeHtml(vhRemark) + '</textarea><div style="text-align: right;"><button class="btn btn-sm btn-success" onclick="saveVHEvaluation(\'' + emp.code + '\')" style="padding: 3px 12px; font-size: 12px;"><i class="fa fa-save"></i> Save</button><button class="btn btn-sm btn-default" onclick="clearVHEvaluation(\'' + emp.code + '\')" style="padding: 3px 12px; font-size: 12px; margin-left: 5px;"><i class="fa fa-undo"></i> Clear</button></div></div></div></div></div><div style="flex: 1; min-width: 200px; display: flex; flex-direction: column; gap: 12px;"><div style="background: #f8fafc; border-radius: 14px; padding: 10px 12px; text-align: center;"><div style="font-weight: 600; font-size: 13px; margin-bottom: 6px;">📄 Pagination Contribution</div><div style="display: flex; align-items: center; justify-content: center; gap: 12px;"><div style="width: 120px; height: 120px; border-radius: 50%; background: ' + pagGrad + '; position: relative;"><span style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; width: 72px; height: 72px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px;">' + pagPercent + '%</span></div><div style="font-size: 13px; font-weight: 500;">' + pagScore.toFixed(1) + ' points</div></div></div><div style="background: #f8fafc; border-radius: 14px; padding: 10px 12px; text-align: center;"><div style="font-weight: 600; font-size: 13px; margin-bottom: 6px;">🎨 Other Tasks</div><div style="display: flex; align-items: center; justify-content: center; gap: 12px;"><div style="width: 120px; height: 120px; border-radius: 50%; background: ' + othGrad + '; position: relative;"><span style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; width: 72px; height: 72px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px;">' + othPercent + '%</span></div><div style="font-size: 13px; font-weight: 500;">' + othScore.toFixed(1) + ' points</div></div></div></div></div></div>';
+  }
+  html += '</div></div>';
+  document.getElementById('employeeList').innerHTML = html;
+}
+
+function openHODEvalForVerticalHead(empCode, empName) {
+  window.currentUserRole = 'Vertical Head';
+  callServer("getEmployeeForHODEval", { empCode: empCode }).then(function(empData) {
+    if (empData.exists) {
+      callServer("getHODEvaluation", { empCode: empCode }).then(function(hodResult) {
+        var existingRatings = {}, existingComments = '', existingOverallLevel = '';
+        if (hodResult.evaluations && hodResult.evaluations.length > 0) {
+          existingRatings = hodResult.evaluations[0].kraRatings || {};
+          existingComments = hodResult.evaluations[0].comments || '';
+          existingOverallLevel = hodResult.evaluations[0].overallLevel || '';
+        }
+        openHODEvaluationModal(empCode, empName, true, existingRatings, existingComments, existingOverallLevel, empData.selfRatings, false);
+      }).catch(function(error) { showToast('Error: ' + error.message, 'error'); });
+    }
+  }).catch(function(error) { showToast('Error: ' + error.message, 'error'); });
+}
+
+function updateAssessmentLevel(empCode) {
+  var ratingSelect = document.getElementById('vh_performance_' + empCode);
+  var levelDisplay = document.getElementById('vh_level_display_' + empCode);
+  var levelHidden = document.getElementById('vh_level_' + empCode);
+  if (!ratingSelect || !levelDisplay || !levelHidden) return;
+  var rating = ratingSelect.value;
+  var level = '';
+  if (rating && rating !== '') {
+    var numRating = parseInt(rating);
+    if (numRating >= 8 && numRating <= 10) level = 'DE - Distinguished Expert';
+    else if (numRating >= 5 && numRating <= 7) level = 'ME - Meets Expectations';
+    else if (numRating >= 1 && numRating <= 4) level = 'NI - Needs Improvement';
+  }
+  levelDisplay.value = level;
+  levelHidden.value = level;
+}
+
+function openHODEvalForVerticalHead(empCode, empName) {
+  window.currentUserRole = 'Vertical Head';
+  callServer("getEmployeeForHODEval", { empCode: empCode }).then(function(empData) {
+    if (empData.exists) {
+      callServer("getHODEvaluation", { empCode: empCode }).then(function(hodResult) {
+        var existingRatings = {};
+        var existingComments = '';
+        var existingOverallLevel = '';
+        if (hodResult.evaluations && hodResult.evaluations.length > 0) {
+          existingRatings = hodResult.evaluations[0].kraRatings || {};
+          existingComments = hodResult.evaluations[0].comments || '';
+          existingOverallLevel = hodResult.evaluations[0].overallLevel || '';
+        }
+        openHODEvaluationModal(empCode, empName, true, existingRatings, existingComments, existingOverallLevel, empData.selfRatings, false);
+      }).catch(function(error) {
+        showToast('Error loading HOD evaluation: ' + error.message, 'error');
+      });
+    }
+  }).catch(function(error) {
+    showToast('Error loading employee data: ' + error.message, 'error');
+  });
+}
+
+function logoutCurrentUser() {
+  authenticatedUser = null;
+  authenticatedUnitHead = null;
+  showToast('Logged out successfully', 'success');
+  
+  // Reset UI elements
+  var hodAuthSection = document.getElementById('hodAuthSection');
+  var hodProtected = document.getElementById('hodProtectedContent');
+  var unitHeadAuth = document.getElementById('unitHeadAuthSection');
+  var unitHeadProtected = document.getElementById('unitHeadProtectedContent');
+  var vhAuth = document.getElementById('vhAuthSection');
+  var vhProtected = document.getElementById('vhProtectedContent');
+  
+  if (hodAuthSection) hodAuthSection.style.display = 'block';
+  if (hodProtected) hodProtected.style.display = 'none';
+  if (unitHeadAuth) unitHeadAuth.style.display = 'block';
+  if (unitHeadProtected) unitHeadProtected.style.display = 'none';
+  if (vhAuth) vhAuth.style.display = 'block';
+  if (vhProtected) vhProtected.style.display = 'none';
+  
+  // Clear inputs
+  var hodEmail = document.getElementById('hod_email');
+  var hodSecret = document.getElementById('hod_secret_code');
+  var unitEmail = document.getElementById('unithead_email');
+  var unitSecret = document.getElementById('unithead_secret_code');
+  var vhEmail = document.getElementById('vh_email');
+  var vhSecret = document.getElementById('vh_secret_code');
+  
+  if (hodEmail) hodEmail.value = '';
+  if (hodSecret) hodSecret.value = '';
+  if (unitEmail) unitEmail.value = '';
+  if (unitSecret) unitSecret.value = '';
+  if (vhEmail) vhEmail.value = '';
+  if (vhSecret) vhSecret.value = '';
+  
+  // Switch to self tab
+  $('.nav-pills a[href="#self"]').tab('show');
+}
+
+function saveVHEvaluation(empCode) {
+  var performanceSelect = document.getElementById('vh_performance_' + empCode);
+  var performanceRating = performanceSelect ? performanceSelect.value : '';
+  var levelHidden = document.getElementById('vh_level_' + empCode);
+  var overallLevel = levelHidden ? levelHidden.value : '';
+  var remarkTextarea = document.getElementById('vh_remark_' + empCode);
+  var remark = remarkTextarea ? remarkTextarea.value : '';
+  if (!performanceRating) { showToast('Please select Performance Rating (1-10) before saving.', 'error'); return; }
+  if (!remark || remark.trim() === '') { showToast('Please enter a remark before saving.', 'error'); return; }
+  var vhEvaluation = { performance_rating: parseInt(performanceRating), overall_level_text: overallLevel, remark: remark, evaluated_date: new Date().toISOString() };
+  callServer("saveVHEvaluation", { emp_code: empCode, vh_evaluation: vhEvaluation }).then(function(result) {
+    if (result.success) { showToast(result.message, 'success'); if (currentSelectedCentre) loadEmployeesByCentre(currentSelectedCentre, currentSelectedWorkplace || ''); }
+    else showToast(result.message, 'error');
+  }).catch(function(error) { showToast('Error: ' + error.message, 'error'); });
+}
+
+function clearVHEvaluation(empCode) {
+  var performanceSelect = document.getElementById('vh_performance_' + empCode);
+  var levelDisplay = document.getElementById('vh_level_display_' + empCode);
+  var levelHidden = document.getElementById('vh_level_' + empCode);
+  var remarkTextarea = document.getElementById('vh_remark_' + empCode);
+  if (performanceSelect) performanceSelect.value = '';
+  if (levelDisplay) levelDisplay.value = '';
+  if (levelHidden) levelHidden.value = '';
+  if (remarkTextarea) remarkTextarea.value = '';
+  showToast('Form cleared', 'info');
+}
+
+function printEvaluationReport(empCode, empName) {
+  var loadingDiv = document.createElement('div');
+  loadingDiv.id = 'printLoading';
+  loadingDiv.innerHTML = '<div style="position:fixed;top:50%;left:50%;background:white;padding:20px;border-radius:10px;z-index:10000;"><i class="fa fa-spinner fa-spin"></i> Generating report...</div>';
+  document.body.appendChild(loadingDiv);
+  callServer("generateEvaluationReport", { empCode: empCode }).then(function(result) {
+    var loadingElem = document.getElementById('printLoading');
+    if (loadingElem) loadingElem.remove();
+    if (result.success) {
+      var printWindow = window.open('', '_blank');
+      printWindow.document.write(result.html);
+      printWindow.document.close();
+      printWindow.onload = function() { setTimeout(function() { printWindow.print(); }, 500); };
+    } else showToast('Error: ' + result.message, 'error');
+  }).catch(function(error) { var loadingElem = document.getElementById('printLoading'); if (loadingElem) loadingElem.remove(); showToast('Error: ' + error.message, 'error'); });
+}
+
+// ==================== PAGE LOAD INITIALIZATION ====================
+$(document).ready(function() {
+  $('#registrationTabLi').hide();
+});
+
+// ==================== EXPOSE FUNCTIONS GLOBALLY ====================
+// Make sure all functions that are called from HTML onclick handlers are available globally
+window.openSelfEvaluationFromSelfTab = openSelfEvaluationFromSelfTab;
+window.openSelfEvaluationModal = openSelfEvaluationModal;
+window.saveSelfEvaluationFromModal = saveSelfEvaluationFromModal;
+window.updateSelfModalLiveScore = updateSelfModalLiveScore;
+window.authenticateHOD = authenticateHOD;
+window.authenticateUnitHead = authenticateUnitHead;
+window.authenticateVerticalHead = authenticateVerticalHead;
+window.loadEmployeeFromMaster = loadEmployeeFromMaster;
+window.registerEmployee = registerEmployee;
+window.saveHODEvaluationFromModal = saveHODEvaluationFromModal;
+window.updateHODModalLiveScore = updateHODModalLiveScore;
+window.openHODEvalForHODTab = openHODEvalForHODTab;
+window.openHODEvalForVerticalHead = openHODEvalForVerticalHead;
+window.printEvaluationReport = printEvaluationReport;
+window.selectCentre = selectCentre;
+window.filterHODByWorkplace = filterHODByWorkplace;
+window.filterUnitHeadByWorkplace = filterUnitHeadByWorkplace;
+window.filterVHByWorkplace = filterVHByWorkplace;
+window.approveUnitHeadEvaluation = approveUnitHeadEvaluation;
+window.openUnitHeadEval = openUnitHeadEval;
+window.showRegistrationModal = showRegistrationModal;
+window.saveRegistrationFromModal = saveRegistrationFromModal;
+window.saveVHEvaluation = saveVHEvaluation;
+window.clearVHEvaluation = clearVHEvaluation;
+window.updateAssessmentLevel = updateAssessmentLevel;
+window.logoutCurrentUser = logoutCurrentUser;
+
+</script>
+  
+</body>
+</html>
