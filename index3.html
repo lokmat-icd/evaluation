@@ -1279,8 +1279,8 @@ function loadEmployeesForUnitHead(unitPrefix) {
   teamListDiv.innerHTML = '<div class="loading"><i class="fa fa-spinner fa-spin"></i> Loading employees...</div>';
   var unitHeadName = authenticatedUnitHead ? authenticatedUnitHead.name : '';
   
-  // First, get workplaces with counts (similar to ICD/HOD tab)
-  callServer("getWorkplacesByUnitWithTotal", { unit: unitPrefix }).then(function(workplacesResult) {
+  // Get workplaces with counts - USE PREFIX MATCH (true)
+  callServer("getWorkplacesByUnitWithTotal", { unit: unitPrefix, usePrefixMatch: true }).then(function(workplacesResult) {
     if (workplacesResult.success && workplacesResult.workplaces.length > 0) {
       var filterDiv = document.getElementById('unitHeadWorkplaceFilters');
       filterDiv.style.display = 'flex';
@@ -1292,7 +1292,7 @@ function loadEmployeesForUnitHead(unitPrefix) {
         totalEmployees += workplacesResult.workplaces[i].total;
       }
       
-      // Generate filter buttons
+      // Generate filter buttons with correct counts
       var filterHtml = '<button class="btn btn-default filter-btn active-filter" onclick="filterUnitHeadByWorkplace(\'\')"><i class="fa fa-list"></i> All Workplaces (' + totalCompleted + '/' + totalEmployees + ')</button>';
       for (var i = 0; i < workplacesResult.workplaces.length; i++) {
         var wp = workplacesResult.workplaces[i];
@@ -1308,7 +1308,7 @@ function loadEmployeesForUnitHead(unitPrefix) {
     document.getElementById('unitHeadWorkplaceFilters').style.display = 'none';
   });
   
-  // Now load employees
+  // Load employees (this already uses prefix matching correctly)
   callServer("getEmployeesByUnitPrefix", { unitPrefix: unitPrefix, unitHeadName: unitHeadName }).then(function(result) {
     if (result.success && result.employees && result.employees.length > 0) {
       unitHeadEmployeesCache = result.employees;
