@@ -1303,66 +1303,44 @@ function displayUnitHeadEmployeeCards(employees, workplaceFilter) {
   var filteredEmployees = employees;
   if (workplaceFilter && workplaceFilter !== '') filteredEmployees = employees.filter(function(emp) { return emp.workplace === workplaceFilter; });
   if (filteredEmployees.length === 0) { teamListDiv.innerHTML = '<div class="alert alert-info">No employees found' + (workplaceFilter ? ' for workplace: ' + workplaceFilter : '') + '</div>'; return; }
-  
   var html = '<h4>Team Members <span class="badge">' + filteredEmployees.length + '</span></h4>';
-  var unitHeadName = authenticatedUnitHead ? authenticatedUnitHead.name : '';
-  
   for (var i = 0; i < filteredEmployees.length; i++) {
     var member = filteredEmployees[i];
     var isICDEmployee = member.isICD === true;
-    var isDirectReport = member.reportsToUnitHead === true;
-    
     var statusClass = member.completion === 'Yes' ? 'status-submitted' : 'status-pending';
     var statusText = member.completion === 'Yes' ? '✓ Self Evaluation Submitted' : '📝 Draft';
     var workloadDisplay = formatTeamWorkloadDisplay(member.teamWorkload);
     var workloadHtml = workloadDisplay ? '<div class="workload-line"><i class="fa fa-tasks"></i> ' + workloadDisplay + '</div>' : '';
     var dailyWorkloadHtml = generateDailyWorkloadHTML(member.dailyWorkload);
-    
     var jobDescription = '', specialProjectsText = '';
     if (member.specialProjects) {
       if (typeof member.specialProjects === 'object') { jobDescription = member.specialProjects.job_description || ''; specialProjectsText = member.specialProjects.special_projects || ''; }
       else if (typeof member.specialProjects === 'string') { try { var parsed = JSON.parse(member.specialProjects); jobDescription = parsed.job_description || ''; specialProjectsText = parsed.special_projects || ''; } catch(e) { specialProjectsText = member.specialProjects; } }
     }
-    
-    // For regular employees, HOD must have completed evaluation
-    var hodComplete = !isDirectReport && !isICDEmployee && member.hodRatings && member.hodRatings.page_layout > 0 && member.hodRatings.deadline_adherence > 0 && member.hodRatings.quality_accuracy > 0 && member.hodRatings.advertising_integration > 0 && member.hodRatings.platform_adaptation > 0 && member.hodRatings.collaboration > 0;
-    
+    var hodComplete = !isICDEmployee && member.hodRatings && member.hodRatings.page_layout > 0 && member.hodRatings.deadline_adherence > 0 && member.hodRatings.quality_accuracy > 0 && member.hodRatings.advertising_integration > 0 && member.hodRatings.platform_adaptation > 0 && member.hodRatings.collaboration > 0;
     var unitHeadStatusText = (member.status === "Assessed-UH") ? '✓ Approved' : ((member.status === "Assessed") ? '⏳ Pending Approval' : '⏳ Pending');
     var unitHeadStatusClass = (member.status === "Assessed-UH") ? 'status-complete' : 'status-pending';
     var vhComplete = member.vhEvaluation && member.vhEvaluation.performance_rating && member.vhEvaluation.performance_rating !== '';
     var canPrintPdf = vhComplete;
-    
-    // NEW BUTTON LOGIC based on reportsToUnitHead flag
     var buttonHtml = '';
-
-	if (member.status === "Assessed") {
-		// Employee is ready for Unit Head approval
-		buttonHtml = '<button class="btn btn-sm btn-success" onclick="approveUnitHeadEvaluation(\'' + member.code + '\', \'' + escapeHtml(member.name) + '\')" style="margin-right: 8px;"><i class="fa fa-check-circle"></i> Approve</button><button class="btn btn-sm btn-warning" onclick="openUnitHeadEval(\'' + member.code + '\', \'' + escapeHtml(member.name) + '\')"><i class="fa fa-pencil-square-o"></i> Modify Rating</button>';
-	} else if (member.status === "Assessed-UH") {
-		// Already approved, can still modify
-		buttonHtml = '<button class="btn btn-sm btn-warning" onclick="openUnitHeadEval(\'' + member.code + '\', \'' + escapeHtml(member.name) + '\')"><i class="fa fa-pencil-square-o"></i> Modify Rating</button>';
-	} else if (member.status === "Pending") {
-		// Pending evaluation - check if Unit Head can directly evaluate
-		// FIXED: Direct reports and ICD employees should show Evaluate button
-		if (isDirectReport || isICDEmployee) {
+    
+	if (member.reportsToUnitHead || member.isICD) {
+		if (member.status === "Pending") {
 			buttonHtml = '<button class="btn btn-sm btn-primary" onclick="openUnitHeadEval(\'' + member.code + '\', \'' + escapeHtml(member.name) + '\')"><i class="fa fa-pencil-square-o"></i> Evaluate</button>';
-		} else {
-			// Regular employee - needs HOD evaluation first
-			buttonHtml = '<button class="btn btn-sm btn-default" disabled style="opacity:0.5;" title="HOD evaluation required first"><i class="fa fa-clock-o"></i> Pending HOD</button>';
+		} else if (member.status === "Assessed") {
+			buttonHtml = '<button class="btn btn-sm btn-success" onclick="approveUnitHeadEvaluation(\'' + member.code + '\', \'' + escapeHtml(member.name) + '\')" style="margin-right: 8px;"><i class="fa fa-check-circle"></i> Approve</button>' +
+						 '<button class="btn btn-sm btn-warning" onclick="openUnitHeadEval(\'' + member.code + '\', \'' + escapeHtml(member.name) + '\')"><i class="fa fa-pencil-square-o"></i> Modify Rating</button>';
+		} else if (member.status === "Assessed-UH") {
+			buttonHtml = '<button class="btn btn-sm btn-warning" onclick="openUnitHeadEval(\'' + member.code + '\', \'' + escapeHtml(member.name) + '\')"><i class="fa fa-pencil-square-o"></i> Modify Rating</button>';
+		}
+	} else {
+		// Regular employees (with HOD layer) - original logic
+		if (member.status === "Assessed") {
+			buttonHtml = '<button ...>Approve</button><button ...>Modify Rating</button>';
 		}
 	}
-    
-    // Build the card HTML
-    html += '<div class="team-member-card" ' + (member.status === 'Assessed-UH' ? 'style="background: #e8f8e8; border-left: 4px solid #28a745;"' : '') + '><div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; margin-bottom: 10px;"><div style="flex: 1;"><strong style="font-size: 16px;"><i class="fa fa-user"></i> ' + escapeHtml(member.name) + '</strong>' + 
-      (isDirectReport ? '<span class="label label-primary" style="margin-left: 10px; background-color: #17a2b8;"><i class="fa fa-user-plus"></i> Direct Report</span>' : '') +
-      (isICDEmployee && !isDirectReport ? '<span class="label label-info" style="margin-left: 10px; background-color: #ff9800;"><i class="fa fa-users"></i> ICD</span>' : '') +
-      '<br><small><i class="fa fa-briefcase"></i> ' + escapeHtml(member.designation || 'N/A') + ' | <i class="fa fa-building"></i> ' + escapeHtml(member.unit) + '</small><br><small><i class="fa fa-map-marker"></i> Workplace: ' + escapeHtml(member.workplace || 'N/A') + ' | <i class="fa fa-id-card"></i> Code: ' + escapeHtml(member.code) + '</small>' + workloadHtml + '</div><div style="text-align: right;"><span class="remark-badge ' + statusClass + '">' + statusText + '</span>' +
-      (!isDirectReport && !isICDEmployee ? '<span class="remark-badge ' + (hodComplete ? 'status-complete' : 'status-pending') + '">HOD: ' + (hodComplete ? '✓ Complete' : '⏳ Pending') + '</span>' : '') +
-      '<span class="remark-badge ' + unitHeadStatusClass + '">Unit Head: ' + unitHeadStatusText + '</span><span class="remark-badge ' + (vhComplete ? 'status-complete' : 'status-pending') + '">VH: ' + (vhComplete ? '✓ Complete' : '⏳ Pending') + '</span></div></div>' + 
-      dailyWorkloadHtml + 
-      '<div style="margin-top: 15px; text-align: right; border-top: 1px solid #eee; padding-top: 12px;">' + buttonHtml + 
-      (canPrintPdf ? '<button class="btn btn-sm btn-info" onclick="printEvaluationReport(\'' + escapeHtml(member.code) + '\', \'' + escapeHtml(member.name) + '\')"><i class="fa fa-print"></i> PDF Report</button>' : '<button class="btn btn-sm btn-default" disabled style="opacity: 0.5;" title="VH evaluation required first">PDF Report</button>') + 
-      '</div></div>';
+	
+    html += '<div class="team-member-card" ' + (member.status === 'Assessed-UH' ? 'style="background: #e8f8e8; border-left: 4px solid #28a745;"' : '') + '><div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; margin-bottom: 10px;"><div style="flex: 1;"><strong style="font-size: 16px;"><i class="fa fa-user"></i> ' + escapeHtml(member.name) + '</strong>' + (isICDEmployee ? '<span class="label label-info" style="margin-left: 10px; background-color: #ff9800;"><i class="fa fa-users"></i> ICD</span>' : '') + '<br><small><i class="fa fa-briefcase"></i> ' + escapeHtml(member.designation || 'N/A') + ' | <i class="fa fa-building"></i> ' + escapeHtml(member.unit) + '</small><br><small><i class="fa fa-map-marker"></i> Workplace: ' + escapeHtml(member.workplace || 'N/A') + ' | <i class="fa fa-id-card"></i> Code: ' + escapeHtml(member.code) + '</small>' + workloadHtml + '</div><div style="text-align: right;"><span class="remark-badge ' + statusClass + '">' + statusText + '</span><span class="remark-badge ' + (hodComplete ? 'status-complete' : 'status-pending') + '">HOD: ' + (hodComplete ? '✓ Complete' : '⏳ Pending') + '</span><span class="remark-badge ' + unitHeadStatusClass + '">Unit Head: ' + unitHeadStatusText + '</span><span class="remark-badge ' + (vhComplete ? 'status-complete' : 'status-pending') + '">VH: ' + (vhComplete ? '✓ Complete' : '⏳ Pending') + '</span></div></div>' + dailyWorkloadHtml + '<div style="margin-top: 15px; text-align: right; border-top: 1px solid #eee; padding-top: 12px;">' + buttonHtml + (canPrintPdf ? '<button class="btn btn-sm btn-info" onclick="printEvaluationReport(\'' + escapeHtml(member.code) + '\', \'' + escapeHtml(member.name) + '\')"><i class="fa fa-print"></i> PDF Report</button>' : '<button class="btn btn-sm btn-default" disabled style="opacity: 0.5;" title="VH evaluation required first">PDF Report</button>') + '</div></div>';
   }
   teamListDiv.innerHTML = html;
 }
