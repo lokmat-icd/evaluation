@@ -1278,12 +1278,74 @@ function loadEmployeesForUnitHead(unitPrefix) {
   var teamListDiv = document.getElementById('unitHeadTeamList');
   teamListDiv.innerHTML = '<div class="loading"><i class="fa fa-spinner fa-spin"></i> Loading employees...</div>';
   var unitHeadName = authenticatedUnitHead ? authenticatedUnitHead.name : '';
+  
+  // Load workplace filters first (like ICD tab)
+  callServer("getWorkplacesByUnitWithTotal", { unit: unitPrefix }).then(function(workplacesResult) {
+    if (workplacesResult.success && workplacesResult.workplaces && workplacesResult.workplaces.length > 0) {
+      var filterDiv = document.getElementById('unitHeadWorkplaceFilters');
+      filterDiv.style.display = 'flex';
+      
+      // Calculate totals
+      var totalCompleted = 0, totalEmployees = 0;
+      for (var i = 0; i < workplacesResult.workplaces.length; i++) {
+        totalCompleted += workplacesResult.workplaces[i].completed;
+        totalEmployees += workplacesResult.workplaces[i].total;
+      }
+      
+      // Build filter buttons
+      var filterHtml = '<button class="btn btn-default filter-btn active-filter" onclick="filterUnitHeadByWorkplace(\'\')">' +
+        '<i class="fa fa-list"></i> All Workplaces (' + totalCompleted + '/' + totalEmployees + ')</button>';
+      
+      for (var i = 0; i < workplacesResult.workplaces.length; i++) {
+        var wp = workplacesResult.workplaces[i];
+        filterHtml += '<button class="btn btn-default filter-btn" onclick="filterUnitHeadByWorkplace(\'' + 
+          wp.name.replace(/'/g, "\\'") + '\')">' +
+          '<i class="fa fa-location-arrow"></i> ' + wp.name + ' (' + wp.completed + '/' + wp.total + ')</button>';
+      }
+      filterDiv.innerHTML = filterHtml;
+      currentSelectedUnitHeadWorkplace = '';
+    } else {
+      document.getElementById('unitHeadWorkplaceFilters').style.display = 'none';
+    }
+  }).catch(function(error) {
+    console.error("Error loading workplaces:", error);
+    document.getElementById('unitHeadWorkplaceFilters').style.display = 'none';
+  });
+  
+  // Then load employees
   callServer("getEmployeesByUnitPrefix", { unitPrefix: unitPrefix, unitHeadName: unitHeadName }).then(function(result) {
     if (result.success && result.employees && result.employees.length > 0) {
       unitHeadEmployeesCache = result.employees;
       displayUnitHeadEmployeeCards(result.employees, '');
-    } else teamListDiv.innerHTML = '<div class="alert alert-info">No employees found reporting to you in unit: ' + unitPrefix + '</div>';
-  }).catch(function(error) { teamListDiv.innerHTML = '<div class="alert alert-danger">Error loading employees: ' + error.message + '</div>'; });
+    } else {
+      teamListDiv.innerHTML = '<div class="alert alert-info">No employees found for unit: ' + unitPrefix + 
+        '<br><br>Note: Employees need to complete self evaluation first.</div>';
+    }
+  }).catch(function(error) {
+    teamListDiv.innerHTML = '<div class="alert alert-danger">Error loading employees: ' + error.message + '</div>';
+  });
+}
+
+// Update the filter function to properly filter by workplace
+function filterUnitHeadByWorkplace(workplace) {
+  currentSelectedUnitHeadWorkplace = workplace;
+  
+  // Update active button styling
+  var buttons = document.querySelectorAll('#unitHeadWorkplaceFilters .filter-btn');
+  for (var i = 0; i < buttons.length; i++) {
+    buttons[i].classList.remove('active-filter');
+    var btnText = buttons[i].innerText.trim();
+    if (workplace === '' && btnText.startsWith('All Workplaces')) {
+      buttons[i].classList.add('active-filter');
+    } else if (workplace !== '' && btnText.startsWith(workplace)) {
+      buttons[i].classList.add('active-filter');
+    }
+  }
+  
+  // Filter and display employees
+  if (unitHeadEmployeesCache) {
+    displayUnitHeadEmployeeCards(unitHeadEmployeesCache, workplace);
+  }
 }
 
 function filterUnitHeadByWorkplace(workplace) {
@@ -1300,9 +1362,20 @@ function filterUnitHeadByWorkplace(workplace) {
 
 function displayUnitHeadEmployeeCards(employees, workplaceFilter) {
   var teamListDiv = document.getElementById('unitHeadTeamList');
+  
+  // Apply workplace filter
   var filteredEmployees = employees;
-  if (workplaceFilter && workplaceFilter !== '') filteredEmployees = employees.filter(function(emp) { return emp.workplace === workplaceFilter; });
-  if (filteredEmployees.length === 0) { teamListDiv.innerHTML = '<div class="alert alert-info">No employees found' + (workplaceFilter ? ' for workplace: ' + workplaceFilter : '') + '</div>'; return; }
+  if (workplaceFilter && workplaceFilter !== '') {
+    filteredEmployees = employees.filter(function(emp) {
+      return emp.workplace === workplaceFilter;
+    });
+  }
+  
+  if (filteredEmployees.length === 0) {
+    teamListDiv.innerHTML = '<div class="alert alert-info">No employees found' + 
+      (workplaceFilter ? ' for workplace: ' + workplaceFilter : '') + '</div>';
+    return;
+  }
   var html = '<h4>Team Members <span class="badge">' + filteredEmployees.length + '</span></h4>';
   for (var i = 0; i < filteredEmployees.length; i++) {
     var member = filteredEmployees[i];
