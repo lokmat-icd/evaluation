@@ -633,7 +633,7 @@
   
   <script>
 // ==================== CONFIGURATION ====================
-const API_URL = "https://script.google.com/macros/s/AKfycbwZxICn7VFEFU7TXWEuuTzLvNrJs597hArn9lYUd_5feqhA0ZX57EGEKpSCskpSO9Lp/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbwQ1faVtQmUdkfCsPHd6bF05ozR2iySsseSbqMrfw18C3XDCId8p6FKYxgnqLyQhlCkbQ/exec";
 
 // ==================== GLOBAL VARIABLES ====================
 var currentEvalEmp = null;
@@ -1060,16 +1060,27 @@ function openHODEvalForHODTab(empCode, empName, isReadOnly) {
   }).catch(function(error) { showToast('Error: ' + error.message, 'error'); });
 }
 
-function openHODEvaluationModal(empCode, empName, isEditable, existingRatings, existingComments, existingOverallLevel, selfRatings, isViewOnly) {
+function openHODEvaluationModal(empCode, empName, isEditable, existingRatings, existingComments, existingOverallLevel, selfRatings, isViewOnly, reportsDirectly) {
   currentHODEvalEmpCode = empCode;
   currentHODEvalIsEditable = isEditable;
   if (isViewOnly) currentHODEvalIsEditable = false;
+  
   var userRole = window.currentUserRole || (authenticatedUser ? authenticatedUser.position : null);
   var modalTitle = userRole === 'Unit Head' ? 'Unit Head Evaluation' : 'Evaluation by ICD/Branch Head';
-  document.getElementById('hodEvalModalTitle').innerHTML = modalTitle + ' - ' + escapeHtml(empName);
+  
+  // Adjust title for direct-reporting employees
+  if (reportsDirectly && userRole === 'Unit Head') {
+    document.getElementById('hodEvalModalTitle').innerHTML = 'Unit Head Direct Evaluation - ' + escapeHtml(empName);
+  } else {
+    document.getElementById('hodEvalModalTitle').innerHTML = modalTitle + ' - ' + escapeHtml(empName);
+  }
+  
   if (isViewOnly) document.getElementById('hodEvalModalTitle').innerHTML = 'View Evaluation by ICD/Branch Head - ' + escapeHtml(empName) + ' (Read Only)';
+  
   var disabledAttr = currentHODEvalIsEditable ? '' : 'disabled';
+  
   var selfRatingsHtml = selfRatings ? '<div style="background: #e8f4fd; padding: 12px; margin-bottom: 15px; border-radius: 8px;"><strong><i class="fa fa-info-circle"></i> Self Evaluation Ratings (Reference)</strong><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; font-size: 12px;"><div>📄 Page Layout: ' + (selfRatings.page_layout || 0) + '/5</div><div>⏱️ Deadline Adherence: ' + (selfRatings.deadline_adherence || 0) + '/5</div><div>✅ Quality & Accuracy: ' + (selfRatings.quality_accuracy || 0) + '/5</div><div>📢 Advertising: ' + (selfRatings.advertising_integration || 0) + '/5</div><div>💻 Platform Adaptation: ' + (selfRatings.platform_adaptation || 0) + '/5</div><div>🤝 Collaboration: ' + (selfRatings.collaboration || 0) + '/5</div></div></div>' : '';
+  
   var kraHtml = '';
   for (var i = 0; i < kraDefinitions.length; i++) {
     var kra = kraDefinitions[i];
@@ -1078,8 +1089,16 @@ function openHODEvaluationModal(empCode, empName, isEditable, existingRatings, e
     ratingOptions.forEach(function(opt) { optionsHtml += '<option value="' + opt + '" ' + (opt == ratingValue ? 'selected' : '') + '>' + opt + '</option>'; });
     kraHtml += '<div class="col-md-6"><div class="kra-box"><div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;"><h5 style="margin: 0;"><strong>' + kra.name + '</strong></h5><select id="modal_hod_kra_' + kra.id + '" class="form-control rating-select" style="width: 65px;" ' + disabledAttr + ' onchange="updateHODModalLiveScore()" onfocus="this.select()">' + optionsHtml + '</select></div><div style="font-size: 11px; color: #666; margin-top: 8px;"><div><strong>KPI:</strong> ' + kra.kpi + '</div><div><strong>Target:</strong> ' + kra.target + '</div></div></div></div>';
   }
+  
   var viewOnlyWarning = isViewOnly ? '<div class="alert alert-info"><i class="fa fa-info-circle"></i> <strong>View Only Mode:</strong> You are viewing your own evaluation. No changes can be made.</div>' : '';
-  var modalHtml = viewOnlyWarning + selfRatingsHtml + '<div class="panel panel-default"><div class="panel-heading" style="background-color: #1e3c72; color: white; display: flex; justify-content: space-between; align-items: center;"><strong><i class="fa fa-star"></i> KRA Performance Ratings (1-5 Scale)</strong><div><span id="modalHodLiveScoreDisplay" style="background: #ffc107; color: #1e3c72; padding: 3px 10px; border-radius: 15px; font-size: 12px;">Score: 0.0/10</span><span id="modalHodLiveLevelDisplay" style="background: #6c757d; color: white; padding: 3px 10px; border-radius: 15px; font-size: 12px; margin-left: 5px;">Level: Not Assessed</span></div></div><div class="panel-body"><div class="row">' + kraHtml + '</div></div></div><div class="form-group"><label>Comments</label><textarea id="modal_hod_comments" class="form-control" rows="3" ' + disabledAttr + ' onfocus="this.select()">' + escapeHtml(existingComments) + '</textarea></div><input type="hidden" id="modal_hod_overall_level" value="' + escapeHtml(existingOverallLevel) + '">';
+  var directReportNote = (reportsDirectly && userRole === 'Unit Head') ? '<div class="alert alert-info"><i class="fa fa-info-circle"></i> This employee reports directly to you. You are evaluating them directly (no ICD/HOD review required).</div>' : '';
+  
+  var modalHtml = viewOnlyWarning + directReportNote + selfRatingsHtml + 
+                  '<div class="panel panel-default"><div class="panel-heading" style="background-color: #1e3c72; color: white; display: flex; justify-content: space-between; align-items: center;"><strong><i class="fa fa-star"></i> KRA Performance Ratings (1-5 Scale)</strong><div><span id="modalHodLiveScoreDisplay" style="background: #ffc107; color: #1e3c72; padding: 3px 10px; border-radius: 15px; font-size: 12px;">Score: 0.0/10</span><span id="modalHodLiveLevelDisplay" style="background: #6c757d; color: white; padding: 3px 10px; border-radius: 15px; font-size: 12px; margin-left: 5px;">Level: Not Assessed</span></div></div><div class="panel-body"><div class="row">' + kraHtml + '</div></div></div>' +
+                  '<div class="form-group"><label>Comments</label><textarea id="modal_hod_comments" class="form-control" rows="3" ' + disabledAttr + ' onfocus="this.select()">' + escapeHtml(existingComments) + '</textarea></div>' +
+                  '<input type="hidden" id="modal_hod_overall_level" value="' + escapeHtml(existingOverallLevel) + '">' +
+                  '<input type="hidden" id="modal_reports_directly" value="' + (reportsDirectly ? 'true' : 'false') + '">';
+  
   document.getElementById('hodEvalModalBody').innerHTML = modalHtml;
   var saveBtn = document.getElementById('hodEvalSaveBtn');
   if (saveBtn) saveBtn.style.display = (currentHODEvalIsEditable && !isViewOnly) ? 'inline-block' : 'none';
@@ -1108,19 +1127,46 @@ function updateHODModalLiveScore() {
 function saveHODEvaluationFromModal() {
   if (!currentHODEvalIsEditable) { showToast('This evaluation is locked and cannot be edited.', 'warning'); return; }
   if (!currentHODEvalEmpCode) return;
+  
   var kraIds = ['page_layout','deadline_adherence','quality_accuracy','advertising_integration','platform_adaptation','collaboration'];
   var allValid = true;
-  for (var i = 0; i < kraIds.length; i++) { var val = parseFloat(document.getElementById('modal_hod_kra_' + kraIds[i]).value) || 0; if (val < 1 || val > 5) allValid = false; }
+  for (var i = 0; i < kraIds.length; i++) { 
+    var val = parseFloat(document.getElementById('modal_hod_kra_' + kraIds[i]).value) || 0; 
+    if (val < 1 || val > 5) allValid = false; 
+  }
   if (!allValid) { showToast('Please provide ratings for all 6 KRAs', 'error'); return; }
+  
   var comments = document.getElementById('modal_hod_comments').value;
   if (!comments.trim()) { showToast('Please enter comments', 'error'); return; }
+  
   var overallLevel = document.getElementById('modal_hod_overall_level') ? document.getElementById('modal_hod_overall_level').value : '';
-  var formObject = { emp_code: currentHODEvalEmpCode, comments: comments, overall_level: overallLevel };
-  kraDefinitions.forEach(function(kra) { formObject[kra.id] = parseFloat(document.getElementById('modal_hod_kra_' + kra.id).value) || 0; });
+  var reportsDirectly = document.getElementById('modal_reports_directly') ? document.getElementById('modal_reports_directly').value === 'true' : false;
+  
+  var formObject = { 
+    emp_code: currentHODEvalEmpCode, 
+    comments: comments, 
+    overall_level: overallLevel,
+    reports_directly: reportsDirectly  // Add this flag
+  };
+  
+  kraDefinitions.forEach(function(kra) { 
+    formObject[kra.id] = parseFloat(document.getElementById('modal_hod_kra_' + kra.id).value) || 0; 
+  });
+  
   var userRole = window.currentUserRole || (authenticatedUser ? authenticatedUser.position : null);
+  
+  // For Unit Head with direct-reporting employees, use saveUnitHeadEvaluation directly
   var serverFunction = 'saveHODEvaluation';
-  if (userRole === 'Vertical Head') serverFunction = 'updateHODEvaluation';
-  if (userRole === 'Unit Head') serverFunction = 'saveUnitHeadEvaluation';
+  if (userRole === 'Vertical Head') {
+    serverFunction = 'updateHODEvaluation';
+  } else if (userRole === 'Unit Head') {
+    if (reportsDirectly) {
+      serverFunction = 'saveUnitHeadDirectEvaluation';
+    } else {
+      serverFunction = 'saveUnitHeadEvaluation';
+    }
+  }
+  
   callServer(serverFunction, formObject).then(function(result) {
     if (result.success) {
       showToast(result.message, 'success');
@@ -1132,13 +1178,16 @@ function saveHODEvaluationFromModal() {
       } else if (userRole === 'Head' && authenticatedUser && authenticatedUser.name) {
         loadTeamMembersForHead(authenticatedUser.name);
       } else if (userRole === 'Unit Head' && authenticatedUnitHead && authenticatedUnitHead.unit) {
-        // IMPORTANT: Refresh the Unit Head employee list after saving evaluation
         loadEmployeesForUnitHead(authenticatedUnitHead.unit);
       } else if (currentSelectedCentre) {
         loadEmployeesByCentre(currentSelectedCentre, currentSelectedWorkplace || '');
       }
-    } else showToast('Error: ' + result.message, 'error');
-  }).catch(function(error) { showToast('Error: ' + error.message, 'error'); });
+    } else {
+      showToast('Error: ' + result.message, 'error');
+    }
+  }).catch(function(error) { 
+    showToast('Error: ' + error.message, 'error'); 
+  });
 }
 
 // ==================== REGISTRATION FUNCTIONS ====================
@@ -1370,6 +1419,7 @@ function filterUnitHeadByWorkplace(workplace) {
 
 function displayUnitHeadEmployeeCards(employees, workplaceFilter) {
   var teamListDiv = document.getElementById('unitHeadTeamList');
+  var unitHeadName = authenticatedUnitHead ? authenticatedUnitHead.name : '';
   
   // Apply workplace filter
   var filteredEmployees = employees;
@@ -1384,30 +1434,105 @@ function displayUnitHeadEmployeeCards(employees, workplaceFilter) {
       (workplaceFilter ? ' for workplace: ' + workplaceFilter : '') + '</div>';
     return;
   }
+  
   var html = '<h4>Team Members <span class="badge">' + filteredEmployees.length + '</span></h4>';
+  
   for (var i = 0; i < filteredEmployees.length; i++) {
     var member = filteredEmployees[i];
     var isICDEmployee = member.isICD === true;
+    
+    // NEW: Check if employee reports directly to this Unit Head
+    var reportsDirectlyToUnitHead = (member.reporting_authority === unitHeadName);
+    // For direct-reporting employees, treat them like ICD for button visibility
+    var needsUnitHeadEvaluation = isICDEmployee || reportsDirectlyToUnitHead;
+    
     var statusClass = member.completion === 'Yes' ? 'status-submitted' : 'status-pending';
     var statusText = member.completion === 'Yes' ? '✓ Self Evaluation Submitted' : '📝 Draft';
     var workloadDisplay = formatTeamWorkloadDisplay(member.teamWorkload);
     var workloadHtml = workloadDisplay ? '<div class="workload-line"><i class="fa fa-tasks"></i> ' + workloadDisplay + '</div>' : '';
     var dailyWorkloadHtml = generateDailyWorkloadHTML(member.dailyWorkload);
+    
     var jobDescription = '', specialProjectsText = '';
     if (member.specialProjects) {
-      if (typeof member.specialProjects === 'object') { jobDescription = member.specialProjects.job_description || ''; specialProjectsText = member.specialProjects.special_projects || ''; }
-      else if (typeof member.specialProjects === 'string') { try { var parsed = JSON.parse(member.specialProjects); jobDescription = parsed.job_description || ''; specialProjectsText = parsed.special_projects || ''; } catch(e) { specialProjectsText = member.specialProjects; } }
+      if (typeof member.specialProjects === 'object') { 
+        jobDescription = member.specialProjects.job_description || ''; 
+        specialProjectsText = member.specialProjects.special_projects || ''; 
+      }
+      else if (typeof member.specialProjects === 'string') { 
+        try { 
+          var parsed = JSON.parse(member.specialProjects); 
+          jobDescription = parsed.job_description || ''; 
+          specialProjectsText = parsed.special_projects || ''; 
+        } catch(e) { 
+          specialProjectsText = member.specialProjects; 
+        } 
+      }
     }
-    var hodComplete = !isICDEmployee && member.hodRatings && member.hodRatings.page_layout > 0 && member.hodRatings.deadline_adherence > 0 && member.hodRatings.quality_accuracy > 0 && member.hodRatings.advertising_integration > 0 && member.hodRatings.platform_adaptation > 0 && member.hodRatings.collaboration > 0;
-    var unitHeadStatusText = (member.status === "Assessed-UH") ? '✓ Approved' : ((member.status === "Assessed") ? '⏳ Pending Approval' : '⏳ Pending');
+    
+    // For direct-reporting employees, HOD evaluation is not required
+    // So we consider hodComplete as true if they report directly to Unit Head
+    var hodComplete = false;
+    if (reportsDirectlyToUnitHead) {
+      // Direct-reporting employees don't need HOD evaluation
+      hodComplete = true;
+    } else {
+      hodComplete = member.hodRatings && member.hodRatings.page_layout > 0 && 
+                    member.hodRatings.deadline_adherence > 0 && 
+                    member.hodRatings.quality_accuracy > 0 && 
+                    member.hodRatings.advertising_integration > 0 && 
+                    member.hodRatings.platform_adaptation > 0 && 
+                    member.hodRatings.collaboration > 0;
+    }
+    
+    var unitHeadStatusText = (member.status === "Assessed-UH") ? '✓ Approved' : 
+                              ((member.status === "Assessed") ? '⏳ Pending Approval' : '⏳ Pending');
     var unitHeadStatusClass = (member.status === "Assessed-UH") ? 'status-complete' : 'status-pending';
     var vhComplete = member.vhEvaluation && member.vhEvaluation.performance_rating && member.vhEvaluation.performance_rating !== '';
     var canPrintPdf = vhComplete;
+    
+    // BUTTON LOGIC - Same for ICD and direct-reporting employees
     var buttonHtml = '';
-    if (member.status === "Assessed") buttonHtml = '<button class="btn btn-sm btn-success" onclick="approveUnitHeadEvaluation(\'' + member.code + '\', \'' + escapeHtml(member.name) + '\')" style="margin-right: 8px;"><i class="fa fa-check-circle"></i> Approve</button><button class="btn btn-sm btn-warning" onclick="openUnitHeadEval(\'' + member.code + '\', \'' + escapeHtml(member.name) + '\')"><i class="fa fa-pencil-square-o"></i> Modify Rating</button>';
-    else if (member.status === "Assessed-UH") buttonHtml = '<button class="btn btn-sm btn-warning" onclick="openUnitHeadEval(\'' + member.code + '\', \'' + escapeHtml(member.name) + '\')"><i class="fa fa-pencil-square-o"></i> Modify Rating</button>';
-    else if (member.status === "Pending" && isICDEmployee) buttonHtml = '<button class="btn btn-sm btn-primary" onclick="openUnitHeadEval(\'' + member.code + '\', \'' + escapeHtml(member.name) + '\')"><i class="fa fa-pencil-square-o"></i> Evaluate</button>';
-    html += '<div class="team-member-card" ' + (member.status === 'Assessed-UH' ? 'style="background: #e8f8e8; border-left: 4px solid #28a745;"' : '') + '><div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; margin-bottom: 10px;"><div style="flex: 1;"><strong style="font-size: 16px;"><i class="fa fa-user"></i> ' + escapeHtml(member.name) + '</strong>' + (isICDEmployee ? '<span class="label label-info" style="margin-left: 10px; background-color: #ff9800;"><i class="fa fa-users"></i> ICD</span>' : '') + '<br><small><i class="fa fa-briefcase"></i> ' + escapeHtml(member.designation || 'N/A') + ' | <i class="fa fa-building"></i> ' + escapeHtml(member.unit) + '</small><br><small><i class="fa fa-map-marker"></i> Workplace: ' + escapeHtml(member.workplace || 'N/A') + ' | <i class="fa fa-id-card"></i> Code: ' + escapeHtml(member.code) + '</small>' + workloadHtml + '</div><div style="text-align: right;"><span class="remark-badge ' + statusClass + '">' + statusText + '</span><span class="remark-badge ' + (hodComplete ? 'status-complete' : 'status-pending') + '">HOD: ' + (hodComplete ? '✓ Complete' : '⏳ Pending') + '</span><span class="remark-badge ' + unitHeadStatusClass + '">Unit Head: ' + unitHeadStatusText + '</span><span class="remark-badge ' + (vhComplete ? 'status-complete' : 'status-pending') + '">VH: ' + (vhComplete ? '✓ Complete' : '⏳ Pending') + '</span></div></div>' + dailyWorkloadHtml + '<div style="margin-top: 15px; text-align: right; border-top: 1px solid #eee; padding-top: 12px;">' + buttonHtml + (canPrintPdf ? '<button class="btn btn-sm btn-info" onclick="printEvaluationReport(\'' + escapeHtml(member.code) + '\', \'' + escapeHtml(member.name) + '\')"><i class="fa fa-print"></i> PDF Report</button>' : '<button class="btn btn-sm btn-default" disabled style="opacity: 0.5;" title="VH evaluation required first">PDF Report</button>') + '</div></div>';
+    if (member.status === "Assessed") {
+      buttonHtml = '<button class="btn btn-sm btn-success" onclick="approveUnitHeadEvaluation(\'' + member.code + '\', \'' + escapeHtml(member.name) + '\')" style="margin-right: 8px;"><i class="fa fa-check-circle"></i> Approve</button>' +
+                   '<button class="btn btn-sm btn-warning" onclick="openUnitHeadEval(\'' + member.code + '\', \'' + escapeHtml(member.name) + '\')"><i class="fa fa-pencil-square-o"></i> Modify Rating</button>';
+    } 
+    else if (member.status === "Assessed-UH") {
+      buttonHtml = '<button class="btn btn-sm btn-warning" onclick="openUnitHeadEval(\'' + member.code + '\', \'' + escapeHtml(member.name) + '\')"><i class="fa fa-pencil-square-o"></i> Modify Rating</button>';
+    } 
+    else if (member.status === "Pending" && needsUnitHeadEvaluation) {
+      // This now includes BOTH ICD employees AND direct-reporting employees
+      buttonHtml = '<button class="btn btn-sm btn-primary" onclick="openUnitHeadEval(\'' + member.code + '\', \'' + escapeHtml(member.name) + '\')"><i class="fa fa-pencil-square-o"></i> Evaluate</button>';
+    }
+    
+    var badgeHtml = '';
+    if (reportsDirectlyToUnitHead) {
+      badgeHtml = '<span class="label label-info" style="margin-left: 10px; background-color: #17a2b8;"><i class="fa fa-user"></i> Direct Report</span>';
+    } else if (isICDEmployee) {
+      badgeHtml = '<span class="label label-info" style="margin-left: 10px; background-color: #ff9800;"><i class="fa fa-users"></i> ICD</span>';
+    }
+    
+    html += '<div class="team-member-card" ' + (member.status === 'Assessed-UH' ? 'style="background: #e8f8e8; border-left: 4px solid #28a745;"' : '') + '>' +
+            '<div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; margin-bottom: 10px;">' +
+            '<div style="flex: 1;">' +
+            '<strong style="font-size: 16px;"><i class="fa fa-user"></i> ' + escapeHtml(member.name) + '</strong>' + badgeHtml +
+            '<br><small><i class="fa fa-briefcase"></i> ' + escapeHtml(member.designation || 'N/A') + ' | <i class="fa fa-building"></i> ' + escapeHtml(member.unit) + '</small>' +
+            '<br><small><i class="fa fa-map-marker"></i> Workplace: ' + escapeHtml(member.workplace || 'N/A') + ' | <i class="fa fa-id-card"></i> Code: ' + escapeHtml(member.code) + '</small>' +
+            workloadHtml +
+            '</div>' +
+            '<div style="text-align: right;">' +
+            '<span class="remark-badge ' + statusClass + '">' + statusText + '</span>' +
+            '<span class="remark-badge ' + (hodComplete ? 'status-complete' : 'status-pending') + '">HOD: ' + (hodComplete ? '✓ Complete' : '⏳ Pending') + '</span>' +
+            '<span class="remark-badge ' + unitHeadStatusClass + '">Unit Head: ' + unitHeadStatusText + '</span>' +
+            '<span class="remark-badge ' + (vhComplete ? 'status-complete' : 'status-pending') + '">VH: ' + (vhComplete ? '✓ Complete' : '⏳ Pending') + '</span>' +
+            '</div>' +
+            '</div>' +
+            dailyWorkloadHtml +
+            '<div style="margin-top: 15px; text-align: right; border-top: 1px solid #eee; padding-top: 12px;">' + 
+            buttonHtml + 
+            (canPrintPdf ? '<button class="btn btn-sm btn-info" onclick="printEvaluationReport(\'' + escapeHtml(member.code) + '\', \'' + escapeHtml(member.name) + '\')"><i class="fa fa-print"></i> PDF Report</button>' : 
+                           '<button class="btn btn-sm btn-default" disabled style="opacity: 0.5;" title="VH evaluation required first">PDF Report</button>') + 
+            '</div>' +
+            '</div>';
   }
   teamListDiv.innerHTML = html;
 }
@@ -1415,32 +1540,64 @@ function displayUnitHeadEmployeeCards(employees, workplaceFilter) {
 function openUnitHeadEval(empCode, empName) {
   window.currentUserRole = 'Unit Head';
   
-  // Store reference to refresh after modal closes
   var unitHeadUnit = authenticatedUnitHead ? authenticatedUnitHead.unit : null;
+  var unitHeadName = authenticatedUnitHead ? authenticatedUnitHead.name : null;
   
   callServer("getEmployeeForHODEval", { empCode: empCode }).then(function(empData) {
     if (empData.exists) {
-      callServer("getHODEvaluation", { empCode: empCode }).then(function(hodResult) {
-        var existingRatings = {}, existingComments = '', existingOverallLevel = '';
-        if (hodResult.evaluations && hodResult.evaluations.length > 0) {
-          existingRatings = hodResult.evaluations[0].kraRatings || {};
-          existingComments = hodResult.evaluations[0].comments || '';
-          existingOverallLevel = hodResult.evaluations[0].overallLevel || '';
+      // Check if this employee reports directly to this Unit Head
+      callServer("getEmployeeFromMaster", { empCode: empCode }).then(function(masterData) {
+        var reportsDirectly = false;
+        if (masterData.success && masterData.employee) {
+          reportsDirectly = (masterData.employee.reporting_authority === unitHeadName);
         }
         
-        // Pass a callback to refresh after modal closes on save
-        openHODEvaluationModal(empCode, empName, true, existingRatings, existingComments, existingOverallLevel, empData.selfRatings, false);
-        
-        // Add event listener for modal hidden to refresh the list
-        $('#hodEvalModal').off('hidden.bs.modal').on('hidden.bs.modal', function() {
-          if (unitHeadUnit) {
-            loadEmployeesForUnitHead(unitHeadUnit);
+        callServer("getHODEvaluation", { empCode: empCode }).then(function(hodResult) {
+          var existingRatings = {}, existingComments = '', existingOverallLevel = '';
+          if (hodResult.evaluations && hodResult.evaluations.length > 0) {
+            existingRatings = hodResult.evaluations[0].kraRatings || {};
+            existingComments = hodResult.evaluations[0].comments || '';
+            existingOverallLevel = hodResult.evaluations[0].overallLevel || '';
           }
+          
+          // For direct-reporting employees, HOD evaluation is not required
+          // Pass a flag to the modal
+          openHODEvaluationModal(empCode, empName, true, existingRatings, existingComments, existingOverallLevel, empData.selfRatings, false, reportsDirectly);
+          
+          $('#hodEvalModal').off('hidden.bs.modal').on('hidden.bs.modal', function() {
+            if (unitHeadUnit) {
+              loadEmployeesForUnitHead(unitHeadUnit);
+            }
+          });
+        }).catch(function(error) { 
+          showToast('Error loading HOD evaluation: ' + error.message, 'error'); 
         });
-        
-      }).catch(function(error) { showToast('Error loading HOD evaluation: ' + error.message, 'error'); });
-    } else showToast('Employee data not found', 'error');
-  }).catch(function(error) { showToast('Error loading employee data: ' + error.message, 'error'); });
+      }).catch(function(error) {
+        // Fallback - proceed without direct report check
+        callServer("getHODEvaluation", { empCode: empCode }).then(function(hodResult) {
+          var existingRatings = {}, existingComments = '', existingOverallLevel = '';
+          if (hodResult.evaluations && hodResult.evaluations.length > 0) {
+            existingRatings = hodResult.evaluations[0].kraRatings || {};
+            existingComments = hodResult.evaluations[0].comments || '';
+            existingOverallLevel = hodResult.evaluations[0].overallLevel || '';
+          }
+          openHODEvaluationModal(empCode, empName, true, existingRatings, existingComments, existingOverallLevel, empData.selfRatings, false, false);
+          
+          $('#hodEvalModal').off('hidden.bs.modal').on('hidden.bs.modal', function() {
+            if (unitHeadUnit) {
+              loadEmployeesForUnitHead(unitHeadUnit);
+            }
+          });
+        }).catch(function(error) { 
+          showToast('Error loading HOD evaluation: ' + error.message, 'error'); 
+        });
+      });
+    } else {
+      showToast('Employee data not found', 'error');
+    }
+  }).catch(function(error) { 
+    showToast('Error loading employee data: ' + error.message, 'error'); 
+  });
 }
 
 function approveUnitHeadEvaluation(empCode, empName) {
