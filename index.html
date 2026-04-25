@@ -851,7 +851,7 @@ function renderSelfEvalModalContent(evalData, employeeMasterData) {
     var ratingValue = (evalData && evalData.kraRatings && evalData.kraRatings[kra.id]) ? evalData.kraRatings[kra.id] : defaultRating;
     var optionsHtml = '';
     ratingOptions.forEach(function(opt) { optionsHtml += '<option value="' + opt + '" ' + (opt == ratingValue ? 'selected' : '') + '>' + opt + '</option>'; });
-    kraHtml += '<div class="col-md-6"><div class="kra-box"><div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;"><h5 style="margin: 0;"><strong>' + kra.name + '</strong></h5><select id="modal_kra_' + kra.id + '" class="form-control rating-select" style="width: 65px;" ' + disabledAttr + ' onchange="updateSelfModalLiveScore()" onfocus="this.select()">' + optionsHtml + '</select></div><div style="font-size: 11px; color: #666; margin-top: 8px;"><div><strong>KPI:</strong> ' + kra.kpi + '</div><div><strong>Target:</strong> ' + kra.target + '</div></div></div></div>';
+    kraHtml += '<div class="col-md-6"><div class="kra-box"><div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;"><h5 style="margin: 0;"><strong>' + kra.name + '</strong></h5><select id="modal_kra_' + kra.id + '" class="form-control rating-select" style="width: 65px;" ' + disabledAttr + ' onchange="updateSelfModalLiveScore()">' + optionsHtml + '</select></div><div style="font-size: 11px; color: #666; margin-top: 8px;"><div><strong>KPI:</strong> ' + kra.kpi + '</div><div><strong>Target:</strong> ' + kra.target + '</div></div></div></div>';
   }
   var dw = (evalData && evalData.dailyWorkload) ? evalData.dailyWorkload : {};
   var dutyHour = '', dutyMinute = '', dutyAmpm = 'PM';
