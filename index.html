@@ -1045,7 +1045,7 @@ function openHODEvalForHODTab(empCode, empName, isReadOnly) {
       var canEdit = false;
       var isHeadUser = (authenticatedUser && authenticatedUser.position !== 'ICD');
       if (isHeadUser) canEdit = !hodComplete && !viewOnly;
-      else if (isICDUser && !isSelfCard) canEdit = (overallStatus !== "Complete" && overallStatus !== "Assessed-UH") && !viewOnly;
+      else if (isICDUser && !isSelfCard) canEdit = (overallStatus !== "Complete") && !viewOnly;
       else if (isICDUser && isSelfCard) canEdit = false;
       callServer("getHODEvaluation", { empCode: empCode }).then(function(hodResult) {
         var existingRatings = {}, existingComments = '', existingOverallLevel = '';
