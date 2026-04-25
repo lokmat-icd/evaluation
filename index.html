@@ -633,7 +633,7 @@
   
   <script>
 // ==================== CONFIGURATION ====================
-const API_URL = "https://script.google.com/macros/s/AKfycbxvi3t_t-LWyGGHt5WiB0FbtHD3QF4s_7pfrIYGGfkVjL_0IegrMXY0OTRd0BaZqDm4HA/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbwCB5Z4mZkBD04VukaauwoUm1DiMp8Xwrz3VDJ9WO-e8ZedticvP2rUyGtXMQ_7QRZbGA/exec";
 
 // ==================== GLOBAL VARIABLES ====================
 var currentEvalEmp = null;
@@ -1012,13 +1012,21 @@ function displayHODEmployeeCards(employees, workplaceFilter) {
     var workloadDisplay = formatTeamWorkloadDisplay(member.teamWorkload);
     var workloadHtml = workloadDisplay ? '<div class="workload-line"><i class="fa fa-tasks"></i> ' + workloadDisplay + '</div>' : '';
     var dailyWorkloadHtml = generateDailyWorkloadHTML(member.dailyWorkload);
+    
     var jobDescription = '', specialProjectsText = '';
     if (member.specialProjects) {
-      if (typeof member.specialProjects === 'object') { jobDescription = member.specialProjects.job_description || ''; specialProjectsText = member.specialProjects.special_projects || ''; }
-      else if (typeof member.specialProjects === 'string') { try { var parsed = JSON.parse(member.specialProjects); jobDescription = parsed.job_description || ''; specialProjectsText = parsed.special_projects || ''; } catch(e) { specialProjectsText = member.specialProjects; } }
+      if (typeof member.specialProjects === 'object') {
+        jobDescription = member.specialProjects.job_description || '';
+        specialProjectsText = member.specialProjects.special_projects || '';
+      }
+      else if (typeof member.specialProjects === 'string') {
+        try { var parsed = JSON.parse(member.specialProjects); jobDescription = parsed.job_description || ''; specialProjectsText = parsed.special_projects || ''; } catch(e) { specialProjectsText = member.specialProjects; }
+      }
     }
+    
     var jobDescriptionHtml = jobDescription ? '<div style="background: #f0f7ff; padding: 10px; margin: 10px 0; border-radius: 6px; border-left: 3px solid #1e3c72;"><strong><i class="fa fa-file-text"></i> 📋 Job Description:</strong><div style="white-space: pre-wrap; margin-top: 5px; font-size: 13px;">' + escapeHtml(jobDescription) + '</div></div>' : '';
-    var specialProjectsHtml = specialProjectsText ? '<div style="background: #e8f4fd; padding: 10px; margin: 10px 0; border-radius: 6px; border-left: 3px solid #ff9800;"><strong><i class="fa fa-rocket"></i> 🚀 Special Projects:</strong><div style="white-space: pre-wrap; margin-top: 5px; font-size: 13px;">' + escapeHtml(specialProjectsText) + '</div></div>' : '';
+    var specialProjectsHtml = specialProjectsText ? '<div style="background: #e8f4fd; padding: 10px; margin: 10px 0; border-radius: 6px; border-left: 3px solid #ff9800;"><strong><i class="fa fa-rocket"></i> 🚀 Special Projects & Initiatives:</strong><div style="white-space: pre-wrap; margin-top: 5px; font-size: 13px;">' + escapeHtml(specialProjectsText) + '</div></div>' : '';
+    
     var hodComplete = member.hodRatings && member.hodRatings.page_layout > 0 && member.hodRatings.deadline_adherence > 0 && member.hodRatings.quality_accuracy > 0 && member.hodRatings.advertising_integration > 0 && member.hodRatings.platform_adaptation > 0 && member.hodRatings.collaboration > 0;
     var unitHeadApproved = (member.status === "Assessed-UH");
     var unitHeadStatusText = unitHeadApproved ? '✓ Approved' : '⏳ Pending';
@@ -1026,6 +1034,7 @@ function displayHODEmployeeCards(employees, workplaceFilter) {
     var vhComplete = member.vhEvaluation && member.vhEvaluation.performance_rating && member.vhEvaluation.performance_rating !== '';
     var canPrintPdf = vhComplete;
     var buttonHtml = isSelfCard ? '<button class="btn btn-sm btn-info" onclick="openHODEvalForHODTab(\'' + escapeHtml(member.code) + '\', \'' + escapeHtml(member.name) + '\', true)"><i class="fa fa-eye"></i> View My Evaluation</button>' : '<button class="btn btn-sm btn-primary" onclick="openHODEvalForHODTab(\'' + escapeHtml(member.code) + '\', \'' + escapeHtml(member.name) + '\', false)"><i class="fa fa-star"></i> Evaluate</button>';
+    
     html += '<div class="team-member-card" ' + (isSelfCard ? 'style="background: #f0f7ff; border-left: 4px solid #ff9800;"' : '') + '><div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; margin-bottom: 10px;"><div style="flex: 1;"><strong style="font-size: 16px;"><i class="fa fa-user"></i> ' + escapeHtml(member.name) + '</strong>' + (isSelfCard ? '<span class="label label-warning" style="margin-left: 10px;"><i class="fa fa-user-circle"></i> You (ICD)</span>' : '') + (!isSelfCard && member.isICD ? '<span class="label label-info" style="margin-left: 10px; background-color: #ff9800;"><i class="fa fa-users"></i> ICD</span>' : '') + '<br><small><i class="fa fa-briefcase"></i> ' + escapeHtml(member.designation || 'N/A') + ' | <i class="fa fa-building"></i> ' + escapeHtml(member.unit) + '</small><br><small><i class="fa fa-map-marker"></i> Workplace: ' + escapeHtml(member.workplace || 'N/A') + ' | <i class="fa fa-id-card"></i> Code: ' + escapeHtml(member.code) + '</small>' + workloadHtml + '</div><div style="text-align: right;"><span class="remark-badge ' + statusClass + '">' + statusText + '</span><span class="remark-badge ' + (hodComplete ? 'status-complete' : 'status-pending') + '">HOD: ' + (hodComplete ? '✓ Complete' : '⏳ Pending') + '</span><span class="remark-badge ' + unitHeadStatusClass + '">Unit Head: ' + unitHeadStatusText + '</span><span class="remark-badge ' + (vhComplete ? 'status-complete' : 'status-pending') + '">VH: ' + (vhComplete ? '✓ Complete' : '⏳ Pending') + '</span></div></div>' + dailyWorkloadHtml + jobDescriptionHtml + specialProjectsHtml + '<div style="margin-top: 15px; text-align: right; border-top: 1px solid #eee; padding-top: 12px;">' + buttonHtml + (canPrintPdf ? '<button class="btn btn-sm btn-info" onclick="printEvaluationReport(\'' + escapeHtml(member.code) + '\', \'' + escapeHtml(member.name) + '\')"><i class="fa fa-print"></i> PDF Report</button>' : '<button class="btn btn-sm btn-default" disabled style="opacity: 0.5;" title="VH evaluation required first">PDF Report</button>') + '</div></div>';
   }
   teamListDiv.innerHTML = html;
@@ -1430,7 +1439,6 @@ function displayUnitHeadEmployeeCards(employees, workplaceFilter) {
   var teamListDiv = document.getElementById('unitHeadTeamList');
   var unitHeadName = authenticatedUnitHead ? authenticatedUnitHead.name : '';
   
-  // Apply workplace filter
   var filteredEmployees = employees;
   if (workplaceFilter && workplaceFilter !== '') {
     filteredEmployees = employees.filter(function(emp) {
@@ -1439,8 +1447,7 @@ function displayUnitHeadEmployeeCards(employees, workplaceFilter) {
   }
   
   if (filteredEmployees.length === 0) {
-    teamListDiv.innerHTML = '<div class="alert alert-info">No employees found' + 
-      (workplaceFilter ? ' for workplace: ' + workplaceFilter : '') + '</div>';
+    teamListDiv.innerHTML = '<div class="alert alert-info">No employees found' + (workplaceFilter ? ' for workplace: ' + workplaceFilter : '') + '</div>';
     return;
   }
   
@@ -1449,10 +1456,7 @@ function displayUnitHeadEmployeeCards(employees, workplaceFilter) {
   for (var i = 0; i < filteredEmployees.length; i++) {
     var member = filteredEmployees[i];
     var isICDEmployee = member.isICD === true;
-    
-    // NEW: Check if employee reports directly to this Unit Head
     var reportsDirectlyToUnitHead = (member.reporting_authority === unitHeadName);
-    // For direct-reporting employees, treat them like ICD for button visibility
     var needsUnitHeadEvaluation = isICDEmployee || reportsDirectlyToUnitHead;
     
     var statusClass = member.completion === 'Yes' ? 'status-submitted' : 'status-pending';
@@ -1461,45 +1465,51 @@ function displayUnitHeadEmployeeCards(employees, workplaceFilter) {
     var workloadHtml = workloadDisplay ? '<div class="workload-line"><i class="fa fa-tasks"></i> ' + workloadDisplay + '</div>' : '';
     var dailyWorkloadHtml = generateDailyWorkloadHTML(member.dailyWorkload);
     
+    // Get Job Description and Special Projects
     var jobDescription = '', specialProjectsText = '';
     if (member.specialProjects) {
-      if (typeof member.specialProjects === 'object') { 
-        jobDescription = member.specialProjects.job_description || ''; 
-        specialProjectsText = member.specialProjects.special_projects || ''; 
+      if (typeof member.specialProjects === 'object') {
+        jobDescription = member.specialProjects.job_description || '';
+        specialProjectsText = member.specialProjects.special_projects || '';
       }
-      else if (typeof member.specialProjects === 'string') { 
+      else if (typeof member.specialProjects === 'string') {
         try { 
           var parsed = JSON.parse(member.specialProjects); 
           jobDescription = parsed.job_description || ''; 
           specialProjectsText = parsed.special_projects || ''; 
         } catch(e) { 
           specialProjectsText = member.specialProjects; 
-        } 
+        }
       }
     }
     
-    // For direct-reporting employees, HOD evaluation is not required
-    // So we consider hodComplete as true if they report directly to Unit Head
+    // Calculate HOD Performance Score
+    var hodTotal = (member.hodRatings.page_layout || 0) + (member.hodRatings.deadline_adherence || 0) +
+                  (member.hodRatings.quality_accuracy || 0) + (member.hodRatings.advertising_integration || 0) +
+                  (member.hodRatings.platform_adaptation || 0) + (member.hodRatings.collaboration || 0);
+    var hodPerformanceOutOf10 = Math.round((hodTotal / 30) * 10 * 10) / 10;
+    
+    var hodLevelText = '', hodLevelColor = '';
+    if (member.hodOverallLevel === 'DE') { hodLevelText = 'DE - Distinguished Expert'; hodLevelColor = '#28a745'; }
+    else if (member.hodOverallLevel === 'ME') { hodLevelText = 'ME - Meets Expectations'; hodLevelColor = '#ffc107'; }
+    else if (member.hodOverallLevel === 'NI') { hodLevelText = 'NI - Needs Improvement'; hodLevelColor = '#dc3545'; }
+    else { hodLevelText = member.hodOverallLevel || 'Not Assessed'; hodLevelColor = '#6c757d'; }
+    
     var hodComplete = false;
     if (reportsDirectlyToUnitHead) {
-      // Direct-reporting employees don't need HOD evaluation
       hodComplete = true;
     } else {
-      hodComplete = member.hodRatings && member.hodRatings.page_layout > 0 && 
-                    member.hodRatings.deadline_adherence > 0 && 
-                    member.hodRatings.quality_accuracy > 0 && 
-                    member.hodRatings.advertising_integration > 0 && 
-                    member.hodRatings.platform_adaptation > 0 && 
-                    member.hodRatings.collaboration > 0;
+      hodComplete = member.hodRatings && member.hodRatings.page_layout > 0 && member.hodRatings.deadline_adherence > 0 && 
+                    member.hodRatings.quality_accuracy > 0 && member.hodRatings.advertising_integration > 0 && 
+                    member.hodRatings.platform_adaptation > 0 && member.hodRatings.collaboration > 0;
     }
     
-    var unitHeadStatusText = (member.status === "Assessed-UH") ? '✓ Approved' : 
-                              ((member.status === "Assessed") ? '⏳ Pending Approval' : '⏳ Pending');
+    var unitHeadStatusText = (member.status === "Assessed-UH") ? '✓ Approved' : ((member.status === "Assessed") ? '⏳ Pending Approval' : '⏳ Pending');
     var unitHeadStatusClass = (member.status === "Assessed-UH") ? 'status-complete' : 'status-pending';
     var vhComplete = member.vhEvaluation && member.vhEvaluation.performance_rating && member.vhEvaluation.performance_rating !== '';
     var canPrintPdf = vhComplete;
     
-    // BUTTON LOGIC - Same for ICD and direct-reporting employees
+    // Buttons - NO CHANGE
     var buttonHtml = '';
     if (member.status === "Assessed") {
       buttonHtml = '<button class="btn btn-sm btn-success" onclick="approveUnitHeadEvaluation(\'' + member.code + '\', \'' + escapeHtml(member.name) + '\')" style="margin-right: 8px;"><i class="fa fa-check-circle"></i> Approve</button>' +
@@ -1509,7 +1519,6 @@ function displayUnitHeadEmployeeCards(employees, workplaceFilter) {
       buttonHtml = '<button class="btn btn-sm btn-warning" onclick="openUnitHeadEval(\'' + member.code + '\', \'' + escapeHtml(member.name) + '\')"><i class="fa fa-pencil-square-o"></i> Modify Rating</button>';
     } 
     else if (member.status === "Pending" && needsUnitHeadEvaluation) {
-      // This now includes BOTH ICD employees AND direct-reporting employees
       buttonHtml = '<button class="btn btn-sm btn-primary" onclick="openUnitHeadEval(\'' + member.code + '\', \'' + escapeHtml(member.name) + '\')"><i class="fa fa-pencil-square-o"></i> Evaluate</button>';
     }
     
@@ -1520,6 +1529,7 @@ function displayUnitHeadEmployeeCards(employees, workplaceFilter) {
       badgeHtml = '<span class="label label-info" style="margin-left: 10px; background-color: #ff9800;"><i class="fa fa-users"></i> ICD</span>';
     }
     
+    // Build the card HTML
     html += '<div class="team-member-card" ' + (member.status === 'Assessed-UH' ? 'style="background: #e8f8e8; border-left: 4px solid #28a745;"' : '') + '>' +
             '<div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; margin-bottom: 10px;">' +
             '<div style="flex: 1;">' +
@@ -1536,8 +1546,28 @@ function displayUnitHeadEmployeeCards(employees, workplaceFilter) {
             '</div>' +
             '</div>' +
             dailyWorkloadHtml +
-            '<div style="margin-top: 15px; text-align: right; border-top: 1px solid #eee; padding-top: 12px;">' + 
-            buttonHtml + 
+            '<div style="display: flex; flex-wrap: wrap; gap: 20px; margin: 15px 0;">' +
+            '  <div style="flex: 1; min-width: 250px;">' +
+            '    <div style="background: #f0f7ff; padding: 12px; border-radius: 8px; border-left: 3px solid #1e3c72; height: 100%;">' +
+            '      <strong><i class="fa fa-file-text"></i> 📋 Job Description</strong>' +
+            '      <div style="white-space: pre-wrap; margin-top: 8px; font-size: 13px; max-height: 200px; overflow-y: auto;">' + (jobDescription ? escapeHtml(jobDescription) : '<em class="text-muted">No job description provided</em>') + '</div>' +
+            '    </div>' +
+            '  </div>' +
+            '  <div style="flex: 1; min-width: 250px;">' +
+            '    <div style="background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; height: 100%;">' +
+            '      <strong><i class="fa fa-star"></i> 📋 HOD Evaluation</strong>' +
+            '      <div style="margin: 10px 0;">' +
+            '        <span>⭐ Score: <strong>' + hodPerformanceOutOf10 + '/10</strong></span>' +
+            '        <span style="margin-left: 12px; background: ' + hodLevelColor + '; color: ' + (hodLevelColor === '#ffc107' ? '#333' : 'white') + '; padding: 2px 10px; border-radius: 20px; font-size: 11px; font-weight: bold;">' + hodLevelText + '</span>' +
+            '      </div>' +
+            '      <div style="background: white; padding: 8px 12px; border-radius: 12px; font-size: 12px; color: #2c3e50; border-left: 3px solid #1e3c72; max-height: 120px; overflow-y: auto;">' +
+            '        💬 ' + (member.hodComments ? escapeHtml(member.hodComments) : 'No comments yet') +
+            '      </div>' +
+            '    </div>' +
+            '  </div>' +
+            '</div>' +
+            (specialProjectsText ? '<div style="background: #e8f4fd; padding: 10px; margin: 10px 0; border-radius: 6px; border-left: 3px solid #ff9800;"><strong><i class="fa fa-rocket"></i> 🚀 Special Projects & Initiatives:</strong><div style="white-space: pre-wrap; margin-top: 5px; font-size: 13px;">' + escapeHtml(specialProjectsText) + '</div></div>' : '') +
+            '<div style="margin-top: 15px; text-align: right; border-top: 1px solid #eee; padding-top: 12px;">' + buttonHtml + 
             (canPrintPdf ? '<button class="btn btn-sm btn-info" onclick="printEvaluationReport(\'' + escapeHtml(member.code) + '\', \'' + escapeHtml(member.name) + '\')"><i class="fa fa-print"></i> PDF Report</button>' : 
                            '<button class="btn btn-sm btn-default" disabled style="opacity: 0.5;" title="VH evaluation required first">PDF Report</button>') + 
             '</div>' +
@@ -1734,7 +1764,6 @@ function displayVHEmployeeCards(employees, workplaceFilter) {
   var totalEmployees = filteredByWorkplace.length;
   var workplaceDisplay = workplaceFilter ? 'Workplace: ' + workplaceFilter : 'All Workplaces';
   
-  // Calculate team totals for pie charts
   var teamPaginationScore = 0;
   var teamOtherWorkScore = 0;
   var employeeScores = [];
@@ -1769,7 +1798,6 @@ function displayVHEmployeeCards(employees, workplaceFilter) {
     var othDeg = Math.round((othPercent / 100) * 360);
     var othGrad = othPercent > 0 ? 'conic-gradient(#ff9800 0deg ' + othDeg + 'deg, #e0e0e0 ' + othDeg + 'deg 360deg)' : 'conic-gradient(#e0e0e0 0deg 360deg)';
     
-    // Calculate HOD performance score
     var hodTotal = (emp.hodRatings.page_layout || 0) + (emp.hodRatings.deadline_adherence || 0) +
                   (emp.hodRatings.quality_accuracy || 0) + (emp.hodRatings.advertising_integration || 0) +
                   (emp.hodRatings.platform_adaptation || 0) + (emp.hodRatings.collaboration || 0);
@@ -1781,18 +1809,15 @@ function displayVHEmployeeCards(employees, workplaceFilter) {
     else if (emp.hodOverallLevel === 'NI') { levelText = 'NI - Needs Improvement'; levelColor = '#dc3545'; }
     else { levelText = emp.hodOverallLevel || 'Not Assessed'; levelColor = '#6c757d'; }
     
-    // Vertical Head evaluation data
     var vhPerformanceRating = emp.vhEvaluation ? (emp.vhEvaluation.performance_rating || '') : '';
     var vhOverallLevel = emp.vhEvaluation ? (emp.vhEvaluation.overall_level_text || '') : '';
     var vhRemark = emp.vhEvaluation ? (emp.vhEvaluation.remark || '') : '';
     
-    // Build rating options
     var perfOptions = '';
     for (var p = 1; p <= 10; p++) {
       perfOptions += '<option value="' + p + '" ' + (vhPerformanceRating == p ? 'selected' : '') + '>' + p + '</option>';
     }
     
-    // Workload chips
     var workloadChips = '';
     var dw = emp.dailyWorkload || {};
     var workloadItems = [];
@@ -1807,20 +1832,29 @@ function displayVHEmployeeCards(employees, workplaceFilter) {
       workloadChips += '<span class="workload-chip" style="background:#eef2ff; padding:4px 10px; border-radius:20px; font-size:11px; display:inline-block; margin:2px;">📄 ' + workloadItems[w] + '</span>';
     }
     
-    // Special projects preview
-    var specialText = '';
-    if (typeof emp.specialProjects === 'string') specialText = emp.specialProjects;
-    else if (emp.specialProjects && typeof emp.specialProjects === 'object') {
-      if (emp.specialProjects.special_projects) specialText = emp.specialProjects.special_projects;
-      else if (emp.specialProjects.completed) specialText += emp.specialProjects.completed;
-      if (emp.specialProjects.upcoming) specialText += ' ' + emp.specialProjects.upcoming;
-      if (emp.specialProjects.achievements) specialText += ' ' + emp.specialProjects.achievements;
+    // Get Job Description and Special Projects text (FULL, no truncation)
+    var jobDescription = '', specialFull = '';
+    if (emp.specialProjects) {
+      if (typeof emp.specialProjects === 'object') {
+        jobDescription = emp.specialProjects.job_description || '';
+        specialFull = emp.specialProjects.special_projects || '';
+      }
+      else if (typeof emp.specialProjects === 'string') {
+        try { 
+          var parsed = JSON.parse(emp.specialProjects); 
+          jobDescription = parsed.job_description || ''; 
+          specialFull = parsed.special_projects || ''; 
+        } catch(e) { 
+          specialFull = emp.specialProjects; 
+        }
+      }
     }
-    var specialShort = specialText ? (specialText.length > 70 ? specialText.substring(0, 70) + '...' : specialText) : '';
+    
+    var jobDescriptionHtml = jobDescription ? '<div style="margin-top: 8px;"><i class="fa fa-file-text"></i> <strong>Job Description:</strong><div style="white-space: pre-wrap; margin-top: 5px; font-size: 12px; background: #f0f7ff; padding: 8px; border-radius: 6px;">' + escapeHtml(jobDescription) + '</div></div>' : '';
+    var specialProjectsHtml = specialFull ? '<div style="margin-top: 8px;"><i class="fa fa-rocket"></i> <strong>Special Projects & Initiatives:</strong><div style="white-space: pre-wrap; margin-top: 5px; font-size: 12px; background: #fff8e1; padding: 8px; border-radius: 6px;">' + escapeHtml(specialFull) + '</div></div>' : '';
     
     html += `
       <div class="employee-card" style="background: white; border: 1px solid #e0e0e0; border-radius: 12px; margin-bottom: 24px; padding: 18px;">
-        <!-- Header with buttons on the right -->
         <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid #eee;">
           <div>
             <strong style="font-size: 16px; color: #1e3c72;"><i class="fa fa-user-circle"></i> ${escapeHtml(emp.name)}</strong>
@@ -1837,17 +1871,15 @@ function displayVHEmployeeCards(employees, workplaceFilter) {
           </div>
         </div>
         
-        <!-- Workload chips row -->
+        <!-- Workload Section -->
         <div style="background: #f1f5f9; border-radius: 12px; padding: 10px 14px; margin-bottom: 18px;">
           <div><i class="fa fa-tasks"></i> <strong>Workload:</strong> ${workloadChips || '—'}</div>
-          ${specialShort ? '<div style="margin-top: 6px;"><i class="fa fa-rocket"></i> <strong>Special:</strong> ' + escapeHtml(specialShort) + '</div>' : ''}
+          ${jobDescriptionHtml}
+          ${specialProjectsHtml}
         </div>
         
-        <!-- Two column layout: Left (HOD + VH) | Right (Pie charts) -->
         <div style="display: flex; flex-wrap: wrap; gap: 20px;">
-          <!-- LEFT COLUMN: HOD Evaluation + Vertical Head Evaluation stacked -->
           <div style="flex: 1; min-width: 280px; display: flex; flex-direction: column; gap: 20px;">
-            <!-- HOD Evaluation Block -->
             <div style="background: #f8fafc; border-radius: 16px; padding: 16px; border: 1px solid #e2e8f0;">
               <div><i class="fa fa-star" style="color:#1e3c72;"></i> <strong>📋 HOD Evaluation</strong></div>
               <div style="margin: 10px 0;">
@@ -1859,7 +1891,6 @@ function displayVHEmployeeCards(employees, workplaceFilter) {
               </div>
             </div>
             
-            <!-- Vertical Head Evaluation Block -->
             <div style="background: #f8fafc; border-radius: 16px; padding: 16px; border: 1px solid #e2e8f0;">
               <div><i class="fa fa-flag" style="color:#e68a00;"></i> <strong>🚩 Vertical Head Evaluation</strong></div>
               <div style="margin-top: 10px;">
@@ -1886,9 +1917,7 @@ function displayVHEmployeeCards(employees, workplaceFilter) {
             </div>
           </div>
           
-          <!-- RIGHT COLUMN: Pie Charts -->
           <div style="flex: 1; min-width: 240px; display: flex; flex-direction: column; gap: 12px;">
-            <!-- Pagination Contribution Pie Chart -->
             <div style="background: #f8fafc; border-radius: 14px; padding: 12px; border: 1px solid #e2e8f0; text-align: center;">
               <div style="font-weight: 600; font-size: 13px; margin-bottom: 8px;">📄 Pagination Contribution Out of Total Pages</div>
               <div style="display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap;">
@@ -1899,7 +1928,6 @@ function displayVHEmployeeCards(employees, workplaceFilter) {
               </div>
             </div>
             
-            <!-- Other Tasks Pie Chart -->
             <div style="background: #f8fafc; border-radius: 14px; padding: 12px; border: 1px solid #e2e8f0; text-align: center;">
               <div style="font-weight: 600; font-size: 13px; margin-bottom: 8px;">🎨 Ad Design, Event Creative, Photo, PDF etc.</div>
               <div style="display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap;">
