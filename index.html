@@ -633,7 +633,7 @@
   
   <script>
 // ==================== CONFIGURATION ====================
-const API_URL = "https://script.google.com/macros/s/AKfycbwQ1faVtQmUdkfCsPHd6bF05ozR2iySsseSbqMrfw18C3XDCId8p6FKYxgnqLyQhlCkbQ/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbxvi3t_t-LWyGGHt5WiB0FbtHD3QF4s_7pfrIYGGfkVjL_0IegrMXY0OTRd0BaZqDm4HA/exec";
 
 // ==================== GLOBAL VARIABLES ====================
 var currentEvalEmp = null;
@@ -1140,13 +1140,13 @@ function saveHODEvaluationFromModal() {
   if (!comments.trim()) { showToast('Please enter comments', 'error'); return; }
   
   var overallLevel = document.getElementById('modal_hod_overall_level') ? document.getElementById('modal_hod_overall_level').value : '';
-  var reportsDirectly = document.getElementById('modal_reports_directly') ? document.getElementById('modal_reports_directly').value === 'true' : false;
+  var reportsDirectlyElem = document.getElementById('modal_reports_directly');
+  var reportsDirectly = reportsDirectlyElem ? reportsDirectlyElem.value === 'true' : false;
   
   var formObject = { 
     emp_code: currentHODEvalEmpCode, 
     comments: comments, 
-    overall_level: overallLevel,
-    reports_directly: reportsDirectly  // Add this flag
+    overall_level: overallLevel
   };
   
   kraDefinitions.forEach(function(kra) { 
@@ -1155,13 +1155,21 @@ function saveHODEvaluationFromModal() {
   
   var userRole = window.currentUserRole || (authenticatedUser ? authenticatedUser.position : null);
   
-  // For Unit Head with direct-reporting employees, use saveUnitHeadEvaluation directly
+  // For Unit Head with direct-reporting employees, use saveUnitHeadDirectEvaluation
   var serverFunction = 'saveHODEvaluation';
+  
+  // CRITICAL FIX: For Unit Head, use the correct function based on reportsDirectly flag
   if (userRole === 'Vertical Head') {
     serverFunction = 'updateHODEvaluation';
   } else if (userRole === 'Unit Head') {
     if (reportsDirectly) {
+      // Make sure all required fields are present for saveUnitHeadDirectEvaluation
+      // The backend expects: emp_code, page_layout, deadline_adherence, quality_accuracy, 
+      // advertising_integration, platform_adaptation, collaboration, comments, overall_level
       serverFunction = 'saveUnitHeadDirectEvaluation';
+      // Log for debugging
+      console.log("Using saveUnitHeadDirectEvaluation for direct-reporting employee");
+      console.log("Form object:", formObject);
     } else {
       serverFunction = 'saveUnitHeadEvaluation';
     }
@@ -1186,6 +1194,7 @@ function saveHODEvaluationFromModal() {
       showToast('Error: ' + result.message, 'error');
     }
   }).catch(function(error) { 
+    console.error("Save error:", error);
     showToast('Error: ' + error.message, 'error'); 
   });
 }
