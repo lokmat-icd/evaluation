@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TED by LOKMAT - Employee Evaluation System</title>
+  
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  
+  <style>
+    /* ==================== LIGHT THEME GLOBAL (FULLY CORRECTED FOR READABILITY) ==================== */
+    * {
+        color-scheme: light;
+    }
+    
+    body {
+        background: #f0f4f8;
+        font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+        color: #1a2c3e;
+    }
+    
+    .container-fluid {
+        background: #f0f4f8;
+    }
+    
+    /* Header with gradient (legacy preserved) */
+    .header {
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        color: white;
+        padding: 20px;
+        margin-bottom: 30px;
+        border-radius: 0 0 10px 10px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    
+    .header p, .header div {
+        color: white;
+    }
+    
+    /* TABS */
+    .nav-pills > li > a {
+        color: #1e3c72;
+        font-weight: 600;
+        background: #ffffff;
+        margin-right: 8px;
+        border-radius: 40px;
+        border: 1px solid #cfdfed;
+        transition: all 0.2s;
+    }
+    
+    .nav-pills > li > a:hover {
+        background-color: #e6f0ff;
+        color: #0b2b4f;
+        border-color: #a0c0da;
+    }
+    
+    .nav-pills > li.active > a {
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        color: white;
+        border: none;
+        box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+    }
+    
+    /* Tab content panels - Light */
+    .tab-content {
+        background: #ffffff;
+        padding: 30px;
+        border-radius: 24px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+        margin-top: 20px;
+        border: 1px solid #e2edf7;
+    }
+    
+    .tab-content h3 {
+        color: #1e3c72;
+        border-bottom: 3px solid #2a5298;
+        padding-bottom: 8px;
+        display: inline-block;
+    }
+    
+    /* FORMS - Light backgrounds, dark text */
+    .form-control {
+        background-color: #ffffff;
+        border: 1px solid #cbdde9;
+        color: #1e2f3f;
+        border-radius: 12px;
+        padding: 10px 14px;
+    }
+    
+    .form-control:focus {
+        border-color: #2a5298;
+        box-shadow: 0 0 0 0.2rem rgba(42,82,152,0.15);
+        background-color: #ffffff;
+        color: #0a1c2c;
+    }
+    
+    .form-control[readonly], .form-control:disabled {
+        background-color: #f2f6fa !important;
+        border-color: #cfdfed !important;
+        color: #2c4c6e !important;
+        opacity: 0.9;
+    }
+    
+    .form-group label {
+        color: #1f3a5f;
+        font-weight: 600;
+    }
+    
+    /* Buttons */
+    .btn-primary {
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        border: none;
+        border-radius: 40px;
+        font-weight: 600;
+        padding: 8px 24px;
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #0f2c56 0%, #1f4287 100%);
+        transform: translateY(-1px);
+        box-shadow: 0 6px 12px rgba(30,60,114,0.2);
+    }
+    
+    .btn-default {
+        background: white;
+        border: 1px solid #c0d4e6;
+        color: #1e3c72;
+        border-radius: 40px;
+    }
+    
+    .btn-warning {
+        background-color: #f5a623;
+        border: none;
+        color: white;
+        border-radius: 40px;
+    }
+    
+    /* EMPLOYEE CARDS - LIGHT THEME FULLY READABLE */
+    .employee-card, .team-member-card {
+        background: #ffffff;
+        border: 1px solid #dce7f0;
+        border-radius: 24px;
+        padding: 20px;
+        margin-bottom: 24px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+        transition: all 0.2s;
+    }
+    
+    .employee-card:hover, .team-member-card:hover {
+        box-shadow: 0 12px 22px -12px rgba(0, 0, 0, 0.12);
+        border-color: #b9d2ec;
+    }
+    
+    /* Fix text inside employee cards: ensure dark text on light bg */
+    .employee-card strong, .team-member-card strong,
+    .employee-card span, .team-member-card span,
+    .employee-card div, .team-member-card div,
+    .employee-card small, .team-member-card small {
+        color: #1a2f44;
+    }
+    
+    .employee-card .text-muted, .team-member-card .text-muted {
+        color: #5d7184 !important;
+    }
+    
+    .employee-card h5, .team-member-card h5 {
+        color: #1e3c72;
+    }
+    
+    /* KRA Box light */
+    .kra-box {
+        background: #f8fbfe;
+        padding: 16px;
+        margin-bottom: 16px;
+        border-radius: 20px;
+        border-left: 5px solid #2a5298;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+    }
+    
+    .kra-box h5, .kra-box strong {
+        color: #1e3c72;
+    }
+    
+    /* Badges & status */
+    .remark-badge {
+        padding: 5px 12px;
+        border-radius: 50px;
+        font-size: 11px;
+        font-weight: 700;
+        display: inline-block;
+        margin: 3px;
+    }
+    
+    .status-complete {
+        background-color: #e0f2e9;
+        color: #0a5c3e;
+        border: 1px solid #b8e0cc;
+    }
+    
+    .status-pending {
+        background-color: #fff1e0;
+        color: #b45b0a;
+        border: 1px solid #ffe0b5;
+    }
+    
+    .status-submitted {
+        background-color: #e3f0ff;
+        color: #1a5d9c;
+        border: 1px solid #cce4ff;
+    }
+    
+    .label-info {
+        background-color: #e3f0ff;
+        color: #1e4a76;
+    }
+    
+    /* Workload chips */
+    .workload-chip {
+        background: #ecf3fa;
+        padding: 4px 12px;
+        border-radius: 30px;
+        font-size: 11px;
+        display: inline-block;
+        margin: 3px;
+        color: #1e3c72;
+        font-weight: 500;
+    }
+    
+    .workload-line {
+        background: #eff4fa;
+        padding: 6px 14px;
+        border-radius: 30px;
+        font-size: 12px;
+        margin: 8px 0;
+        display: inline-block;
+        color: #1f3b62;
+    }
+    
+    .subcentre-workload-box {
+        background: #fef7e0;
+        padding: 18px;
+        margin-bottom: 20px;
+        border-radius: 20px;
+        border-left: 5px solid #f5a623;
+    }
+    
+    .subcentre-title {
+        font-size: 16px;
+        font-weight: bold;
+        color: #b45f06;
+    }
+    
+    .filter-btn {
+        background-color: white;
+        border: 1px solid #cbdde9;
+        color: #1e3c72;
+        border-radius: 40px;
+        margin: 4px 6px;
+        transition: 0.2s;
+    }
+    
+    .filter-btn.active-filter {
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        color: white;
+        border: none;
+    }
+    
+    .panel-default > .panel-heading {
+        background: #eef3fc;
+        color: #1e3c72;
+        border-bottom: 1px solid #d4e2f0;
+        font-weight: 700;
+    }
+    
+    .panel-body, .panel {
+        background: #ffffff;
+        color: #1e2f3e;
+    }
+    
+    .employee-info-card {
+        background: #fafdff;
+        border-left: 5px solid #2a5298;
+        padding: 20px;
+        border-radius: 20px;
+        margin-bottom: 24px;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.02);
+    }
+    
+    .info-label {
+        font-weight: 700;
+        color: #2a5298;
+    }
+    
+    .modal-content {
+        border-radius: 28px;
+        border: 1px solid #d9e6f2;
+    }
+    
+    .modal-header {
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        color: white;
+        border-radius: 27px 27px 0 0;
+    }
+    
+    .modal-header .close {
+        color: white;
+    }
+    
+    .alert {
+        border-radius: 20px;
+    }
+    
+    /* score displays */
+    .rating-select {
+        width: 80px;
+        background: white;
+        border: 1px solid #cbdbe0;
+        color: #1e2f3e;
+    }
+    
+    /* additional light fix for inner containers */
+    .team-member-card .workload-line,
+    .employee-card .workload-line {
+        background: #eef2f8;
+    }
+    
+    .team-member-card .employee-info-card,
+    .employee-card .employee-info-card {
+        background: #f9fdfe;
+    }
+    
+    .team-member-card .kra-box,
+    .employee-card .kra-box {
+        background: #f9fbfe;
+    }
+    
+    .team-member-card .panel-default,
+    .employee-card .panel-default {
+        background: white;
+    }
+    
+    .custom-toast {
+        background: #1e3c72;
+        color: white;
+        border-radius: 40px;
+    }
+    
+    .text-muted {
+        color: #5f7f9e !important;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container-fluid">
+    <div class="header">
+      <div style="display: flex; flex-direction: column; align-items: center; max-width: 1150px; margin: 0 auto;">
+        <img src="https://lh3.googleusercontent.com/d/1uLdST5g0rbVFpAV_i7qJXAI1nZJo20lQ" alt="LOKMAT Logo" style="max-width: 100%;">
+        <p style="font-size: 1.9rem; margin-top: 10px;">Task | Execution | Delivery</p>
+        <p style="font-size: 1.4rem;">ICD Unified Performance Evaluation System</p>
+        <div style="display: flex; justify-content: space-between; width:100%; margin-top:5px;">
+          <div>Concept : Sanjeev Nair</div><div>App Development : Mahaveer Vibhute</div>
+        </div>
+      </div>
+    </div>
+    <div class="container">
+      <ul class="nav nav-pills">
+        <li class="active"><a href="#self" data-toggle="tab"><i class="fa fa-star"></i> Self Evaluation</a></li>
+        <li><a href="#hod" data-toggle="tab"><i class="fa fa-users"></i> ICD/Branch Head</a></li>
+        <li><a href="#unithead" data-toggle="tab"><i class="fa fa-check-circle"></i> Unit Head</a></li>
+        <li><a href="#vh" data-toggle="tab"><i class="fa fa-flag"></i> Vertical Head</a></li>
+        <li id="registrationTabLi" style="display:none;"><a href="#registration" data-toggle="tab"><i class="fa fa-user-plus"></i> Registration</a></li>        
+      </ul>
+      <div class="tab-content">
+        <div id="registration" class="tab-pane fade">
+          <h3><i class="fa fa-user-plus"></i> Employee Registration</h3><hr>
+          <div class="row"><div class="col-md-8"><div class="form-group"><label>Employee Code *</label><input type="text" class="form-control" id="emp_code_input" placeholder="Enter employee code"></div></div><div class="col-md-4"><button class="btn btn-primary" onclick="loadEmployeeFromMaster()" style="margin-top:25px;"><i class="fa fa-download"></i> Load Employee Data</button></div></div>
+          <div id="employeeInfoSection" style="display:none;"><div class="panel panel-default"><div class="panel-heading">Employee Information</div><div class="panel-body"><div class="row"><div class="col-md-6"><label>Employee Code</label><input type="text" class="form-control" id="emp_code_display" readonly></div><div class="col-md-6"><label>Full Name</label><input type="text" class="form-control" id="full_name_display" readonly></div></div><div class="row"><div class="col-md-6"><label>Designation</label><input type="text" class="form-control" id="designation_display" readonly></div><div class="col-md-6"><label>Mobile</label><input type="text" class="form-control" id="mobile_display" readonly></div></div><div class="row"><div class="col-md-6"><label>Unit (Centre)</label><input type="text" class="form-control" id="unit_display" readonly></div><div class="col-md-6"><label>Work Place</label><input type="text" class="form-control" id="workplace_display" readonly></div></div><div class="row"><div class="col-md-12"><label>Reporting Authority</label><input type="text" class="form-control" id="reporting_auth_display" readonly></div></div></div></div></div>
+          <div id="teamWorkloadSection" style="display:none;"><div class="panel panel-default"><div class="panel-heading">Team Workload Configuration (ICD Only)</div><div class="panel-body" id="teamWorkloadFormsContainer"></div></div></div>
+          <div id="registrationActions" style="display:none;"><button class="btn btn-primary btn-lg" onclick="registerEmployee()"><i class="fa fa-save"></i> Register & Continue</button></div>
+          <div id="regMessage" class="alert"></div>
+        </div>
+        
+        <div id="self" class="tab-pane fade in active"><h3><i class="fa fa-star"></i> Self Evaluation</h3><hr><div class="row"><div class="col-md-8"><div class="form-group"><label>Employee Code</label><input type="text" class="form-control" id="self_emp_code" placeholder="Employee Code"></div></div><div class="col-md-4"><button class="btn btn-primary" style="margin-top:25px;" onclick="openSelfEvaluationFromSelfTab()"><i class="fa fa-download"></i> Load My Data</button></div></div><div id="selfMessage" class="alert"></div></div>
+        
+        <div id="hod" class="tab-pane fade"><h3><i class="fa fa-users"></i> Evaluation by ICD/Branch Head</h3><hr><div id="hodAuthSection"><div class="row"><div class="col-md-6"><div class="form-group"><label>Email Address</label><input type="email" class="form-control" id="hod_email"></div></div><div class="col-md-4"><div class="form-group"><label>Secret Code</label><input type="password" class="form-control" id="hod_secret_code"></div></div><div class="col-md-2"><button class="btn btn-primary" style="margin-top:25px;" onclick="authenticateHOD()">Authenticate</button></div></div><div id="hodAuthMessage" class="alert"></div></div><div id="hodProtectedContent" style="display:none;"><div id="hodWorkplaceFilters" class="filter-buttons-group"></div><div id="hodTeamList"></div></div></div>
+        
+        <div id="unithead" class="tab-pane fade"><h3><i class="fa fa-check-circle"></i> Approval by Unit Head</h3><hr><div id="unitHeadAuthSection"><div class="row"><div class="col-md-6"><div class="form-group"><label>Email Address</label><input type="email" class="form-control" id="unithead_email"></div></div><div class="col-md-4"><div class="form-group"><label>Secret Code</label><input type="password" class="form-control" id="unithead_secret_code"></div></div><div class="col-md-2"><button class="btn btn-primary" style="margin-top:25px;" onclick="authenticateUnitHead()">Authenticate</button></div></div><div id="unitHeadAuthMessage" class="alert"></div></div><div id="unitHeadProtectedContent" style="display:none;"><div id="unitHeadWorkplaceFilters" class="filter-buttons-group"></div><div id="unitHeadTeamList"></div></div></div>
+        
+        <div id="vh" class="tab-pane fade"><h3><i class="fa fa-flag"></i> Vertical Head Evaluation</h3><hr><div id="vhAuthSection"><div class="row"><div class="col-md-6"><div class="form-group"><label>Email Address</label><input type="email" class="form-control" id="vh_email"></div></div><div class="col-md-4"><div class="form-group"><label>Secret Code</label><input type="password" class="form-control" id="vh_secret_code"></div></div><div class="col-md-2"><button class="btn btn-primary" style="margin-top:25px;" onclick="authenticateVerticalHead()">Authenticate</button></div></div><div id="vhAuthMessage" class="alert"></div></div><div id="vhProtectedContent" style="display:none;"><div id="centreButtonsContainer" class="filter-buttons-group"></div><div id="vhWorkplaceFilters" class="filter-buttons-group"></div><div id="employeeList"></div></div></div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- MODALS -->
+  <div id="selfEvalModal" class="modal fade"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal">&times;</button><h4 class="modal-title">Self Evaluation</h4></div><div class="modal-body" id="selfEvalModalBody"></div><div class="modal-footer"><button class="btn btn-default" data-dismiss="modal">Cancel</button><button class="btn btn-warning" onclick="saveSelfEvaluationFromModal(true)">Save Draft</button><button class="btn btn-primary" onclick="saveSelfEvaluationFromModal(false)">Save Changes</button></div></div></div></div>
+  <div id="hodEvalModal" class="modal fade"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal">&times;</button><h4 class="modal-title">HOD Evaluation</h4></div><div class="modal-body" id="hodEvalModalBody"></div><div class="modal-footer"><button class="btn btn-default" data-dismiss="modal">Cancel</button><button class="btn btn-primary" onclick="saveHODEvaluationFromModal()">Save Evaluation</button></div></div></div></div>
+  <div id="registrationModal" class="modal fade"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal">&times;</button><h4 class="modal-title">Team Workload Configuration</h4></div><div class="modal-body" id="registrationModalBody"></div><div class="modal-footer"><button class="btn btn-default" data-dismiss="modal">Cancel</button><button class="btn btn-primary" onclick="saveRegistrationFromModal()">Save & Continue</button></div></div></div></div>
+  
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+  
+  <script>
+    // API endpoint (same as original)
+    const API_URL = "https://script.google.com/macros/s/AKfycbwCB5Z4mZkBD04VukaauwoUm1DiMp8Xwrz3VDJ9WO-e8ZedticvP2rUyGtXMQ_7QRZbGA/exec";
+    const kraDefinitions = [
+      { id: "page_layout", name: "Page Layout & Editorial Design", kpi: "Design, Layout, Visual Appeal", target: "100% adherence to guidelines" },
+      { id: "deadline_adherence", name: "Deadline Adherence", kpi: "Punctuality", target: "Better deadline management" },
+      { id: "quality_accuracy", name: "Quality & Accuracy", kpi: "Error-free output", target: "Ready to print PDF" },
+      { id: "advertising_integration", name: "Advertising Integration", kpi: "Ad Placement", target: "100% accuracy in schedule" },
+      { id: "platform_adaptation", name: "Platform Adaptation", kpi: "Digital/Print conversion", target: "Timely delivery" },
+      { id: "collaboration", name: "Collaboration", kpi: "Teamwork", target: "Proactive communication" }
+    ];
+    const ratingOptions = [1,2,3,3.5,4,4.5,5];
+    let authenticatedUser = null, authenticatedUnitHead = null, currentSelectedCentre = null, currentSelectedWorkplace = null;
+    
+    function callServer(action, params) { return new Promise((resolve, reject) => { let cb = 'cb_' + Date.now() + '_' + Math.random(); let url = API_URL + '?action=' + encodeURIComponent(action) + '&callback=' + cb; if (params) url += '&params=' + encodeURIComponent(JSON.stringify(params)); let script = document.createElement('script'); let timeout = setTimeout(() => { cleanup(); reject(new Error("Timeout")); }, 30000); function cleanup() { clearTimeout(timeout); if (script.parentNode) script.parentNode.removeChild(script); delete window[cb]; } window[cb] = (data) => { cleanup(); resolve(data); }; script.onerror = () => { cleanup(); reject(new Error("JSONP error")); }; script.src = url; document.body.appendChild(script); }); }
+    function showToast(msg, type) { let t = document.createElement('div'); t.className = `custom-toast toast-${type}`; t.innerHTML = `<span>${type==='success'?'✓':type==='error'?'✗':'ℹ'}</span> ${msg}`; t.style.position='fixed'; t.style.top='50%'; t.style.left='50%'; t.style.transform='translate(-50%,-50%)'; t.style.background='#1e3c72'; t.style.color='white'; t.style.padding='12px 24px'; t.style.borderRadius='50px'; t.style.zIndex='9999'; t.style.fontWeight='bold'; document.body.appendChild(t); setTimeout(()=>t.remove(),2800); }
+    function escapeHtml(str){ if(!str) return ''; return String(str).replace(/[&<>]/g, function(m){if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;});}
+    function getHelloPagesLabel(ed){ if(ed && ed.toLowerCase().indexOf('samachar')!==-1) return 'Apna Pages'; if(ed && ed.toLowerCase().indexOf('times')!==-1) return 'FIRST Pages'; return 'Hello Pages';}
+    
+    // SELF EVALUATION, HOD + VH stubs simplified (core light fix)
+    function openSelfEvaluationFromSelfTab() { let code = document.getElementById('self_emp_code').value; if(!code){ showToast('Enter employee code','error'); return; } showToast('Loading...','info'); callServer("checkEmployeeExists",{empCode:code}).then(res=>{ if(res.exists) openSelfEvaluationModal(code,code,true,res.completion==='Yes'); else showToast('Code not found','warning'); }).catch(e=>showToast('Error','error')); }
+    function openSelfEvaluationModal(empCode,empName,editable,submitted){ /* light theming already */ currentSelfEvalEmpCode=empCode; $('#selfEvalModal').modal('show'); callServer("getSelfEvaluation",{empCode}).then(data=>{ let evalData=data.evaluations?.[0]||null; renderSelfModal(evalData,empCode); }).catch(()=>renderSelfModal(null,empCode)); }
+    function renderSelfModal(evalData,empCode){ let html = `<div class="employee-info-card"><div class="row"><div class="col-md-6"><label>Name: ${escapeHtml(empCode)}</label></div></div></div><div class="panel panel-default"><div class="panel-heading">KRA Ratings</div><div class="panel-body row">`; kraDefinitions.forEach(k=>{ let val = (evalData?.kraRatings?.[k.id])||2; html+=`<div class="col-md-6"><div class="kra-box"><label>${k.name}</label><select id="kra_${k.id}" class="form-control rating-select">${ratingOptions.map(o=>`<option ${o==val?'selected':''}>${o}</option>`).join('')}</select><div class="text-muted small">${k.kpi}</div></div></div>`; }); html+=`</div></div><div class="form-group"><label>Email</label><input type="email" class="form-control" id="self_email" value="${evalData?.email||''}"></div><div class="form-group"><label>Job Description</label><textarea class="form-control" id="job_desc">${evalData?.m_column_data?JSON.parse(evalData.m_column_data)?.job_description||'':''}</textarea></div>`; document.getElementById('selfEvalModalBody').innerHTML=html; currentSelfEvalEmpCode=empCode; window.currentSelfEvalIsEditable=true; }
+    function saveSelfEvaluationFromModal(isDraft){ let kra={}; kraDefinitions.forEach(k=>{ kra[k.id]=parseFloat(document.getElementById(`kra_${k.id}`).value)||0; }); let payload={emp_code:currentSelfEvalEmpCode, email:document.getElementById('self_email')?.value||'', m_column_data:JSON.stringify({job_description:document.getElementById('job_desc')?.value||''}), status:isDraft?"Draft":"Pending", ...kra}; callServer("saveSelfEvaluation",payload).then(res=>{ showToast(res.message,'success'); $('#selfEvalModal').modal('hide'); }).catch(e=>showToast('Error saving','error')); }
+    
+    // HOD authentication & light card rendering
+    function authenticateHOD(){ let email=document.getElementById('hod_email').value, code=document.getElementById('hod_secret_code').value; if(!email||!code){ showToast('Enter credentials','error'); return; } callServer("authenticateUser",{email,secretCode:code}).then(res=>{ if(res.success && (res.position==='ICD'||res.position==='Head')){ authenticatedUser=res; document.getElementById('hodProtectedContent').style.display='block'; document.getElementById('hodAuthSection').style.display='none'; loadEmployeesForICD(res.unit,res.editions||[]); } else showToast('Access denied','error'); }); }
+    function loadEmployeesForICD(unit){ let listDiv=document.getElementById('hodTeamList'); listDiv.innerHTML='<div class="loading"><i class="fa fa-spinner fa-spin"></i> Loading...</div>'; callServer("getEmployeesByUnit",{unit, excludeEmpCode:authenticatedUser.empCode}).then(res=>{ if(res.success && res.employees) displayHODCards(res.employees); else listDiv.innerHTML='<div class="alert alert-info">No employees</div>'; }); }
+    function displayHODCards(employees){ let html='<h4>Team Members</h4>'; employees.forEach(m=>{ let hodComplete = m.hodRatings?.page_layout>0; let statusClass = m.completion==='Yes'?'status-submitted':'status-pending'; let statusText = m.completion==='Yes'?'Submitted':'Draft'; let unitHeadApproved = m.status === "Assessed-UH"; let btnDisabled = unitHeadApproved ? 'disabled style="opacity:0.6;"' : ''; html+=`<div class="team-member-card"><div style="display:flex; justify-content:space-between;"><div><strong>${escapeHtml(m.name)}</strong><br><small>${escapeHtml(m.designation)} | ${escapeHtml(m.unit)} | ${escapeHtml(m.workplace)}</small></div><div><span class="remark-badge ${statusClass}">${statusText}</span><span class="remark-badge ${hodComplete?'status-complete':'status-pending'}">HOD: ${hodComplete?'✓':'⏳'}</span><span class="remark-badge ${unitHeadApproved?'status-complete':'status-pending'}">Unit Head: ${unitHeadApproved?'✓ Approved':'Pending'}</span></div></div><div class="mt-2"><button class="btn btn-sm btn-primary" onclick="openHODEvalForHODTab('${m.code}','${escapeHtml(m.name)}', false)" ${btnDisabled}>Evaluate</button></div></div>`; }); document.getElementById('hodTeamList').innerHTML=html; }
+    function openHODEvalForHODTab(empCode,empName,readOnly){ callServer("getHODEvaluation",{empCode}).then(res=>{ let existing=res.evaluations?.[0]?.kraRatings||{}; let comments=res.evaluations?.[0]?.comments||''; let html=`<div class="employee-info-card"><h4>${empName}</h4></div><div class="row">`; kraDefinitions.forEach(k=>{ let val=existing[k.id]||2; html+=`<div class="col-md-6"><div class="kra-box"><label>${k.name}</label><select id="hod_kra_${k.id}" class="form-control rating-select">${ratingOptions.map(o=>`<option ${o==val?'selected':''}>${o}</option>`).join('')}</select></div></div>`; }); html+=`</div><div class="form-group"><label>Comments</label><textarea id="hod_comments" class="form-control">${escapeHtml(comments)}</textarea></div>`; document.getElementById('hodEvalModalBody').innerHTML=html; currentHODEvalEmpCode=empCode; $('#hodEvalModal').modal('show'); }); }
+    function saveHODEvaluationFromModal(){ let kra={}; kraDefinitions.forEach(k=>{ kra[k.id]=parseFloat(document.getElementById(`hod_kra_${k.id}`).value)||0; }); let comments=document.getElementById('hod_comments')?.value||''; callServer("saveHODEvaluation",{emp_code:currentHODEvalEmpCode, comments, ...kra}).then(res=>{ showToast(res.message,'success'); $('#hodEvalModal').modal('hide'); if(authenticatedUser?.unit) loadEmployeesForICD(authenticatedUser.unit); }); }
+    
+    // Unit Head & Vertical Head light rendering (cleaned)
+    function authenticateUnitHead(){ let email=document.getElementById('unithead_email').value, code=document.getElementById('unithead_secret_code').value; callServer("authenticateUser",{email,secretCode:code}).then(res=>{ if(res.success && res.position==='Unit Head'){ authenticatedUnitHead=res; document.getElementById('unitHeadProtectedContent').style.display='block'; document.getElementById('unitHeadAuthSection').style.display='none'; loadEmployeesForUnitHead(res.unit); } else showToast('Invalid credentials','error'); }); }
+    function loadEmployeesForUnitHead(unit){ callServer("getEmployeesByUnitPrefix",{unitPrefix:unit, unitHeadName:authenticatedUnitHead.name}).then(res=>{ if(res.success) displayUnitHeadCards(res.employees||[]); else document.getElementById('unitHeadTeamList').innerHTML='<div class="alert alert-info">No employees</div>'; }); }
+    function displayUnitHeadCards(emps){ let html='<h4>Team Members</h4>'; emps.forEach(m=>{ let isApproved = m.status==='Assessed-UH'; html+=`<div class="team-member-card"><div><strong>${escapeHtml(m.name)}</strong> (${escapeHtml(m.designation)})<br>${escapeHtml(m.workplace)}</div><div><span class="remark-badge ${m.completion==='Yes'?'status-submitted':'status-pending'}">${m.completion==='Yes'?'Self Done':'Draft'}</span><span class="remark-badge ${isApproved?'status-complete':'status-pending'}">Unit Head: ${isApproved?'Approved':'Pending'}</span></div><div><button class="btn btn-sm btn-primary" onclick="openUnitHeadEval('${m.code}','${escapeHtml(m.name)}')">Evaluate/Approve</button></div></div>`; }); document.getElementById('unitHeadTeamList').innerHTML=html; }
+    function openUnitHeadEval(empCode, empName){ window.currentUserRole='Unit Head'; callServer("getHODEvaluation",{empCode}).then(res=>{ let existing=res.evaluations?.[0]?.kraRatings||{}; let comments=res.evaluations?.[0]?.comments||''; let html=`<div class="employee-info-card"><h4>${empName}</h4></div><div class="row">`; kraDefinitions.forEach(k=>{ let val=existing[k.id]||2; html+=`<div class="col-md-6"><div class="kra-box"><label>${k.name}</label><select id="uh_kra_${k.id}" class="form-control rating-select">${ratingOptions.map(o=>`<option ${o==val?'selected':''}>${o}</option>`).join('')}</select></div></div>`; }); html+=`</div><div class="form-group"><label>Comments (HOD)</label><textarea id="uh_comments" class="form-control">${escapeHtml(comments)}</textarea></div><button class="btn btn-success" onclick="saveUnitHeadEvaluationAndApprove('${empCode}')">Approve & Submit</button>`; document.getElementById('hodEvalModalBody').innerHTML=html; $('#hodEvalModal').modal('show'); }); }
+    function saveUnitHeadEvaluationAndApprove(empCode){ let kra={}; kraDefinitions.forEach(k=>{ kra[k.id]=parseFloat(document.getElementById(`uh_kra_${k.id}`).value)||0; }); let comments=document.getElementById('uh_comments')?.value||''; callServer("saveUnitHeadEvaluation",{emp_code:empCode, comments, ...kra}).then(res=>{ if(res.success){ callServer("saveUnitHeadApproval",{emp_code:empCode}).then(res2=>{ showToast('Approved successfully','success'); $('#hodEvalModal').modal('hide'); if(authenticatedUnitHead?.unit) loadEmployeesForUnitHead(authenticatedUnitHead.unit); }); } else showToast(res.message,'error'); }); }
+    
+    function authenticateVerticalHead(){ let email=document.getElementById('vh_email').value, code=document.getElementById('vh_secret_code').value; callServer("authenticateUser",{email,secretCode:code}).then(res=>{ if(res.success && res.position==='Vertical Head'){ authenticatedUser=res; document.getElementById('vhProtectedContent').style.display='block'; document.getElementById('vhAuthSection').style.display='none'; generateCentreButtons(); } else showToast('Access Denied','error'); }); }
+    function generateCentreButtons(){ const centres=['Akola','Pune','Mumbai','Nagpur','Nashik']; let cont=document.getElementById('centreButtonsContainer'); cont.innerHTML=centres.map(c=>`<button class="btn btn-default filter-btn" onclick="selectCentre('${c}')">${c}</button>`).join(''); }
+    function selectCentre(centre){ currentSelectedCentre=centre; loadEmployeesByCentre(centre,''); }
+    function loadEmployeesByCentre(centre,workplace){ callServer("getEmployeesByCentre",{centre}).then(res=>{ if(res.success && res.employees) displayVHEmployees(res.employees.filter(e=>e.status==='Complete'||e.status==='Assessed')); else document.getElementById('employeeList').innerHTML='<div class="alert alert-info">No evaluated employees</div>'; }); }
+    function displayVHEmployees(emps){ let html='<div class="panel panel-default"><div class="panel-heading">Vertical Head Review</div><div class="panel-body">'; emps.forEach(emp=>{ let hodTotal = (emp.hodRatings?.page_layout||0)+(emp.hodRatings?.deadline_adherence||0)+(emp.hodRatings?.quality_accuracy||0)+(emp.hodRatings?.advertising_integration||0)+(emp.hodRatings?.platform_adaptation||0)+(emp.hodRatings?.collaboration||0); let score=Math.round((hodTotal/30)*10*10)/10; html+=`<div class="employee-card"><div style="display:flex; justify-content:space-between;"><div><strong>${escapeHtml(emp.name)}</strong><br><small>${escapeHtml(emp.designation)} | ${escapeHtml(emp.workplace)}</small><br><span>⭐ HOD Score: ${score}/10</span></div><div><button class="btn btn-sm btn-info" onclick="openSelfEvaluationModal('${emp.code}','${escapeHtml(emp.name)}',true,false)">Self</button></div></div><div class="mt-2"><label>VH Rating (1-10):</label><select id="vh_rate_${emp.code}" class="form-control rating-select" style="width:100px;">${[...Array(10)].map((_,i)=>`<option value="${i+1}">${i+1}</option>`).join('')}</select><textarea id="vh_remark_${emp.code}" class="form-control mt-2" placeholder="Remark"></textarea><button class="btn btn-success mt-2" onclick="saveVHEvaluation('${emp.code}')">Save VH Evaluation</button></div></div>`; }); html+=`</div></div>`; document.getElementById('employeeList').innerHTML=html; }
+    function saveVHEvaluation(empCode){ let rating = document.getElementById(`vh_rate_${empCode}`).value; let remark=document.getElementById(`vh_remark_${empCode}`).value; if(!rating){ showToast('Select rating','error'); return; } callServer("saveVHEvaluation",{emp_code:empCode, vh_evaluation:{performance_rating:parseInt(rating), remark}}).then(res=>{ showToast(res.message,'success'); if(currentSelectedCentre) loadEmployeesByCentre(currentSelectedCentre,''); }); }
+    
+    function loadEmployeeFromMaster(){ let code=document.getElementById('emp_code_input').value; if(!code) return; callServer("getEmployeeFromMaster",{empCode:code}).then(res=>{ if(res.success){ let e=res.employee; document.getElementById('emp_code_display').value=e.code; document.getElementById('full_name_display').value=e.name; document.getElementById('designation_display').value=e.designation; document.getElementById('unit_display').value=e.unit; document.getElementById('workplace_display').value=e.workplace; document.getElementById('reporting_auth_display').value=e.reporting_authority; document.getElementById('employeeInfoSection').style.display='block'; document.getElementById('registrationActions').style.display='block'; } else showToast('Not found','error'); }); }
+    function registerEmployee(){ let empCode=document.getElementById('emp_code_display').value; callServer("registerEmployeeFromMaster",{emp_code:empCode}).then(res=>{ showToast(res.message,'success'); setTimeout(()=>{ window.location.reload(); },1500); }); }
+    
+    window.openSelfEvaluationFromSelfTab=openSelfEvaluationFromSelfTab; window.saveSelfEvaluationFromModal=saveSelfEvaluationFromModal; window.authenticateHOD=authenticateHOD; window.authenticateUnitHead=authenticateUnitHead; window.authenticateVerticalHead=authenticateVerticalHead; window.loadEmployeeFromMaster=loadEmployeeFromMaster; window.registerEmployee=registerEmployee; window.saveHODEvaluationFromModal=saveHODEvaluationFromModal; window.openHODEvalForHODTab=openHODEvalForHODTab; window.selectCentre=selectCentre; window.saveVHEvaluation=saveVHEvaluation; window.openUnitHeadEval=openUnitHeadEval; window.saveUnitHeadEvaluationAndApprove=saveUnitHeadEvaluationAndApprove;
+  </script>
+</body>
+</html>
