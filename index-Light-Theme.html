@@ -101,7 +101,7 @@
     .form-control {
         background-color: #ffffff;
         border: 1px solid #cbd5e1;
-        color: #1e293b;
+        color: #ffffff;
         border-radius: 10px;
         padding: 10px 12px;
         transition: all 0.2s;
@@ -152,7 +152,7 @@
     
     select.form-control option {
         background-color: #ffffff;
-        color: #1e293b;
+        color: #ffffff;
     }
     
     /* ==================== BUTTONS ==================== */
@@ -269,7 +269,7 @@
     }
     
     .info-value {
-        color: #1e293b;
+        color: #ffffff;
     }
     
     /* KRA Box */
@@ -297,7 +297,7 @@
         margin-top: 10px;
         background-color: #ffffff;
         border-color: #cbd5e1;
-        color: #1e293b;
+        color: #ffffff;
         font-weight: 500;
     }
     
@@ -1139,7 +1139,7 @@ function displayHODEmployeeCards(employees, workplaceFilter) {
     if (isSelfCard) {
       cardStyle = 'style="background: #ffffff; border-left: 4px solid #b45309;"';
     } else if (isUnitHeadApproved) {
-      cardStyle = 'style="background: #1e3a5f; border-left: 4px solid #15803d;"';
+      cardStyle = 'style="background: #ffffff; border-left: 4px solid #15803d;"';
     } else {
       cardStyle = '';
     }
@@ -1601,7 +1601,7 @@ function displayUnitHeadEmployeeCards(employees, workplaceFilter) {
       badgeHtml = '<span class="label label-info" style="margin-left: 10px; background-color: #b45309;"><i class="fa fa-users"></i> ICD</span>';
     }
     
-    html += '<div class="team-member-card" ' + (member.status === 'Assessed-UH' ? 'style="background: #1e3a5f; border-left: 4px solid #15803d;"' : '') + '>' +
+    html += '<div class="team-member-card" ' + (member.status === 'Assessed-UH' ? 'style="background: #ffffff; border-left: 4px solid #15803d;"' : '') + '>' +
             '<div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; margin-bottom: 10px;">' +
             '<div style="flex: 1;">' +
             '<strong style="font-size: 16px;"><i class="fa fa-user"></i> ' + escapeHtml(member.name) + '</strong>' + badgeHtml +
