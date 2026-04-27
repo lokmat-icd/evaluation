@@ -43,7 +43,7 @@
 }
 
 .workload-line {
-  background: #f0fdf4;
+  background: #ffffff;
   padding: 4px 10px;
   border-radius: 15px;
   font-size: 11px;
@@ -108,7 +108,7 @@ body {
 }
 
 .kra-box {
-  background: #f8f9fa;
+  background: #ffffff;
   padding: 15px;
   margin-bottom: 15px;
   border-radius: 8px;
@@ -372,12 +372,12 @@ body {
 /* All sub-cards: clean backgrounds, no left border brackets */
 
 /* Workload container / Daily Workload section */
-.employee-card > div > div[style*="background: #f8f9fa"],
-.employee-card > div > div[style*="background:#f8f9fa"],
-.team-member-card > div > div[style*="background: #f8f9fa"],
-.team-member-card > div > div[style*="background:#f8f9fa"],
-.employee-card div[style*="background: #f8f9fa"],
-.team-member-card div[style*="background: #f8f9fa"] {
+.employee-card > div > div[style*="background: #ffffff"],
+.employee-card > div > div[style*="background:#ffffff"],
+.team-member-card > div > div[style*="background: #ffffff"],
+.team-member-card > div > div[style*="background:#ffffff"],
+.employee-card div[style*="background: #ffffff"],
+.team-member-card div[style*="background: #ffffff"] {
   background: #f8fafc !important;
   border-radius: 12px !important;
   border: none !important;
@@ -1010,7 +1010,7 @@ function formatTeamWorkloadDisplay(teamWorkload) {
 
 function generateDailyWorkloadHTML(dailyWorkload) {
   if (!dailyWorkload || Object.keys(dailyWorkload).length === 0) {
-    return '<div style="background: #f8f9fa; padding: 10px; margin: 10px 0; border-radius: 6px;"><strong><i class="fa fa-calendar"></i> 📋 Daily Workload:</strong><div>No data</div></div>';
+    return '<div style="background: #ffffff; padding: 10px; margin: 10px 0; border-radius: 6px;"><strong><i class="fa fa-calendar"></i> 📋 Daily Workload:</strong><div>No data</div></div>';
   }
   var items = [];
   if (dailyWorkload.main_full_page_design) items.push(dailyWorkload.main_full_page_design + ' Full Page Design (Main)');
@@ -1029,11 +1029,11 @@ function generateDailyWorkloadHTML(dailyWorkload) {
   if (dailyWorkload.pdf_quality_check) items.push(dailyWorkload.pdf_quality_check + ' PDF Quality Check');
   if (dailyWorkload.epaper_page_upload) items.push(dailyWorkload.epaper_page_upload + ' Epaper Page Upload');
   if (dailyWorkload.news_article_typing) items.push(dailyWorkload.news_article_typing + ' Words-News/Article Typing');
-  if (items.length === 0) return '<div style="background: #f8f9fa; padding: 10px; margin: 10px 0; border-radius: 6px;"><strong><i class="fa fa-calendar"></i> 📋 Daily Workload:</strong><div>No data</div></div>';
+  if (items.length === 0) return '<div style="background: #ffffff; padding: 10px; margin: 10px 0; border-radius: 6px;"><strong><i class="fa fa-calendar"></i> 📋 Daily Workload:</strong><div>No data</div></div>';
   var itemsHtml = '<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 5px 15px; margin-top: 5px;">';
   for (var i = 0; i < items.length; i++) itemsHtml += '<div><i class="fa fa-check-circle-o" style="color: #1e3c72; font-size: 12px;"></i> ' + items[i] + '</div>';
   itemsHtml += '</div>';
-  return '<div style="background: #f8f9fa; padding: 10px; margin: 10px 0; border-radius: 6px;"><strong><i class="fa fa-calendar"></i> 📋 Daily Workload:</strong>' + itemsHtml + '</div>';
+  return '<div style="background: #ffffff; padding: 10px; margin: 10px 0; border-radius: 6px;"><strong><i class="fa fa-calendar"></i> 📋 Daily Workload:</strong>' + itemsHtml + '</div>';
 }
 
 function calculatePaginationScore(dailyWorkload) {
