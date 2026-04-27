@@ -634,7 +634,7 @@
   
   <script>
 // ==================== CONFIGURATION ====================
-const API_URL = "https://script.google.com/macros/s/AKfycbwcGAiy5gkH4Vnnl9XRZcseZCi1ToAPHKEpaFuf432fpYHCI2abvBygcoBZp7YUWSt0/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbwasjwuFLmsxnW502n_f5p-XQ71ItZvog1iZGPeezs5HyfFxJLNT4tzMxgkl7tTSq62/exec";
 
 // ==================== GLOBAL VARIABLES ====================
 var currentEvalEmp = null;
@@ -2148,23 +2148,29 @@ function exportICDKRAExcel(empCode, empName) {
   showToast('Generating Excel file...', 'info');
   
   callServer("exportICDKRAUsingTemplate", { empCode: empCode }).then(function(result) {
-    if (result.success && result.fileData) {
-      // Decode base64 and download
-      var binary = atob(result.fileData);
-      var array = new Uint8Array(binary.length);
-      for (var i = 0; i < binary.length; i++) {
-        array[i] = binary.charCodeAt(i);
+    if (result.success) {
+      if (result.sheetUrl) {
+        // Open the sheet in a new tab
+        window.open(result.sheetUrl, '_blank');
+        showToast('Sheet opened in new tab. Use File → Download → Microsoft Excel (.xlsx)', 'success');
+      } else if (result.fileData) {
+        // Direct download (if it works)
+        var binary = atob(result.fileData);
+        var array = new Uint8Array(binary.length);
+        for (var i = 0; i < binary.length; i++) {
+          array[i] = binary.charCodeAt(i);
+        }
+        var blob = new Blob([array], {type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+        var link = document.createElement('a');
+        var url = URL.createObjectURL(blob);
+        link.href = url;
+        link.download = result.fileName + ".xlsx";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        showToast('Excel file downloaded successfully!', 'success');
       }
-      var blob = new Blob([array], {type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
-      var link = document.createElement('a');
-      var url = URL.createObjectURL(blob);
-      link.href = url;
-      link.download = result.fileName;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-      showToast('Excel file downloaded successfully!', 'success');
     } else {
       showToast('Error: ' + (result.message || 'Failed to generate Excel'), 'error');
     }
