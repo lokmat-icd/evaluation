@@ -817,7 +817,7 @@ function formatTeamWorkloadDisplay(teamWorkload) {
 
 function generateDailyWorkloadHTML(dailyWorkload) {
   if (!dailyWorkload || Object.keys(dailyWorkload).length === 0) {
-    return '<div style="background: #ffffff; padding: 10px; margin: 10px 0; border-radius: 8px;"><strong><i class="fa fa-calendar"></i> 📋 Daily Workload:</strong><div>No data</div></div>';
+    return '<div style="background: #d1e2f3; padding: 10px; margin: 10px 0; border-radius: 8px;"><strong><i class="fa fa-calendar"></i> 📋 Daily Workload:</strong><div>No data</div></div>';
   }
   var items = [];
   if (dailyWorkload.main_full_page_design) items.push(dailyWorkload.main_full_page_design + ' Full Page Design (Main)');
