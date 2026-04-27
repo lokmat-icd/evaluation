@@ -10,8 +10,7 @@
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   
-  <style>
-
+<style>
 .modal-footer {
   display: flex;
   justify-content: center !important;
@@ -25,273 +24,556 @@
   padding: 15px;
 }
 
-    .workload-chip {
-      background: #eef2ff;
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-size: 11px;
-      display: inline-block;
-      margin: 2px;
-    }
-    .employee-card {
-      transition: all 0.3s ease;
-    }
-    .employee-card:hover {
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      transform: translateY(-2px);
-    }
-    .workload-line {
-      background: #ffffff;
-      padding: 4px 10px;
-      border-radius: 15px;
-      font-size: 11px;
-      display: inline-block;
-    }
-    body {
-      background: #f4f6f9;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-    .header {
-      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-      color: white;
-      padding: 20px;
-      margin-bottom: 30px;
-      border-radius: 0 0 10px 10px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-    .tab-content {
-      background: white;
-      padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      margin-top: 20px;
-      min-height: 500px;
-    }
-    .nav-pills > li > a {
-      color: #1e3c72;
-      font-weight: 600;
-      transition: all 0.3s;
-    }
-    .nav-pills > li.active > a {
-      background-color: #1e3c72;
-      color: white;
-    }
-    .nav-pills > li > a:hover {
-      background-color: #e0e4e8;
-    }
-    .form-group {
-      margin-bottom: 20px;
-    }
-    .btn-primary {
-      background-color: #1e3c72;
-      border-color: #1e3c72;
-    }
-    .btn-primary:hover {
-      background-color: #2a5298;
-      border-color: #2a5298;
-    }
-    .alert {
-      margin-top: 20px;
-      display: none;
-    }
-    .kra-box {
-      background: #ffffff;
-      padding: 15px;
-      margin-bottom: 15px;
-      border-radius: 8px;
-      border-left: 4px solid #1e3c72;
-    }
-    .team-member-card {
-      background: #ffffff;
-      padding: 15px;
-      margin-bottom: 10px;
-      border-radius: 8px;
-      transition: all 0.3s;
-      border-left: 4px solid #1e3c72;
-    }
-    .team-member-card:hover {
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      transform: translateX(5px);
-    }
-    .employee-card {
-      background: white;
-      border: 1px solid #e0e0e0;
-      padding: 15px;
-      margin-bottom: 10px;
-      border-radius: 8px;
-      transition: all 0.3s;
-    }
-    .employee-card:hover {
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-    .remark-badge {
-      padding: 5px 10px;
-      border-radius: 4px;
-      font-size: 12px;
-      font-weight: bold;
-      display: inline-block;
-      margin: 2px;
-    }
-    .status-complete {
-      background-color: #d4edda;
-      color: #155724;
-    }
-    .status-pending {
-      background-color: #fff3cd;
-      color: #856404;
-    }
-    .status-submitted {
-      background-color: #cce5ff;
-      color: #004085;
-    }
-    .modal-content {
-      border-radius: 10px;
-    }
-    .rating-select {
-      width: 80px;
-      display: inline-block;
-      margin-top: 10px;
-    }
-    .filter-buttons-group {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-    .filter-btn {
-      margin-bottom: 5px;
-      transition: all 0.3s;
-    }
-    .filter-btn:hover {
-      transform: translateY(-2px);
-    }
-    .filter-btn.active-filter {
-      background-color: #1e3c72;
-      color: white;
-      border-color: #1e3c72;
-    }
-    .loading {
-      text-align: center;
-      padding: 20px;
-    }
-    @media (max-width: 768px) {
-      .tab-content {
-        padding: 15px;
-      }
-      .team-member-card > div {
-        flex-direction: column;
-        text-align: center;
-      }
-      .team-member-card button {
-        margin-top: 10px;
-      }
-    }
-    .workload-line {
-      background: #e8f4fd;
-      padding: 6px 12px;
-      border-radius: 6px;
-      font-size: 12px;
-      margin: 8px 0;
-      display: inline-block;
-    }
-    .subcentre-workload-box {
-      background: #fff3e0;
-      padding: 15px;
-      margin-bottom: 20px;
-      border-radius: 8px;
-      border-left: 4px solid #ff9800;
-    }
-    .subcentre-title {
-      font-size: 16px;
-      font-weight: bold;
-      color: #e68a00;
-      margin-bottom: 15px;
-    }
-    .readonly-field {
-      background-color: #e9ecef;
-      cursor: not-allowed;
-    }
-    .page-input {
-      width: 80px !important;
-      display: inline-block !important;
-      text-align: center;
-    }
-    .edition-label {
-      font-weight: 600;
-      margin-right: 10px;
-      min-width: 180px;
-      display: inline-block;
-    }
-    .custom-toast {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      min-width: 320px;
-      max-width: 450px;
-      padding: 18px 24px;
-      border-radius: 12px;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.25);
-      z-index: 10000;
-      font-size: 15px;
-      font-weight: 500;
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      text-align: center;
-      justify-content: center;
-    }
-    .toast-success { background: #28a745; color: white; }
-    .toast-error { background: #dc3545; color: white; }
-    .toast-info { background: #17a2b8; color: white; }
-    .toast-warning { background: #ffc107; color: #333; }
-    .emp-code-input {
-      font-size: 18px;
-      font-weight: bold;
-      text-align: center;
-    }
-    .time-input {
-      width: 70px !important;
-      display: inline-block !important;
-      text-align: center;
-    }
-    .ampm-select {
-      width: 80px !important;
-      display: inline-block !important;
-      margin-left: 5px;
-    }
-    .employee-info-card {
-      background: #e8f4fd;
-      padding: 15px;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      border-left: 4px solid #1e3c72;
-    }
-    .info-row-flex {
-      display: flex;
-      flex-wrap: wrap;
-      margin-bottom: 12px;
-      gap: 15px;
-    }
-    .info-field {
-      flex: 1;
-      min-width: 200px;
-    }
-    .info-label {
-      font-weight: 600;
-      color: #1e3c72;
-      margin-right: 8px;
-    }
-    .info-value {
-      color: #333;
-    }
-    .duty-time-group {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      flex-wrap: wrap;
-    }
-  </style>
+.workload-chip {
+  background: #eef2ff;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  display: inline-block;
+  margin: 2px;
+}
+
+.employee-card {
+  transition: all 0.3s ease;
+}
+
+.employee-card:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  transform: translateY(-2px);
+}
+
+.workload-line {
+  background: #f0fdf4;
+  padding: 4px 10px;
+  border-radius: 15px;
+  font-size: 11px;
+  display: inline-block;
+}
+
+body {
+  background: #f4f6f9;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.header {
+  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+  color: white;
+  padding: 20px;
+  margin-bottom: 30px;
+  border-radius: 0 0 10px 10px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.tab-content {
+  background: white;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  margin-top: 20px;
+  min-height: 500px;
+}
+
+.nav-pills > li > a {
+  color: #1e3c72;
+  font-weight: 600;
+  transition: all 0.3s;
+}
+
+.nav-pills > li.active > a {
+  background-color: #1e3c72;
+  color: white;
+}
+
+.nav-pills > li > a:hover {
+  background-color: #e0e4e8;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.btn-primary {
+  background-color: #1e3c72;
+  border-color: #1e3c72;
+}
+
+.btn-primary:hover {
+  background-color: #2a5298;
+  border-color: #2a5298;
+}
+
+.alert {
+  margin-top: 20px;
+  display: none;
+}
+
+.kra-box {
+  background: #f8f9fa;
+  padding: 15px;
+  margin-bottom: 15px;
+  border-radius: 8px;
+  border-left: 4px solid #1e3c72;
+}
+
+.team-member-card {
+  background: #ffffff;
+  padding: 15px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  transition: all 0.3s;
+  border-left: 4px solid #1e3c72;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.team-member-card:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transform: translateX(5px);
+}
+
+.employee-card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  padding: 15px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  transition: all 0.3s;
+}
+
+.employee-card:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.remark-badge {
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: bold;
+  display: inline-block;
+  margin: 2px;
+}
+
+.status-complete {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.status-pending {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.status-submitted {
+  background-color: #cce5ff;
+  color: #004085;
+}
+
+.modal-content {
+  border-radius: 10px;
+}
+
+.rating-select {
+  width: 80px;
+  display: inline-block;
+  margin-top: 10px;
+}
+
+.filter-buttons-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.filter-btn {
+  margin-bottom: 5px;
+  transition: all 0.3s;
+}
+
+.filter-btn:hover {
+  transform: translateY(-2px);
+}
+
+.filter-btn.active-filter {
+  background-color: #1e3c72;
+  color: white;
+  border-color: #1e3c72;
+}
+
+.loading {
+  text-align: center;
+  padding: 20px;
+}
+
+@media (max-width: 768px) {
+  .tab-content {
+    padding: 15px;
+  }
+  .team-member-card > div {
+    flex-direction: column;
+    text-align: center;
+  }
+  .team-member-card button {
+    margin-top: 10px;
+  }
+}
+
+.subcentre-workload-box {
+  background: #fffbeb;
+  padding: 15px;
+  margin-bottom: 20px;
+  border-radius: 8px;
+  border-left: 4px solid #f59e0b;
+}
+
+.subcentre-title {
+  font-size: 16px;
+  font-weight: bold;
+  color: #b45309;
+  margin-bottom: 15px;
+}
+
+.readonly-field {
+  background-color: #e9ecef;
+  cursor: not-allowed;
+}
+
+.page-input {
+  width: 80px !important;
+  display: inline-block !important;
+  text-align: center;
+}
+
+.edition-label {
+  font-weight: 600;
+  margin-right: 10px;
+  min-width: 180px;
+  display: inline-block;
+}
+
+.custom-toast {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  min-width: 320px;
+  max-width: 450px;
+  padding: 18px 24px;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+  z-index: 10000;
+  font-size: 15px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  text-align: center;
+  justify-content: center;
+}
+
+.toast-success { background: #28a745; color: white; }
+.toast-error { background: #dc3545; color: white; }
+.toast-info { background: #17a2b8; color: white; }
+.toast-warning { background: #ffc107; color: #333; }
+
+.emp-code-input {
+  font-size: 18px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.time-input {
+  width: 70px !important;
+  display: inline-block !important;
+  text-align: center;
+}
+
+.ampm-select {
+  width: 80px !important;
+  display: inline-block !important;
+  margin-left: 5px;
+}
+
+.employee-info-card {
+  background: #eff6ff;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border-left: 4px solid #1e3c72;
+}
+
+.info-row-flex {
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+  gap: 15px;
+}
+
+.info-field {
+  flex: 1;
+  min-width: 200px;
+}
+
+.info-label {
+  font-weight: 600;
+  color: #1e3c72;
+  margin-right: 8px;
+}
+
+.info-value {
+  color: #333;
+}
+
+.duty-time-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+/* ==================== MAIN CARDS STYLES - BOOTSTRAP OVERRIDE ==================== */
+
+/* Main container for employee lists */
+#hodTeamList, #unitHeadTeamList, #employeeList {
+  background: transparent;
+}
+
+/* Team Member Card - clean white with subtle border */
+.team-member-card {
+  background: #ffffff !important;
+  border: 1px solid #e9ecef !important;
+  border-left: 4px solid #1e3c72 !important;
+  border-radius: 12px !important;
+  margin-bottom: 16px !important;
+  padding: 20px !important;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.03) !important;
+}
+
+.team-member-card:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
+  transform: translateY(-1px);
+}
+
+/* Employee Card (Vertical Head view) */
+.employee-card {
+  background: #ffffff !important;
+  border: 1px solid #e9ecef !important;
+  border-radius: 16px !important;
+  margin-bottom: 24px !important;
+  padding: 20px !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04) !important;
+}
+
+.employee-card:hover {
+  box-shadow: 0 6px 14px rgba(0,0,0,0.08) !important;
+  transform: translateY(-2px);
+}
+
+/* ===== SUB-CARDS INSIDE MAIN CARDS ===== */
+/* All sub-cards: clean backgrounds, no left border brackets */
+
+/* Workload container / Daily Workload section */
+.employee-card > div > div[style*="background: #f8f9fa"],
+.employee-card > div > div[style*="background:#f8f9fa"],
+.team-member-card > div > div[style*="background: #f8f9fa"],
+.team-member-card > div > div[style*="background:#f8f9fa"],
+.employee-card div[style*="background: #f8f9fa"],
+.team-member-card div[style*="background: #f8f9fa"] {
+  background: #f8fafc !important;
+  border-radius: 12px !important;
+  border: none !important;
+  padding: 12px 16px !important;
+  margin: 10px 0 !important;
+  box-shadow: none !important;
+}
+
+/* Job Description section */
+.employee-card div[style*="background: #f0f7ff"],
+.team-member-card div[style*="background: #f0f7ff"],
+.employee-card div[style*="background:#f0f7ff"],
+.team-member-card div[style*="background:#f0f7ff"],
+.employee-card div[style*="margin-top: 8px;"]:has(.fa-file-text) {
+  background: #f0f9ff !important;
+  border-radius: 12px !important;
+  border: none !important;
+  padding: 12px 16px !important;
+  margin: 10px 0 !important;
+  box-shadow: none !important;
+}
+
+/* Special Projects section */
+.employee-card div[style*="background: #fff8e1"],
+.team-member-card div[style*="background: #fff8e1"],
+.employee-card div[style*="background:#fff8e1"],
+.team-member-card div[style*="background:#fff8e1"],
+.employee-card div[style*="margin-top: 8px;"]:has(.fa-rocket) {
+  background: #fffbeb !important;
+  border-radius: 12px !important;
+  border: none !important;
+  padding: 12px 16px !important;
+  margin: 10px 0 !important;
+  box-shadow: none !important;
+}
+
+/* HOD Evaluation block */
+.employee-card div[style*="background: #f8fafc"]:has(.fa-star),
+.team-member-card div[style*="background: #f8fafc"]:has(.fa-star) {
+  background: #f1f5f9 !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 12px !important;
+  padding: 14px !important;
+  box-shadow: none !important;
+}
+
+/* Vertical Head Evaluation block */
+.employee-card div[style*="background: #f8fafc"]:has(.fa-flag),
+.team-member-card div[style*="background: #f8fafc"]:has(.fa-flag) {
+  background: #fefce8 !important;
+  border: 1px solid #fef08a !important;
+  border-radius: 12px !important;
+  padding: 14px !important;
+  box-shadow: none !important;
+}
+
+/* Workload line indicator */
+.workload-line {
+  background: #f0fdf4 !important;
+  color: #166534 !important;
+  padding: 6px 12px !important;
+  border-radius: 20px !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  margin: 8px 0 !important;
+  display: inline-block !important;
+  border: none !important;
+}
+
+/* Workload chips */
+.workload-chip {
+  background: #eef2ff !important;
+  color: #1e40af !important;
+  padding: 4px 12px !important;
+  border-radius: 24px !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  display: inline-block !important;
+  margin: 2px !important;
+}
+
+/* Status badges */
+.remark-badge {
+  padding: 4px 10px !important;
+  border-radius: 20px !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  display: inline-block !important;
+  margin: 2px 4px !important;
+}
+
+.status-complete {
+  background: #d1fae5 !important;
+  color: #065f46 !important;
+}
+
+.status-pending {
+  background: #fed7aa !important;
+  color: #9a3412 !important;
+}
+
+.status-submitted {
+  background: #bfdbfe !important;
+  color: #1e40af !important;
+}
+
+/* Buttons inside cards */
+.team-member-card .btn-sm, 
+.employee-card .btn-sm {
+  border-radius: 20px !important;
+  padding: 5px 14px !important;
+  font-weight: 500 !important;
+}
+
+.team-member-card .btn-primary,
+.employee-card .btn-primary {
+  background-color: #2563eb !important;
+  border-color: #2563eb !important;
+}
+
+.team-member-card .btn-primary:hover,
+.employee-card .btn-primary:hover {
+  background-color: #1d4ed8 !important;
+}
+
+.team-member-card .btn-success,
+.employee-card .btn-success {
+  background-color: #16a34a !important;
+  border-color: #16a34a !important;
+}
+
+.team-member-card .btn-info,
+.employee-card .btn-info {
+  background-color: #0891b2 !important;
+  border-color: #0891b2 !important;
+}
+
+/* Workload contribution circles */
+.employee-card [style*="border-radius: 50%"] {
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+/* Filter buttons */
+.filter-btn {
+  border-radius: 30px !important;
+  padding: 6px 16px !important;
+  font-weight: 500 !important;
+}
+
+.filter-btn.active-filter {
+  background-color: #1e3c72 !important;
+  color: white !important;
+  border-color: #1e3c72 !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+}
+
+/* Horizontal rule styling */
+.employee-card hr,
+.team-member-card hr {
+  border-top-color: #e2e8f0 !important;
+  margin: 12px 0 !important;
+}
+
+/* Bootstrap panel overrides inside cards */
+.employee-card .panel,
+.team-member-card .panel {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.employee-card .panel-heading,
+.team-member-card .panel-heading {
+  background: transparent !important;
+  border: none !important;
+  padding-left: 0 !important;
+}
+
+.employee-card .panel-body,
+.team-member-card .panel-body {
+  padding: 0 !important;
+}
+
+/* Ensure text colors are not overridden by Bootstrap */
+.team-member-card, .employee-card,
+.team-member-card *, .employee-card * {
+  color: #2c3e50;
+}
+
+/* Score and level display */
+#modalSelfLiveScoreDisplay, #modalSelfLiveLevelDisplay,
+#modalHodLiveScoreDisplay, #modalHodLiveLevelDisplay {
+  display: inline-block !important;
+  vertical-align: middle !important;
+}
+</style>  
 </head>
 
 <body>
