@@ -634,7 +634,7 @@
   
   <script>
 // ==================== CONFIGURATION ====================
-const API_URL = "https://script.google.com/macros/s/AKfycbyqnYr6f5xUojlDJVqjbIl0Trl3vJ8PVtJJgwH2RWPnKp-puzZbB1Cf-yjiITU5Zaa3/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbwGp33PcIhdmBDmm0tZFL3ORcUz4n7JE5SPATgeQls9PDLsGFMzsJIWuXSRM9Zu7phV/exec";
 
 // ==================== GLOBAL VARIABLES ====================
 var currentEvalEmp = null;
@@ -2153,28 +2153,13 @@ function exportICDKRAExcel(empCode, empName) {
         // Open in a new tab
         var newWindow = window.open(result.sheetUrl, '_blank');
         if (!newWindow || newWindow.closed || typeof newWindow.closed == 'undefined') {
-          // Popup blocked, show message
-          showToast('Please allow popups or click the link: ' + result.sheetUrl, 'warning');
+          showToast('Please allow popups or click the link', 'warning');
+          if (result.folderUrl) {
+            showToast('File saved in shared folder: ' + result.folderUrl, 'info');
+          }
         } else {
-          showToast('Sheet opened! Use File → Download → Microsoft Excel (.xlsx)', 'success');
+          showToast('Excel file created! Find it in the shared folder.', 'success');
         }
-      } else if (result.fileData) {
-        // Direct download fallback
-        var binary = atob(result.fileData);
-        var array = new Uint8Array(binary.length);
-        for (var i = 0; i < binary.length; i++) {
-          array[i] = binary.charCodeAt(i);
-        }
-        var blob = new Blob([array], {type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
-        var link = document.createElement('a');
-        var url = URL.createObjectURL(blob);
-        link.href = url;
-        link.download = result.fileName + ".xlsx";
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-        showToast('Excel file downloaded successfully!', 'success');
       }
     } else {
       showToast('Error: ' + (result.message || 'Failed to generate Excel'), 'error');
