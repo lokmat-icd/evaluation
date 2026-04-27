@@ -634,7 +634,7 @@
   
   <script>
 // ==================== CONFIGURATION ====================
-const API_URL = "https://script.google.com/macros/s/AKfycbyj25aivhm0etgTZJLheL1EoYsiyLbdiGsUKGXT55M3MhSjqS_4CI4DN5BTOMkQ_DFf/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbyqnYr6f5xUojlDJVqjbIl0Trl3vJ8PVtJJgwH2RWPnKp-puzZbB1Cf-yjiITU5Zaa3/exec";
 
 // ==================== GLOBAL VARIABLES ====================
 var currentEvalEmp = null;
@@ -2150,13 +2150,16 @@ function exportICDKRAExcel(empCode, empName) {
   callServer("exportICDKRAUsingTemplate", { empCode: empCode }).then(function(result) {
     if (result.success) {
       if (result.sheetUrl) {
-        // Show a confirmation dialog before opening
-        if (confirm(result.message + '\n\nClick OK to open the sheet.')) {
-          window.open(result.sheetUrl, '_blank');
+        // Open in a new tab
+        var newWindow = window.open(result.sheetUrl, '_blank');
+        if (!newWindow || newWindow.closed || typeof newWindow.closed == 'undefined') {
+          // Popup blocked, show message
+          showToast('Please allow popups or click the link: ' + result.sheetUrl, 'warning');
+        } else {
+          showToast('Sheet opened! Use File → Download → Microsoft Excel (.xlsx)', 'success');
         }
-        showToast('Sheet generated! Use File → Download → Microsoft Excel (.xlsx) from the sheet menu.', 'success');
       } else if (result.fileData) {
-        // Direct download (fallback)
+        // Direct download fallback
         var binary = atob(result.fileData);
         var array = new Uint8Array(binary.length);
         for (var i = 0; i < binary.length; i++) {
