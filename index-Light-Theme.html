@@ -817,7 +817,7 @@ function formatTeamWorkloadDisplay(teamWorkload) {
 
 function generateDailyWorkloadHTML(dailyWorkload) {
   if (!dailyWorkload || Object.keys(dailyWorkload).length === 0) {
-    return '<div style="background: #1e293b; padding: 10px; margin: 10px 0; border-radius: 8px;"><strong><i class="fa fa-calendar"></i> 📋 Daily Workload:</strong><div>No data</div></div>';
+    return '<div style="background: #ffffff; padding: 10px; margin: 10px 0; border-radius: 8px;"><strong><i class="fa fa-calendar"></i> 📋 Daily Workload:</strong><div>No data</div></div>';
   }
   var items = [];
   if (dailyWorkload.main_full_page_design) items.push(dailyWorkload.main_full_page_design + ' Full Page Design (Main)');
@@ -836,11 +836,11 @@ function generateDailyWorkloadHTML(dailyWorkload) {
   if (dailyWorkload.pdf_quality_check) items.push(dailyWorkload.pdf_quality_check + ' PDF Quality Check');
   if (dailyWorkload.epaper_page_upload) items.push(dailyWorkload.epaper_page_upload + ' Epaper Page Upload');
   if (dailyWorkload.news_article_typing) items.push(dailyWorkload.news_article_typing + ' Words-News/Article Typing');
-  if (items.length === 0) return '<div style="background: #1e293b; padding: 10px; margin: 10px 0; border-radius: 8px;"><strong><i class="fa fa-calendar"></i> 📋 Daily Workload:</strong><div>No data</div></div>';
+  if (items.length === 0) return '<div style="background: #ffffff; padding: 10px; margin: 10px 0; border-radius: 8px;"><strong><i class="fa fa-calendar"></i> 📋 Daily Workload:</strong><div>No data</div></div>';
   var itemsHtml = '<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 5px 15px; margin-top: 5px;">';
   for (var i = 0; i < items.length; i++) itemsHtml += '<div><i class="fa fa-check-circle-o" style="color: #60a5fa; font-size: 12px;"></i> ' + items[i] + '</div>';
   itemsHtml += '</div>';
-  return '<div style="background: #1e293b; padding: 10px; margin: 10px 0; border-radius: 8px;"><strong><i class="fa fa-calendar"></i> 📋 Daily Workload:</strong>' + itemsHtml + '</div>';
+  return '<div style="background: #ffffff; padding: 10px; margin: 10px 0; border-radius: 8px;"><strong><i class="fa fa-calendar"></i> 📋 Daily Workload:</strong>' + itemsHtml + '</div>';
 }
 
 function calculatePaginationScore(dailyWorkload) {
@@ -1196,7 +1196,7 @@ function openHODEvaluationModal(empCode, empName, isEditable, existingRatings, e
   
   var disabledAttr = currentHODEvalIsEditable ? '' : 'disabled';
   
-  var selfRatingsHtml = selfRatings ? '<div style="background: #1e293b; padding: 12px; margin-bottom: 15px; border-radius: 8px;"><strong><i class="fa fa-info-circle"></i> Self Evaluation Ratings (Reference)</strong><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; font-size: 12px;"><div>📄 Page Layout: ' + (selfRatings.page_layout || 0) + '/5</div><div>⏱️ Deadline Adherence: ' + (selfRatings.deadline_adherence || 0) + '/5</div><div>✅ Quality & Accuracy: ' + (selfRatings.quality_accuracy || 0) + '/5</div><div>📢 Advertising: ' + (selfRatings.advertising_integration || 0) + '/5</div><div>💻 Platform Adaptation: ' + (selfRatings.platform_adaptation || 0) + '/5</div><div>🤝 Collaboration: ' + (selfRatings.collaboration || 0) + '/5</div></div></div>' : '';
+  var selfRatingsHtml = selfRatings ? '<div style="background: #ffffff; padding: 12px; margin-bottom: 15px; border-radius: 8px;"><strong><i class="fa fa-info-circle"></i> Self Evaluation Ratings (Reference)</strong><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; font-size: 12px;"><div>📄 Page Layout: ' + (selfRatings.page_layout || 0) + '/5</div><div>⏱️ Deadline Adherence: ' + (selfRatings.deadline_adherence || 0) + '/5</div><div>✅ Quality & Accuracy: ' + (selfRatings.quality_accuracy || 0) + '/5</div><div>📢 Advertising: ' + (selfRatings.advertising_integration || 0) + '/5</div><div>💻 Platform Adaptation: ' + (selfRatings.platform_adaptation || 0) + '/5</div><div>🤝 Collaboration: ' + (selfRatings.collaboration || 0) + '/5</div></div></div>' : '';
   
   var kraHtml = '';
   for (var i = 0; i < kraDefinitions.length; i++) {
@@ -1405,11 +1405,11 @@ function renderRegistrationModalContent(employee, editionsList) {
       if (edition === '') continue;
       var safeKey = edition.replace(/[^a-zA-Z0-9]/g, '_');
       var helloPagesLabel = getHelloPagesLabel(edition);
-      teamWorkloadHtml += '<div class="subcentre-workload-box" style="background: #1e293b; padding: 15px; margin-bottom: 15px; border-radius: 8px; border-left: 4px solid #b45309;"><div class="subcentre-title" style="font-size: 16px; font-weight: bold; color: #fbbf24; margin-bottom: 15px;"><i class="fa fa-newspaper-o"></i> Edition: ' + escapeHtml(edition) + '</div><div class="row"><div class="col-md-6"><div class="form-group"><label><i class="fa fa-file-text-o"></i> Main Pages (per day):</label><input type="number" class="form-control page-input workload-input" id="reg_main_pages_' + safeKey + '" min="0" max="99" value="0" placeholder="00"></div></div><div class="col-md-6"><div class="form-group"><label><i class="fa fa-file-image-o"></i> ' + helloPagesLabel + ' (per day):</label><input type="number" class="form-control page-input workload-input" id="reg_hello_pages_' + safeKey + '" min="0" max="99" value="0" placeholder="00"></div></div></div></div>';
+      teamWorkloadHtml += '<div class="subcentre-workload-box" style="background: #ffffff; padding: 15px; margin-bottom: 15px; border-radius: 8px; border-left: 4px solid #b45309;"><div class="subcentre-title" style="font-size: 16px; font-weight: bold; color: #fbbf24; margin-bottom: 15px;"><i class="fa fa-newspaper-o"></i> Edition: ' + escapeHtml(edition) + '</div><div class="row"><div class="col-md-6"><div class="form-group"><label><i class="fa fa-file-text-o"></i> Main Pages (per day):</label><input type="number" class="form-control page-input workload-input" id="reg_main_pages_' + safeKey + '" min="0" max="99" value="0" placeholder="00"></div></div><div class="col-md-6"><div class="form-group"><label><i class="fa fa-file-image-o"></i> ' + helloPagesLabel + ' (per day):</label><input type="number" class="form-control page-input workload-input" id="reg_hello_pages_' + safeKey + '" min="0" max="99" value="0" placeholder="00"></div></div></div></div>';
     }
     teamWorkloadHtml += '</div></div>';
   } else teamWorkloadHtml = '<div class="alert alert-info">No editions configured. Please contact administrator.</div>';
-  var modalHtml = '<div class="employee-info-card" style="background: #1e293b; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #2a5298;"><div class="row"><div class="col-md-6"><div class="form-group"><label>Employee Code</label><input type="text" class="form-control" value="' + escapeHtml(employee.code || '') + '" readonly></div></div><div class="col-md-6"><div class="form-group"><label>Full Name</label><input type="text" class="form-control" value="' + escapeHtml(employee.name || '') + '" readonly></div></div></div><div class="row"><div class="col-md-6"><div class="form-group"><label>Designation</label><input type="text" class="form-control" value="' + escapeHtml(employee.designation || '') + '" readonly></div></div><div class="col-md-6"><div class="form-group"><label>Unit (Centre)</label><input type="text" class="form-control" value="' + escapeHtml(employee.unit || '') + '" readonly></div></div></div><div class="row"><div class="col-md-6"><div class="form-group"><label>Work Place</label><input type="text" class="form-control" value="' + escapeHtml(employee.workplace || '') + '" readonly></div></div><div class="col-md-6"><div class="form-group"><label>Reporting Authority</label><input type="text" class="form-control" value="' + escapeHtml(employee.reporting_authority || '') + '" readonly></div></div></div></div><div class="alert alert-info"><i class="fa fa-info-circle"></i> As an ICD user, you need to configure team workload targets for each edition before proceeding to Self Evaluation.</div>' + teamWorkloadHtml;
+  var modalHtml = '<div class="employee-info-card" style="background: #ffffff; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #2a5298;"><div class="row"><div class="col-md-6"><div class="form-group"><label>Employee Code</label><input type="text" class="form-control" value="' + escapeHtml(employee.code || '') + '" readonly></div></div><div class="col-md-6"><div class="form-group"><label>Full Name</label><input type="text" class="form-control" value="' + escapeHtml(employee.name || '') + '" readonly></div></div></div><div class="row"><div class="col-md-6"><div class="form-group"><label>Designation</label><input type="text" class="form-control" value="' + escapeHtml(employee.designation || '') + '" readonly></div></div><div class="col-md-6"><div class="form-group"><label>Unit (Centre)</label><input type="text" class="form-control" value="' + escapeHtml(employee.unit || '') + '" readonly></div></div></div><div class="row"><div class="col-md-6"><div class="form-group"><label>Work Place</label><input type="text" class="form-control" value="' + escapeHtml(employee.workplace || '') + '" readonly></div></div><div class="col-md-6"><div class="form-group"><label>Reporting Authority</label><input type="text" class="form-control" value="' + escapeHtml(employee.reporting_authority || '') + '" readonly></div></div></div></div><div class="alert alert-info"><i class="fa fa-info-circle"></i> As an ICD user, you need to configure team workload targets for each edition before proceeding to Self Evaluation.</div>' + teamWorkloadHtml;
   document.getElementById('registrationModalBody').innerHTML = modalHtml;
 }
 
@@ -1631,13 +1631,13 @@ function displayUnitHeadEmployeeCards(employees, workplaceFilter) {
             '        <span>⭐ Score: <strong>' + hodPerformanceOutOf10 + '/10</strong></span>' +
             '        <span style="margin-left: 12px; background: ' + hodLevelColor + '; color: white; padding: 2px 10px; border-radius: 20px; font-size: 11px; font-weight: bold;">' + hodLevelText + '</span>' +
             '      </div>' +
-            '      <div style="background: #1e293b; padding: 8px 12px; border-radius: 12px; font-size: 12px; color: #cbd5e1; border-left: 3px solid #2a5298; max-height: 120px; overflow-y: auto;">' +
+            '      <div style="background: #ffffff; padding: 8px 12px; border-radius: 12px; font-size: 12px; color: #cbd5e1; border-left: 3px solid #2a5298; max-height: 120px; overflow-y: auto;">' +
             '        💬 ' + (member.hodComments ? escapeHtml(member.hodComments) : 'No comments yet') +
             '      </div>' +
             '    </div>' +
             '  </div>' +
             '</div>' +
-            (specialProjectsText ? '<div style="background: #1e293b; padding: 10px; margin: 10px 0; border-radius: 8px; border-left: 3px solid #b45309;"><strong><i class="fa fa-rocket"></i> 🚀 Special Projects & Initiatives:</strong><div style="white-space: pre-wrap; margin-top: 5px; font-size: 13px; color: #e4e6eb;">' + escapeHtml(specialProjectsText) + '</div></div>' : '') +
+            (specialProjectsText ? '<div style="background: #ffffff; padding: 10px; margin: 10px 0; border-radius: 8px; border-left: 3px solid #b45309;"><strong><i class="fa fa-rocket"></i> 🚀 Special Projects & Initiatives:</strong><div style="white-space: pre-wrap; margin-top: 5px; font-size: 13px; color: #e4e6eb;">' + escapeHtml(specialProjectsText) + '</div></div>' : '') +
             '<div style="margin-top: 15px; text-align: right; border-top: 1px solid #334155; padding-top: 12px;">' + buttonHtml + 
             (canPrintPdf ? '<button class="btn btn-sm btn-info" onclick="printEvaluationReport(\'' + escapeHtml(member.code) + '\', \'' + escapeHtml(member.name) + '\')"><i class="fa fa-print"></i> PDF Report</button>' : 
                            '<button class="btn btn-sm btn-default" disabled style="opacity: 0.5;" title="VH evaluation required first">PDF Report</button>') + 
@@ -1917,10 +1917,10 @@ function displayVHEmployeeCards(employees, workplaceFilter) {
     }
     
     var jobDescriptionHtml = jobDescription ? '<div style="margin-top: 8px;"><i class="fa fa-file-text"></i> <strong>Job Description:</strong><div style="white-space: pre-wrap; margin-top: 5px; font-size: 12px; background: #0f1423; padding: 8px; border-radius: 6px; color: #cbd5e1;">' + escapeHtml(jobDescription) + '</div></div>' : '';
-    var specialProjectsHtml = specialFull ? '<div style="margin-top: 8px;"><i class="fa fa-rocket"></i> <strong>Special Projects & Initiatives:</strong><div style="white-space: pre-wrap; margin-top: 5px; font-size: 12px; background: #1e293b; padding: 8px; border-radius: 6px; color: #cbd5e1;">' + escapeHtml(specialFull) + '</div></div>' : '';
+    var specialProjectsHtml = specialFull ? '<div style="margin-top: 8px;"><i class="fa fa-rocket"></i> <strong>Special Projects & Initiatives:</strong><div style="white-space: pre-wrap; margin-top: 5px; font-size: 12px; background: #ffffff; padding: 8px; border-radius: 6px; color: #cbd5e1;">' + escapeHtml(specialFull) + '</div></div>' : '';
     
     html += `
-      <div class="employee-card" style="background: #1e293b; border: 1px solid #334155; border-radius: 12px; margin-bottom: 24px; padding: 18px;">
+      <div class="employee-card" style="background: #ffffff; border: 1px solid #334155; border-radius: 12px; margin-bottom: 24px; padding: 18px;">
         <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid #334155;">
           <div>
             <strong style="font-size: 16px; color: #60a5fa;"><i class="fa fa-user-circle"></i> ${escapeHtml(emp.name)}</strong>
@@ -1951,7 +1951,7 @@ function displayVHEmployeeCards(employees, workplaceFilter) {
                 <span>⭐ Score: <strong>${performanceOutOf10}/10</strong></span>
                 <span style="margin-left: 12px; background: ${levelColor}; color: white; padding: 2px 10px; border-radius: 20px; font-size: 11px; font-weight: bold;">${levelText}</span>
               </div>
-              <div style="background: #1e293b; padding: 8px 12px; border-radius: 12px; font-size: 12px; color: #cbd5e1; border-left: 3px solid #2a5298;">
+              <div style="background: #ffffff; padding: 8px 12px; border-radius: 12px; font-size: 12px; color: #cbd5e1; border-left: 3px solid #2a5298;">
                 💬 ${emp.hodComments ? escapeHtml(emp.hodComments) : 'No comments yet'}
               </div>
             </div>
@@ -1969,7 +1969,7 @@ function displayVHEmployeeCards(employees, workplaceFilter) {
                   </div>
                   <div style="display: flex; align-items: center; gap: 8px;">
                     <span style="font-size: 12px; font-weight: 500;">📊 Level:</span>
-                    <input type="text" id="vh_level_display_${emp.code}" class="form-control" value="${escapeHtml(vhOverallLevel)}" readonly style="width: 160px; background-color: #1e293b; font-size: 11px; padding: 3px 8px;">
+                    <input type="text" id="vh_level_display_${emp.code}" class="form-control" value="${escapeHtml(vhOverallLevel)}" readonly style="width: 160px; background-color: #ffffff; font-size: 11px; padding: 3px 8px;">
                     <input type="hidden" id="vh_level_${emp.code}" value="${escapeHtml(vhOverallLevel)}">
                   </div>
                 </div>
@@ -2113,7 +2113,7 @@ function clearVHEvaluation(empCode) {
 function printEvaluationReport(empCode, empName) {
   var loadingDiv = document.createElement('div');
   loadingDiv.id = 'printLoading';
-  loadingDiv.innerHTML = '<div style="position:fixed;top:50%;left:50%;background:#1e293b;padding:20px;border-radius:10px;z-index:10000;color:white;"><i class="fa fa-spinner fa-spin"></i> Generating report...</div>';
+  loadingDiv.innerHTML = '<div style="position:fixed;top:50%;left:50%;background:#ffffff;padding:20px;border-radius:10px;z-index:10000;color:white;"><i class="fa fa-spinner fa-spin"></i> Generating report...</div>';
   document.body.appendChild(loadingDiv);
   callServer("generateEvaluationReport", { empCode: empCode }).then(function(result) {
     var loadingElem = document.getElementById('printLoading');
