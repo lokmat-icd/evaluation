@@ -1366,7 +1366,7 @@ function displayHODEmployeeCards(employees, workplaceFilter) {
   var filteredEmployees = employees;
   if (workplaceFilter && workplaceFilter !== '') filteredEmployees = employees.filter(function(emp) { return emp.workplace === workplaceFilter; });
   if (filteredEmployees.length === 0) { teamListDiv.innerHTML = '<div class="alert alert-info">No employees found' + (workplaceFilter ? ' for workplace: ' + workplaceFilter : '') + '</div>'; return; }
-  var html = '<h4>Team Members <span class="badge">' + filteredEmployees.length + '</span></h4>';
+  var html = '<h4 style="color: #ffffff;">Team Members <span class="badge">' + filteredEmployees.length + '</span></h4>';
   var loggedInEmpCode = authenticatedUser ? authenticatedUser.empCode : null;
   var isICDUser = (authenticatedUser && authenticatedUser.position === 'ICD');
   for (var i = 0; i < filteredEmployees.length; i++) {
@@ -1390,8 +1390,8 @@ function displayHODEmployeeCards(employees, workplaceFilter) {
       }
     }
     
-    var jobDescriptionHtml = jobDescription ? '<div style="background: #f0f7ff; padding: 10px; margin: 10px 0; border-radius: 6px; border-left: 3px solid #1e3c72;"><strong><i class="fa fa-file-text"></i> 📋 Job Description:</strong><div style="white-space: pre-wrap; margin-top: 5px; font-size: 13px;">' + escapeHtml(jobDescription) + '</div></div>' : '';
-    var specialProjectsHtml = specialProjectsText ? '<div style="background: #e8f4fd; padding: 10px; margin: 10px 0; border-radius: 6px; border-left: 3px solid #ff9800;"><strong><i class="fa fa-rocket"></i> 🚀 Special Projects & Initiatives:</strong><div style="white-space: pre-wrap; margin-top: 5px; font-size: 13px;">' + escapeHtml(specialProjectsText) + '</div></div>' : '';
+    var jobDescriptionHtml = jobDescription ? '<div style="background: #0f1423; padding: 10px; margin: 10px 0; border-radius: 8px; border-left: 3px solid #2a5298;"><strong><i class="fa fa-file-text"></i> 📋 Job Description:</strong><div style="white-space: pre-wrap; margin-top: 5px; font-size: 13px;">' + escapeHtml(jobDescription) + '</div></div>' : '';
+    var specialProjectsHtml = specialProjectsText ? '<div style="background: #0f1423; padding: 10px; margin: 10px 0; border-radius: 8px; border-left: 3px solid #b45309;"><strong><i class="fa fa-rocket"></i> 🚀 Special Projects & Initiatives:</strong><div style="white-space: pre-wrap; margin-top: 5px; font-size: 13px;">' + escapeHtml(specialProjectsText) + '</div></div>' : '';
     
     var hodComplete = member.hodRatings && member.hodRatings.page_layout > 0 && member.hodRatings.deadline_adherence > 0 && member.hodRatings.quality_accuracy > 0 && member.hodRatings.advertising_integration > 0 && member.hodRatings.platform_adaptation > 0 && member.hodRatings.collaboration > 0;
     var unitHeadApproved = (member.status === "Assessed-UH");
@@ -1400,18 +1400,27 @@ function displayHODEmployeeCards(employees, workplaceFilter) {
     var vhComplete = member.vhEvaluation && member.vhEvaluation.performance_rating && member.vhEvaluation.performance_rating !== '';
     var canPrintPdf = vhComplete;
     
-    // BUTTON LOGIC - Updated: Disable if Unit Head has approved (Assessed-UH)
+    // BUTTON LOGIC - Disable if Unit Head has approved (Assessed-UH)
     var buttonHtml = '';
     if (isSelfCard) {
       buttonHtml = '<button class="btn btn-sm btn-info" onclick="openHODEvalForHODTab(\'' + escapeHtml(member.code) + '\', \'' + escapeHtml(member.name) + '\', true)"><i class="fa fa-eye"></i> View My Evaluation</button>';
     } else if (isUnitHeadApproved) {
-      // Unit Head has already approved - DISABLE the Evaluate button
       buttonHtml = '<button class="btn btn-sm btn-default" disabled style="opacity:0.6; cursor:not-allowed;" title="This employee has been approved by Unit Head. Evaluation is locked."><i class="fa fa-lock"></i> Locked (Approved by Unit Head)</button>';
     } else {
       buttonHtml = '<button class="btn btn-sm btn-primary" onclick="openHODEvalForHODTab(\'' + escapeHtml(member.code) + '\', \'' + escapeHtml(member.name) + '\', false)"><i class="fa fa-star"></i> Evaluate</button>';
     }
     
-    html += '<div class="team-member-card" ' + (isSelfCard ? 'style="background: #f0f7ff; border-left: 4px solid #ff9800;"' : '') + (isUnitHeadApproved ? 'style="background: #e8f8e8; border-left: 4px solid #28a745;"' : '') + '><div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; margin-bottom: 10px;"><div style="flex: 1;"><strong style="font-size: 16px;"><i class="fa fa-user"></i> ' + escapeHtml(member.name) + '</strong>' + (isSelfCard ? '<span class="label label-warning" style="margin-left: 10px;"><i class="fa fa-user-circle"></i> You (ICD)</span>' : '') + (!isSelfCard && member.isICD ? '<span class="label label-info" style="margin-left: 10px; background-color: #ff9800;"><i class="fa fa-users"></i> ICD</span>' : '') + '<br><small><i class="fa fa-briefcase"></i> ' + escapeHtml(member.designation || 'N/A') + ' | <i class="fa fa-building"></i> ' + escapeHtml(member.unit) + '</small><br><small><i class="fa fa-map-marker"></i> Workplace: ' + escapeHtml(member.workplace || 'N/A') + ' | <i class="fa fa-id-card"></i> Code: ' + escapeHtml(member.code) + '</small>' + workloadHtml + '</div><div style="text-align: right;"><span class="remark-badge ' + statusClass + '">' + statusText + '</span><span class="remark-badge ' + (hodComplete ? 'status-complete' : 'status-pending') + '">HOD: ' + (hodComplete ? '✓ Complete' : '⏳ Pending') + '</span><span class="remark-badge ' + unitHeadStatusClass + '">Unit Head: ' + unitHeadStatusText + '</span><span class="remark-badge ' + (vhComplete ? 'status-complete' : 'status-pending') + '">VH: ' + (vhComplete ? '✓ Complete' : '⏳ Pending') + '</span></div></div>' + dailyWorkloadHtml + jobDescriptionHtml + specialProjectsHtml + '<div style="margin-top: 15px; text-align: right; border-top: 1px solid #eee; padding-top: 12px;">' + buttonHtml + (canPrintPdf ? '<button class="btn btn-sm btn-info" onclick="printEvaluationReport(\'' + escapeHtml(member.code) + '\', \'' + escapeHtml(member.name) + '\')"><i class="fa fa-print"></i> PDF Report</button>' : '<button class="btn btn-sm btn-default" disabled style="opacity: 0.5;" title="VH evaluation required first">PDF Report</button>') + '</div></div>';
+    // Card styling - different background for approved employees
+    var cardStyle = '';
+    if (isSelfCard) {
+      cardStyle = 'style="background: #2d3748; border-left: 4px solid #b45309;"';
+    } else if (isUnitHeadApproved) {
+      cardStyle = 'style="background: #1e3a5f; border-left: 4px solid #15803d;"';
+    } else {
+      cardStyle = '';
+    }
+    
+    html += '<div class="team-member-card" ' + cardStyle + '><div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; margin-bottom: 10px;"><div style="flex: 1;"><strong style="font-size: 16px;"><i class="fa fa-user"></i> ' + escapeHtml(member.name) + '</strong>' + (isSelfCard ? '<span class="label label-warning" style="margin-left: 10px;"><i class="fa fa-user-circle"></i> You (ICD)</span>' : '') + (!isSelfCard && member.isICD ? '<span class="label label-info" style="margin-left: 10px; background-color: #b45309;"><i class="fa fa-users"></i> ICD</span>' : '') + '<br><small><i class="fa fa-briefcase"></i> ' + escapeHtml(member.designation || 'N/A') + ' | <i class="fa fa-building"></i> ' + escapeHtml(member.unit) + '</small><br><small><i class="fa fa-map-marker"></i> Workplace: ' + escapeHtml(member.workplace || 'N/A') + ' | <i class="fa fa-id-card"></i> Code: ' + escapeHtml(member.code) + '</small>' + workloadHtml + '</div><div style="text-align: right;"><span class="remark-badge ' + statusClass + '">' + statusText + '</span><span class="remark-badge ' + (hodComplete ? 'status-complete' : 'status-pending') + '">HOD: ' + (hodComplete ? '✓ Complete' : '⏳ Pending') + '</span><span class="remark-badge ' + unitHeadStatusClass + '">Unit Head: ' + unitHeadStatusText + '</span><span class="remark-badge ' + (vhComplete ? 'status-complete' : 'status-pending') + '">VH: ' + (vhComplete ? '✓ Complete' : '⏳ Pending') + '</span></div></div>' + dailyWorkloadHtml + jobDescriptionHtml + specialProjectsHtml + '<div style="margin-top: 15px; text-align: right; border-top: 1px solid #334155; padding-top: 12px;">' + buttonHtml + (canPrintPdf ? '<button class="btn btn-sm btn-info" onclick="printEvaluationReport(\'' + escapeHtml(member.code) + '\', \'' + escapeHtml(member.name) + '\')"><i class="fa fa-print"></i> PDF Report</button>' : '<button class="btn btn-sm btn-default" disabled style="opacity: 0.5;" title="VH evaluation required first">PDF Report</button>') + '</div></div>';
   }
   teamListDiv.innerHTML = html;
 }
