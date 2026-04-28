@@ -2101,7 +2101,7 @@ function displayVHEmployeeCards(employees, workplaceFilter) {
   }
   
   var completeEmployees = filteredByWorkplace.filter(function(emp) {
-    return emp.status === "Complete" || emp.status === "Assessed" || emp.status === "Assessed-UH";
+    return emp.status === "Complete";
   });
   
   var totalEmployees = filteredByWorkplace.length;
@@ -2157,12 +2157,12 @@ function displayVHEmployeeCards(employees, workplaceFilter) {
     var vhRemark = emp.vhEvaluation ? (emp.vhEvaluation.remark || '') : '';
     
     var perfOptions = '';
-	var ratingValues = [1, 2, 3, 4, 5, 6, 7, 7.5, 8, 8.5, 9, 9.5, 10];
-	for (var r = 0; r < ratingValues.length; r++) {
-	  var val = ratingValues[r];
-	  var selected = (vhPerformanceRating == val) ? 'selected' : '';
-	  perfOptions += '<option value="' + val + '" ' + selected + '>' + val + '</option>';
-	}
+    var ratingValues = [1, 2, 3, 4, 5, 6, 7, 7.5, 8, 8.5, 9, 9.5, 10];
+    for (var r = 0; r < ratingValues.length; r++) {
+      var val = ratingValues[r];
+      var selected = (vhPerformanceRating == val) ? 'selected' : '';
+      perfOptions += '<option value="' + val + '" ' + selected + '>' + val + '</option>';
+    }
     
     var workloadChips = '';
     var dw = emp.dailyWorkload || {};
@@ -2198,13 +2198,17 @@ function displayVHEmployeeCards(employees, workplaceFilter) {
     var jobDescriptionHtml = jobDescription ? '<div style="margin-top: 8px;"><i class="fa fa-file-text"></i> <strong>Job Description:</strong><div style="white-space: pre-wrap; margin-top: 5px; font-size: 12px; background: #0f1423; padding: 8px; border-radius: 6px; color: #cbd5e1;">' + escapeHtml(jobDescription) + '</div></div>' : '';
     var specialProjectsHtml = specialFull ? '<div style="margin-top: 8px;"><i class="fa fa-rocket"></i> <strong>Special Projects & Initiatives:</strong><div style="white-space: pre-wrap; margin-top: 5px; font-size: 12px; background: #1e293b; padding: 8px; border-radius: 6px; color: #cbd5e1;">' + escapeHtml(specialFull) + '</div></div>' : '';
     
+    // Card border - YELLOW for status "Complete"
+    var cardBorderStyle = emp.status === "Complete" ? 'border: 2px solid #fbbf24; border-left: 6px solid #fbbf24; box-shadow: 0 0 8px rgba(251, 191, 36, 0.4);' : 'border: 1px solid #334155;';
+    
     html += `
-      <div class="employee-card" style="background: #1e293b; border: 1px solid #334155; border-radius: 12px; margin-bottom: 24px; padding: 18px;">
+      <div class="employee-card" style="background: #1e293b; ${cardBorderStyle} border-radius: 12px; margin-bottom: 24px; padding: 18px;">
         <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid #334155;">
           <div>
             <strong style="font-size: 16px; color: #60a5fa;"><i class="fa fa-user-circle"></i> ${escapeHtml(emp.name)}</strong>
             <span style="font-size: 12px; color: #94a3b8; margin-left: 5px;">(${escapeHtml(emp.designation || 'N/A')})</span><br>
             <small><i class="fa fa-map-marker"></i> ${escapeHtml(emp.workplace || 'N/A')} | <i class="fa fa-id-card"></i> ${escapeHtml(emp.code)}</small>
+            ${emp.status === "Complete" ? '<span class="label label-warning" style="margin-left: 10px; background-color: #fbbf24; color: #1e293b;"><i class="fa fa-check-circle"></i> Complete</span>' : ''}
           </div>
           <div style="text-align: right;">
             <button class="btn btn-sm btn-info" onclick="openSelfEvaluationModal('${emp.code}', '${escapeHtml(emp.name)}', true, false)" style="margin-right: 5px;">
