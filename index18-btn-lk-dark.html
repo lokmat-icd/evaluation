@@ -2316,10 +2316,10 @@ function updateAssessmentLevel(empCode) {
   var rating = ratingSelect.value;
   var level = '';
   if (rating && rating !== '') {
-    var numRating = parseInt(rating);
+    var numRating = parseFloat(rating);
     if (numRating >= 8 && numRating <= 10) level = 'DE - Distinguished Expert';
-    else if (numRating >= 5 && numRating <= 7) level = 'ME - Meets Expectations';
-    else if (numRating >= 1 && numRating <= 4) level = 'NI - Needs Improvement';
+    else if (numRating >= 5 && numRating <= 7.5) level = 'ME - Meets Expectations';
+    else if (numRating >= 1 && numRating <= 4.5) level = 'NI - Needs Improvement';
   }
   levelDisplay.value = level;
   levelHidden.value = level;
