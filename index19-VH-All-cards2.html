@@ -1365,14 +1365,45 @@ function displayHODEmployeeCards(employees, workplaceFilter) {
   var teamListDiv = document.getElementById('hodTeamList');
   var filteredEmployees = employees;
   if (workplaceFilter && workplaceFilter !== '') filteredEmployees = employees.filter(function(emp) { return emp.workplace === workplaceFilter; });
+  
   if (filteredEmployees.length === 0) { teamListDiv.innerHTML = '<div class="alert alert-info">No employees found' + (workplaceFilter ? ' for workplace: ' + workplaceFilter : '') + '</div>'; return; }
+  
   var html = '<h4 style="color: #ffffff;">Team Members <span class="badge">' + filteredEmployees.length + '</span></h4>';
   var loggedInEmpCode = authenticatedUser ? authenticatedUser.empCode : null;
   var isICDUser = (authenticatedUser && authenticatedUser.position === 'ICD');
+  
   for (var i = 0; i < filteredEmployees.length; i++) {
     var member = filteredEmployees[i];
     var isSelfCard = (isICDUser && loggedInEmpCode === member.code);
-    var isUnitHeadApproved = (member.status === "Assessed-UH");
+    var isUnitHeadApproved = (member.status === "Assessed-UH" || member.status === "Complete");
+    
+    // ========== HIERARCHY STATUS FOR HOD VIEW ==========
+    var vhComplete = member.vhEvaluation && member.vhEvaluation.performance_rating && member.vhEvaluation.performance_rating !== '';
+    var unitHeadComplete = (member.status === "Assessed-UH" || member.status === "Complete");
+    var hodComplete = member.hodRatings && member.hodRatings.page_layout > 0 && member.hodRatings.deadline_adherence > 0 && 
+                      member.hodRatings.quality_accuracy > 0 && member.hodRatings.advertising_integration > 0 && 
+                      member.hodRatings.platform_adaptation > 0 && member.hodRatings.collaboration > 0;
+    
+    // Highest level badge for HOD view
+    var highestLevelText = '';
+    var highestLevelColor = '';
+    if (vhComplete) {
+      highestLevelText = '✓ Vertical Head Complete';
+      highestLevelColor = '#15803d';
+    } else if (unitHeadComplete) {
+      highestLevelText = '✓ Unit Head Complete';
+      highestLevelColor = '#2a5298';
+    } else if (hodComplete) {
+      highestLevelText = '✓ HOD/ICD Complete';
+      highestLevelColor = '#b45309';
+    } else if (member.completion === 'Yes') {
+      highestLevelText = '✓ Self Evaluation Complete';
+      highestLevelColor = '#2563eb';
+    } else {
+      highestLevelText = '⏳ Not Started';
+      highestLevelColor = '#6c757d';
+    }
+    
     var statusClass = member.completion === 'Yes' ? 'status-submitted' : 'status-pending';
     var statusText = member.completion === 'Yes' ? '✓ Self Evaluation Submitted' : '📝 Draft';
     var workloadDisplay = formatTeamWorkloadDisplay(member.teamWorkload);
@@ -1393,14 +1424,11 @@ function displayHODEmployeeCards(employees, workplaceFilter) {
     var jobDescriptionHtml = jobDescription ? '<div style="background: #0f1423; padding: 10px; margin: 10px 0; border-radius: 8px; border-left: 3px solid #2a5298;"><strong><i class="fa fa-file-text"></i> 📋 Job Description:</strong><div style="white-space: pre-wrap; margin-top: 5px; font-size: 13px;">' + escapeHtml(jobDescription) + '</div></div>' : '';
     var specialProjectsHtml = specialProjectsText ? '<div style="background: #0f1423; padding: 10px; margin: 10px 0; border-radius: 8px; border-left: 3px solid #b45309;"><strong><i class="fa fa-rocket"></i> 🚀 Special Projects & Initiatives:</strong><div style="white-space: pre-wrap; margin-top: 5px; font-size: 13px;">' + escapeHtml(specialProjectsText) + '</div></div>' : '';
     
-    var hodComplete = member.hodRatings && member.hodRatings.page_layout > 0 && member.hodRatings.deadline_adherence > 0 && member.hodRatings.quality_accuracy > 0 && member.hodRatings.advertising_integration > 0 && member.hodRatings.platform_adaptation > 0 && member.hodRatings.collaboration > 0;
-    var unitHeadApproved = (member.status === "Assessed-UH");
-    var unitHeadStatusText = unitHeadApproved ? '✓ Approved' : '⏳ Pending';
-    var unitHeadStatusClass = unitHeadApproved ? 'status-complete' : 'status-pending';
-    var vhComplete = member.vhEvaluation && member.vhEvaluation.performance_rating && member.vhEvaluation.performance_rating !== '';
-    var canPrintPdf = vhComplete;
+    var hodCompleteCheck = member.hodRatings && member.hodRatings.page_layout > 0 && member.hodRatings.deadline_adherence > 0 && member.hodRatings.quality_accuracy > 0 && member.hodRatings.advertising_integration > 0 && member.hodRatings.platform_adaptation > 0 && member.hodRatings.collaboration > 0;
+    var unitHeadApproved = (member.status === "Assessed-UH" || member.status === "Complete");
+    var vhCompleteCheck = member.vhEvaluation && member.vhEvaluation.performance_rating && member.vhEvaluation.performance_rating !== '';
+    var canPrintPdf = vhCompleteCheck;
     
-    // BUTTON LOGIC - Disable if Unit Head has approved (Assessed-UH)
     var buttonHtml = '';
     if (isSelfCard) {
       buttonHtml = '<button class="btn btn-sm btn-info" onclick="openHODEvalForHODTab(\'' + escapeHtml(member.code) + '\', \'' + escapeHtml(member.name) + '\', true)"><i class="fa fa-eye"></i> View My Evaluation</button>';
@@ -1410,7 +1438,6 @@ function displayHODEmployeeCards(employees, workplaceFilter) {
       buttonHtml = '<button class="btn btn-sm btn-primary" onclick="openHODEvalForHODTab(\'' + escapeHtml(member.code) + '\', \'' + escapeHtml(member.name) + '\', false)"><i class="fa fa-star"></i> Evaluate</button>';
     }
     
-    // Card styling - different background for approved employees
     var cardStyle = '';
     if (isSelfCard) {
       cardStyle = 'style="background: #2d3748; border-left: 4px solid #b45309;"';
@@ -1420,7 +1447,7 @@ function displayHODEmployeeCards(employees, workplaceFilter) {
       cardStyle = '';
     }
     
-    html += '<div class="team-member-card" ' + cardStyle + '><div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; margin-bottom: 10px;"><div style="flex: 1;"><strong style="font-size: 16px;"><i class="fa fa-user"></i> ' + escapeHtml(member.name) + '</strong>' + (isSelfCard ? '<span class="label label-warning" style="margin-left: 10px;"><i class="fa fa-user-circle"></i> You (ICD)</span>' : '') + (!isSelfCard && member.isICD ? '<span class="label label-info" style="margin-left: 10px; background-color: #b45309;"><i class="fa fa-users"></i> ICD</span>' : '') + '<br><small><i class="fa fa-briefcase"></i> ' + escapeHtml(member.designation || 'N/A') + ' | <i class="fa fa-building"></i> ' + escapeHtml(member.unit) + '</small><br><small><i class="fa fa-map-marker"></i> Workplace: ' + escapeHtml(member.workplace || 'N/A') + ' | <i class="fa fa-id-card"></i> Code: ' + escapeHtml(member.code) + '</small>' + workloadHtml + '</div><div style="text-align: right;"><span class="remark-badge ' + statusClass + '">' + statusText + '</span><span class="remark-badge ' + (hodComplete ? 'status-complete' : 'status-pending') + '">HOD: ' + (hodComplete ? '✓ Complete' : '⏳ Pending') + '</span><span class="remark-badge ' + unitHeadStatusClass + '">Unit Head: ' + unitHeadStatusText + '</span><span class="remark-badge ' + (vhComplete ? 'status-complete' : 'status-pending') + '">VH: ' + (vhComplete ? '✓ Complete' : '⏳ Pending') + '</span></div></div>' + dailyWorkloadHtml + jobDescriptionHtml + specialProjectsHtml + '<div style="margin-top: 15px; text-align: right; border-top: 1px solid #334155; padding-top: 12px;">' + buttonHtml + (canPrintPdf ? '<button class="btn btn-sm btn-info" onclick="printEvaluationReport(\'' + escapeHtml(member.code) + '\', \'' + escapeHtml(member.name) + '\')"><i class="fa fa-print"></i> PDF Report</button>' : '<button class="btn btn-sm btn-default" disabled style="opacity: 0.5;" title="VH evaluation required first">PDF Report</button>') + '</div></div>';
+    html += '<div class="team-member-card" ' + cardStyle + '><div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; margin-bottom: 10px;"><div style="flex: 1;"><strong style="font-size: 16px;"><i class="fa fa-user"></i> ' + escapeHtml(member.name) + '</strong>' + (isSelfCard ? '<span class="label label-warning" style="margin-left: 10px;"><i class="fa fa-user-circle"></i> You (ICD)</span>' : '') + (!isSelfCard && member.isICD ? '<span class="label label-info" style="margin-left: 10px; background-color: #b45309;"><i class="fa fa-users"></i> ICD</span>' : '') + '<br><small><i class="fa fa-briefcase"></i> ' + escapeHtml(member.designation || 'N/A') + ' | <i class="fa fa-building"></i> ' + escapeHtml(member.unit) + '</small><br><small><i class="fa fa-map-marker"></i> Workplace: ' + escapeHtml(member.workplace || 'N/A') + ' | <i class="fa fa-id-card"></i> Code: ' + escapeHtml(member.code) + '</small>' + workloadHtml + '</div><div style="text-align: right;"><span class="remark-badge" style="background: ' + highestLevelColor + '; color: white; font-weight: bold; font-size: 12px; padding: 5px 12px;">' + highestLevelText + '</span></div></div>' + dailyWorkloadHtml + jobDescriptionHtml + specialProjectsHtml + '<div style="margin-top: 15px; text-align: right; border-top: 1px solid #334155; padding-top: 12px;">' + buttonHtml + (canPrintPdf ? '<button class="btn btn-sm btn-info" onclick="printEvaluationReport(\'' + escapeHtml(member.code) + '\', \'' + escapeHtml(member.name) + '\')"><i class="fa fa-print"></i> PDF Report</button>' : '<button class="btn btn-sm btn-default" disabled style="opacity: 0.5;" title="VH evaluation required first">PDF Report</button>') + '</div></div>';
   }
   teamListDiv.innerHTML = html;
 }
@@ -1820,12 +1847,15 @@ function displayUnitHeadEmployeeCards(employees, workplaceFilter) {
     var reportsDirectlyToUnitHead = (member.reporting_authority === unitHeadName);
     var needsUnitHeadEvaluation = isICDEmployee || reportsDirectlyToUnitHead;
     
-    // ========== HIERARCHY STATUS LOGIC ==========
-    // Determine the highest completed level
+    // ========== HIERARCHY STATUS LOGIC - CHECK HIGHEST AUTHORITY FIRST ==========
+    // 1. Check Vertical Head (highest authority)
     var vhComplete = member.vhEvaluation && member.vhEvaluation.performance_rating && member.vhEvaluation.performance_rating !== '';
-    var unitHeadComplete = (member.status === "Assessed-UH" || member.status === "Complete");
-    var hodComplete = false;
     
+    // 2. Check Unit Head
+    var unitHeadComplete = (member.status === "Assessed-UH" || member.status === "Complete");
+    
+    // 3. Check HOD/ICD
+    var hodComplete = false;
     if (reportsDirectlyToUnitHead) {
       hodComplete = true; // Direct reports don't need HOD evaluation
     } else {
@@ -1834,37 +1864,37 @@ function displayUnitHeadEmployeeCards(employees, workplaceFilter) {
                     member.hodRatings.platform_adaptation > 0 && member.hodRatings.collaboration > 0;
     }
     
+    // 4. Check Self
     var selfComplete = (member.completion === "Yes");
     
-    // Determine highest completed status for badge
+    // ========== DETERMINE HIGHEST COMPLETED LEVEL FOR BADGE ==========
     var highestLevel = '';
     var highestLevelColor = '';
     var highestLevelText = '';
     
     if (vhComplete) {
       highestLevel = 'vh';
-      highestLevelColor = '#15803d';
+      highestLevelColor = '#15803d';  // Green
       highestLevelText = '✓ Vertical Head Complete';
     } else if (unitHeadComplete) {
       highestLevel = 'unithead';
-      highestLevelColor = '#2a5298';
+      highestLevelColor = '#2a5298';  // Blue
       highestLevelText = '✓ Unit Head Complete';
     } else if (hodComplete) {
       highestLevel = 'hod';
-      highestLevelColor = '#b45309';
+      highestLevelColor = '#b45309';  // Orange
       highestLevelText = '✓ HOD/ICD Complete';
     } else if (selfComplete) {
       highestLevel = 'self';
-      highestLevelColor = '#2563eb';
+      highestLevelColor = '#2563eb';  // Light Blue
       highestLevelText = '✓ Self Evaluation Complete';
     } else {
       highestLevel = 'pending';
-      highestLevelColor = '#6c757d';
+      highestLevelColor = '#6c757d';  // Gray
       highestLevelText = '⏳ Not Started';
     }
     
     // ========== READ-ONLY CHECK ==========
-    // Card becomes read-only if Unit Head has already approved (Assessed-UH)
     var isReadOnly = (member.status === "Assessed-UH");
     
     var statusClass = member.completion === 'Yes' ? 'status-submitted' : 'status-pending';
@@ -1901,25 +1931,21 @@ function displayUnitHeadEmployeeCards(employees, workplaceFilter) {
     else if (member.hodOverallLevel === 'NI') { hodLevelText = 'NI - Needs Improvement'; hodLevelColor = '#b91c1c'; }
     else { hodLevelText = member.hodOverallLevel || 'Not Assessed'; hodLevelColor = '#334155'; }
     
-    // Unit Head status text (for the individual badge)
     var unitHeadStatusText = (member.status === "Assessed-UH" || member.status === "Complete") ? '✓ Approved' : 
                              ((member.status === "Assessed") ? '⏳ Pending Approval' : '⏳ Pending');
     var unitHeadStatusClass = (member.status === "Assessed-UH" || member.status === "Complete") ? 'status-complete' : 'status-pending';
     
-    // ========== BUTTON LOGIC - READ-ONLY ==========
+    // ========== BUTTON LOGIC ==========
     var buttonHtml = '';
     
     if (isReadOnly) {
-      // Card is read-only - show view only button
       buttonHtml = '<button class="btn btn-sm btn-info" onclick="viewUnitHeadEvaluation(\'' + member.code + '\', \'' + escapeHtml(member.name) + '\')" style="margin-right: 8px;"><i class="fa fa-eye"></i> View Evaluation (Approved)</button>';
     } 
     else if (member.status === "Assessed") {
-      // Can approve or modify
       buttonHtml = '<button class="btn btn-sm btn-success" onclick="approveUnitHeadEvaluation(\'' + member.code + '\', \'' + escapeHtml(member.name) + '\')" style="margin-right: 8px;"><i class="fa fa-check-circle"></i> Approve</button>' +
                    '<button class="btn btn-sm btn-warning" onclick="openUnitHeadEval(\'' + member.code + '\', \'' + escapeHtml(member.name) + '\')"><i class="fa fa-pencil-square-o"></i> Modify Rating</button>';
     } 
     else if (member.status === "Assessed-UH") {
-      // Already approved - can only modify (but this case is caught by isReadOnly above)
       buttonHtml = '<button class="btn btn-sm btn-warning" onclick="openUnitHeadEval(\'' + member.code + '\', \'' + escapeHtml(member.name) + '\')"><i class="fa fa-pencil-square-o"></i> Modify Rating</button>';
     } 
     else if (member.status === "Pending" && needsUnitHeadEvaluation) {
@@ -1933,7 +1959,6 @@ function displayUnitHeadEmployeeCards(employees, workplaceFilter) {
       badgeHtml = '<span class="label label-info" style="margin-left: 10px; background-color: #b45309;"><i class="fa fa-users"></i> ICD</span>';
     }
     
-    // Card background for read-only
     var cardStyle = isReadOnly ? 'style="background: #1a2a4a; border-left: 4px solid #15803d; opacity: 0.95;"' : '';
     
     html += '<div class="team-member-card" ' + cardStyle + '>' +
@@ -1945,14 +1970,12 @@ function displayUnitHeadEmployeeCards(employees, workplaceFilter) {
             workloadHtml +
             '</div>' +
             '<div style="text-align: right;">' +
-            // HIERARCHY BADGE - shows the highest completed level
-            '<span class="remark-badge" style="background: ' + highestLevelColor + '; color: white; font-weight: bold;">' + highestLevelText + '</span><br>' +
-            '<span class="remark-badge ' + unitHeadStatusClass + '" style="margin-top: 5px; display: inline-block;">Unit Head: ' + unitHeadStatusText + '</span>' +
+            // HIERARCHY BADGE - shows the highest completed level (not role-specific)
+            '<span class="remark-badge" style="background: ' + highestLevelColor + '; color: white; font-weight: bold; font-size: 12px; padding: 5px 12px;">' + highestLevelText + '</span>' +
             '</div>' +
             '</div>' +
             dailyWorkloadHtml;
     
-    // Only show evaluation details if not read-only OR if read-only (show summary)
     if (!isReadOnly) {
       html += '<div style="display: flex; flex-wrap: wrap; gap: 20px; margin: 15px 0;">' +
               '  <div style="flex: 1; min-width: 250px;">' +
@@ -1975,10 +1998,9 @@ function displayUnitHeadEmployeeCards(employees, workplaceFilter) {
               '  </div>' +
               '</div>';
     } else {
-      // Read-only mode - show evaluation summary in a more compact way
       html += '<div style="display: flex; flex-wrap: wrap; gap: 20px; margin: 15px 0;">' +
-              '  <div style="flex: 1; min-width: 250px;">' +
-              '    <div style="background: #0f1423; padding: 12px; border-radius: 8px; border-left: 3px solid #2a5298;">' +
+              '  <div style="flex: 1;">' +
+              '    <div style="background: #0f1423; padding: 12px; border-radius: 8px; border-left: 3px solid #15803d;">' +
               '      <strong><i class="fa fa-check-circle" style="color: #15803d;"></i> Evaluation Summary (Approved)</strong>' +
               '      <div style="margin-top: 10px;">' +
               '        <span>⭐ HOD Score: <strong>' + hodPerformanceOutOf10 + '/10</strong></span>' +
@@ -2224,11 +2246,9 @@ function displayVHEmployeeCards(employees, workplaceFilter) {
     filteredByWorkplace = employees.filter(function(emp) { return emp.workplace === workplaceFilter; });
   }
   
-  // FIX: Show ALL employees who have completed self evaluation
-  // Don't filter by status - VH should see all employees who have submitted self evaluation
-  // regardless of whether VH evaluation is complete or not
+  // Show ALL employees who have completed self evaluation
   var completeEmployees = filteredByWorkplace.filter(function(emp) {
-    return emp.completion === "Yes";  // Only require self evaluation completion
+    return emp.completion === "Yes";
   });
   
   var totalEmployees = filteredByWorkplace.length;
@@ -2279,6 +2299,31 @@ function displayVHEmployeeCards(employees, workplaceFilter) {
     else if (emp.hodOverallLevel === 'NI') { levelText = 'NI - Needs Improvement'; levelColor = '#b91c1c'; }
     else { levelText = emp.hodOverallLevel || 'Not Assessed'; levelColor = '#334155'; }
     
+    // ========== HIERARCHY STATUS FOR VERTICAL HEAD ==========
+    // For VH, check if VH is already complete
+    var vhComplete = emp.vhEvaluation && emp.vhEvaluation.performance_rating && emp.vhEvaluation.performance_rating !== '';
+    var unitHeadComplete = (emp.status === "Assessed-UH" || emp.status === "Complete");
+    var hodComplete = emp.hodRatings && emp.hodRatings.page_layout > 0 && emp.hodRatings.deadline_adherence > 0 && 
+                      emp.hodRatings.quality_accuracy > 0 && emp.hodRatings.advertising_integration > 0 && 
+                      emp.hodRatings.platform_adaptation > 0 && emp.hodRatings.collaboration > 0;
+    
+    // Highest level badge for VH view
+    var highestLevelText = '';
+    var highestLevelColor = '';
+    if (vhComplete) {
+      highestLevelText = '✓ Vertical Head Complete';
+      highestLevelColor = '#15803d';
+    } else if (unitHeadComplete) {
+      highestLevelText = '✓ Unit Head Complete';
+      highestLevelColor = '#2a5298';
+    } else if (hodComplete) {
+      highestLevelText = '✓ HOD/ICD Complete';
+      highestLevelColor = '#b45309';
+    } else {
+      highestLevelText = '✓ Self Evaluation Complete';
+      highestLevelColor = '#2563eb';
+    }
+    
     var vhPerformanceRating = emp.vhEvaluation ? (emp.vhEvaluation.performance_rating || '') : '';
     var vhOverallLevel = emp.vhEvaluation ? (emp.vhEvaluation.overall_level_text || '') : '';
     var vhRemark = emp.vhEvaluation ? (emp.vhEvaluation.remark || '') : '';
@@ -2325,14 +2370,8 @@ function displayVHEmployeeCards(employees, workplaceFilter) {
     var jobDescriptionHtml = jobDescription ? '<div style="margin-top: 8px;"><i class="fa fa-file-text"></i> <strong>Job Description:</strong><div style="white-space: pre-wrap; margin-top: 5px; font-size: 12px; background: #0f1423; padding: 8px; border-radius: 6px; color: #cbd5e1;">' + escapeHtml(jobDescription) + '</div></div>' : '';
     var specialProjectsHtml = specialFull ? '<div style="margin-top: 8px;"><i class="fa fa-rocket"></i> <strong>Special Projects & Initiatives:</strong><div style="white-space: pre-wrap; margin-top: 5px; font-size: 12px; background: #1e293b; padding: 8px; border-radius: 6px; color: #cbd5e1;">' + escapeHtml(specialFull) + '</div></div>' : '';
     
-    // FIX: Determine Unit Head status badge - should show as complete if status is "Assessed-UH" OR "Complete"
-    // Because "Complete" means VH is done, but Unit Head was already done before that
     var unitHeadStatusText = (emp.status === "Assessed-UH" || emp.status === "Complete") ? '✓ Approved' : ((emp.status === "Assessed") ? '⏳ Pending Approval' : '⏳ Pending');
     var unitHeadStatusClass = (emp.status === "Assessed-UH" || emp.status === "Complete") ? 'status-complete' : 'status-pending';
-    var hodComplete = emp.hodRatings && emp.hodRatings.page_layout > 0 && emp.hodRatings.deadline_adherence > 0 && 
-                      emp.hodRatings.quality_accuracy > 0 && emp.hodRatings.advertising_integration > 0 && 
-                      emp.hodRatings.platform_adaptation > 0 && emp.hodRatings.collaboration > 0;
-    var vhComplete = emp.vhEvaluation && emp.vhEvaluation.performance_rating && emp.vhEvaluation.performance_rating !== '';
     
     html += `
       <div class="employee-card" style="background: #1e293b; border: 1px solid #334155; border-radius: 12px; margin-bottom: 24px; padding: 18px;">
@@ -2343,8 +2382,7 @@ function displayVHEmployeeCards(employees, workplaceFilter) {
             <small><i class="fa fa-map-marker"></i> ${escapeHtml(emp.workplace || 'N/A')} | <i class="fa fa-id-card"></i> ${escapeHtml(emp.code)}</small>
           </div>
           <div style="text-align: right;">
-            <span class="remark-badge ${unitHeadStatusClass}" style="margin-right: 8px;">Unit Head: ${unitHeadStatusText}</span>
-            <span class="remark-badge ${vhComplete ? 'status-complete' : 'status-pending'}">VH: ${vhComplete ? '✓ Complete' : '⏳ Pending'}</span>
+            <span class="remark-badge" style="background: ${highestLevelColor}; color: white; font-weight: bold; font-size: 12px; padding: 5px 12px;">${highestLevelText}</span>
           </div>
         </div>
         
