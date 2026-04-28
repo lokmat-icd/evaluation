@@ -633,7 +633,7 @@
   
   <script>
 // ==================== CONFIGURATION ====================
-const API_URL = "https://script.google.com/macros/s/AKfycbw3quPmyoszAPe5Tc4urFJzna1o_fOs2Enbjgii-YfzuzTbC1oDrYPDN5fkoJfVOX2-lA/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbzETNsyi9my9f2xBGX9hfqAyuQ3neoO0fPteQOKTCmXkLcqa5sYzguopT8zdatZ-PbrMg/exec";
 
 // ==================== GLOBAL VARIABLES ====================
 var currentEvalEmp = null;
@@ -1760,29 +1760,13 @@ function loadEmployeesByCentre(centre, workplaceFilter) {
 }
 
 function displayVHEmployeeCards(employees, workplaceFilter) {
-  
-  var isComplete = (emp.status === "Complete");
-  // Add this HTML for the tick circle (place it at the top-right of the card)
-var completeTickHtml = '';
-if (isComplete) {
-  completeTickHtml = '<div style="position: absolute; top: 15px; right: 15px; width: 50px; height: 50px; background: #28a745; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 10px rgba(0,0,0,0.2);"><i class="fa fa-check" style="color: white; font-size: 28px;"></i></div>';
-}
-
-// Also disable the VH evaluation fields if status is Complete
-var vhDisabledAttr = isComplete ? 'disabled' : '';
-var vhButtonHtml = '';
-if (isComplete) {
-  vhButtonHtml = '<div style="text-align: right; margin-top: 10px;"><span class="label label-success" style="font-size: 14px; padding: 8px 15px;"><i class="fa fa-check-circle"></i> Evaluation Complete ✓</span></div>';
-} else {
-  vhButtonHtml = '<div style="text-align: right;"><button class="btn btn-sm btn-success" onclick="saveVHEvaluation(\'' + emp.code + '\')" style="padding: 3px 12px; font-size: 12px;"><i class="fa fa-save"></i> Save</button><button class="btn btn-sm btn-default" onclick="clearVHEvaluation(\'' + emp.code + '\')" style="padding: 3px 12px; font-size: 12px; margin-left: 5px;"><i class="fa fa-undo"></i> Clear</button></div>';
-}
-
-  
-  var filteredByWorkplace = employees;  
+  // Filter by workplace if needed
+  var filteredByWorkplace = employees;
   if (workplaceFilter && workplaceFilter !== '') {
     filteredByWorkplace = employees.filter(function(emp) { return emp.workplace === workplaceFilter; });
   }
   
+  // Get only completed employees (Assessed-UH or Complete)
   var completeEmployees = filteredByWorkplace.filter(function(emp) {
     return emp.status === "Complete" || emp.status === "Assessed" || emp.status === "Assessed-UH";
   });
@@ -1815,6 +1799,9 @@ if (isComplete) {
     var emp = item.emp;
     var pagScore = item.paginationScore;
     var othScore = item.otherWorkScore;
+    
+    // DEFINE isComplete HERE - inside the loop for each employee
+    var isComplete = (emp.status === "Complete");
     
     var pagPercent = teamPaginationScore > 0 ? Math.round((pagScore / teamPaginationScore) * 100) : 0;
     var othPercent = teamOtherWorkScore > 0 ? Math.round((othScore / teamOtherWorkScore) * 100) : 0;
@@ -1858,7 +1845,7 @@ if (isComplete) {
       workloadChips += '<span class="workload-chip" style="background:#eef2ff; padding:4px 10px; border-radius:20px; font-size:11px; display:inline-block; margin:2px;">📄 ' + workloadItems[w] + '</span>';
     }
     
-    // Get Job Description and Special Projects text (FULL, no truncation)
+    // Get Job Description and Special Projects text
     var jobDescription = '', specialFull = '';
     if (emp.specialProjects) {
       if (typeof emp.specialProjects === 'object') {
@@ -1881,7 +1868,7 @@ if (isComplete) {
     
     html += `
   <div class="employee-card" style="background: white; border: 1px solid #e0e0e0; border-radius: 12px; margin-bottom: 24px; padding: 18px; position: relative;">
-    ${isComplete ? '<div style="position: absolute; top: 15px; right: 15px; width: 50px; height: 50px; background: #28a745; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 10px rgba(0,0,0,0.2);"><i class="fa fa-check" style="color: white; font-size: 28px;"></i></div>' : ''}
+    ${isComplete ? '<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80px; height: 80px; background: #28a745; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 20px rgba(0,0,0,0.3); z-index: 20; border: 3px solid #34ce57;"><i class="fa fa-check" style="color: white; font-size: 45px;"></i></div>' : ''}
     <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid #eee;">
       <div>
         <strong style="font-size: 16px; color: #1e3c72;"><i class="fa fa-user-circle"></i> ${escapeHtml(emp.name)}</strong>
