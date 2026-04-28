@@ -2157,9 +2157,12 @@ function displayVHEmployeeCards(employees, workplaceFilter) {
     var vhRemark = emp.vhEvaluation ? (emp.vhEvaluation.remark || '') : '';
     
     var perfOptions = '';
-    for (var p = 1; p <= 10; p++) {
-      perfOptions += '<option value="' + p + '" ' + (vhPerformanceRating == p ? 'selected' : '') + '>' + p + '</option>';
-    }
+	var ratingValues = [1, 2, 3, 4, 5, 6, 7, 7.5, 8, 8.5, 9, 9.5, 10];
+	for (var r = 0; r < ratingValues.length; r++) {
+	  var val = ratingValues[r];
+	  var selected = (vhPerformanceRating == val) ? 'selected' : '';
+	  perfOptions += '<option value="' + val + '" ' + selected + '>' + val + '</option>';
+	}
     
     var workloadChips = '';
     var dw = emp.dailyWorkload || {};
