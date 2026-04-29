@@ -647,7 +647,7 @@
   
   <script>
 // ==================== CONFIGURATION ====================
-const API_URL = "https://script.google.com/macros/s/AKfycbz_I469l0j94RdiItttUdDxh6-C6fubJEEUZjAzOebb30DZPmyvv7VSUWgo-ZrsTZWT4w/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbyVgZHND2YpYu7Ud-zFyRaC1M_0_p21UNIhEU-rmEYg0H0SN1wTvQAmCTWxHferXUM3Jw/exec";
 
 // ==================== GLOBAL VARIABLES ====================
 var currentEvalEmp = null;
@@ -804,7 +804,7 @@ function openSelfEvaluationFromSelfTab() {
   
   callServer("checkEmployeeExists", { empCode: empCode }).then(function(checkResult) {
     if (checkResult.exists) {
-      // FIX: Check status to determine if already submitted
+      // FIX: Check if status is empty or "Draft" - both are editable
       var status = checkResult.status || "";
       var isAlreadySubmitted = (status !== "" && status !== "Draft");
       
@@ -814,7 +814,7 @@ function openSelfEvaluationFromSelfTab() {
         } else {
           callServer("getEmployeeBasicInfo", { empCode: empCode }).then(function(empInfo) {
             var empName = empInfo.success ? empInfo.name : empCode;
-            // Pass isEditable = true, but isSubmitted = isAlreadySubmitted
+            // isEditable = true, isSubmitted = isAlreadySubmitted (false for empty or draft)
             openSelfEvaluationModal(empCode, empName, true, isAlreadySubmitted);
           }).catch(function() { 
             openSelfEvaluationModal(empCode, empCode, true, isAlreadySubmitted); 
@@ -832,22 +832,36 @@ function openSelfEvaluationFromSelfTab() {
 }
 
 function openSelfEvaluationModal(empCode, empName, isEditable, isSubmitted) {
-  // isSubmitted should be true if status is NOT "Draft" and NOT empty
   currentSelfEvalEmpCode = empCode;
+  
+  // FIRST, set initial values based on the passed parameters
   currentSelfEvalIsEditable = isEditable && !isSubmitted;
   currentSelfEvalIsSubmitted = isSubmitted;
   
-  // Also check for "Complete" status which should be locked
-  // Get fresh status from server to be sure
+  // Get fresh status from server to verify
   callServer("getSelfEvaluation", { empCode: empCode }).then(function(dataResult) {
-    var latestStatus = (dataResult.evaluations && dataResult.evaluations.length > 0) ? 
-                       dataResult.evaluations[dataResult.evaluations.length - 1].status : "";
+    var latestStatus = "";
     
-    // If status is not "Draft" and not empty, it's submitted/locked
-    if (latestStatus !== "" && latestStatus !== "Draft") {
+    // Check if evaluations exist and get status
+    if (dataResult.evaluations && dataResult.evaluations.length > 0) {
+      latestStatus = dataResult.evaluations[dataResult.evaluations.length - 1].status || "";
+    }
+    
+    console.log("Latest status from server:", latestStatus);
+    
+    // Determine if the evaluation is locked/submitted
+    // Locked if status is NOT empty and NOT "Draft"
+    var isLocked = (latestStatus !== "" && latestStatus !== "Draft");
+    
+    if (isLocked) {
       currentSelfEvalIsEditable = false;
       currentSelfEvalIsSubmitted = true;
+    } else {
+      currentSelfEvalIsEditable = true;
+      currentSelfEvalIsSubmitted = false;
     }
+    
+    console.log("Modal editable:", currentSelfEvalIsEditable, "Submitted:", currentSelfEvalIsSubmitted);
     
     window.currentUserRole = authenticatedUser ? authenticatedUser.position : null;
     document.getElementById('selfEvalModalTitle').innerHTML = 'Self Evaluation - ' + escapeHtml(empName);
@@ -864,9 +878,13 @@ function openSelfEvaluationModal(empCode, empName, isEditable, isSubmitted) {
       var latest = (dataResult2.evaluations && dataResult2.evaluations.length > 0) ? dataResult2.evaluations[dataResult2.evaluations.length - 1] : null;
       var employeeMaster = masterResult.success ? masterResult.employee : null;
       renderSelfEvalModalContent(latest, employeeMaster);
-    }).catch(function(error) { console.error(error); renderSelfEvalModalContent(null, null); });
+    }).catch(function(error) { 
+      console.error(error); 
+      renderSelfEvalModalContent(null, null); 
+    });
   }).catch(function(error) {
     console.error(error);
+    // Even on error, keep the original editable state
     renderSelfEvalModalContent(null, null);
   });
 }
