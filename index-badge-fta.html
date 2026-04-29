@@ -1922,13 +1922,11 @@ function loadEmployeesByCentre(centre, workplaceFilter) {
 }
 
 function displayVHEmployeeCards(employees, workplaceFilter) {
-  // Filter by workplace if needed
   var filteredByWorkplace = employees;
   if (workplaceFilter && workplaceFilter !== '') {
     filteredByWorkplace = employees.filter(function(emp) { return emp.workplace === workplaceFilter; });
   }
   
-  // Get only completed employees (Assessed-UH or Complete)
   var completeEmployees = filteredByWorkplace.filter(function(emp) {
     return emp.status === "Complete" || emp.status === "Assessed" || emp.status === "Assessed-UH";
   });
@@ -1962,7 +1960,6 @@ function displayVHEmployeeCards(employees, workplaceFilter) {
     var pagScore = item.paginationScore;
     var othScore = item.otherWorkScore;
     
-    // DEFINE isComplete HERE - inside the loop for each employee
     var isComplete = (emp.status === "Complete");
     
     var pagPercent = teamPaginationScore > 0 ? Math.round((pagScore / teamPaginationScore) * 100) : 0;
@@ -1989,25 +1986,20 @@ function displayVHEmployeeCards(employees, workplaceFilter) {
     var vhRemark = emp.vhEvaluation ? (emp.vhEvaluation.remark || '') : '';
     
     var perfOptions = '';
-    for (var p = 1; p <= 10; p++) {
-      perfOptions += '<option value="' + p + '" ' + (vhPerformanceRating == p ? 'selected' : '') + '>' + p + '</option>';
+    var ratingValues = [1, 2, 3, 4, 5, 6, 7, 7.5, 8, 8.5, 9, 9.5, 10];
+    for (var r = 0; r < ratingValues.length; r++) {
+      var val = ratingValues[r];
+      var selected = (vhPerformanceRating == val) ? 'selected' : '';
+      perfOptions += '<option value="' + val + '" ' + selected + '>' + val + '</option>';
     }
     
-    var workloadChips = '';
-    var dw = emp.dailyWorkload || {};
-    var workloadItems = [];
-    if (dw.main_full_page_design) workloadItems.push(dw.main_full_page_design + ' Main Full');
-    if (dw.main_page_alter_ad_schedule) workloadItems.push(dw.main_page_alter_ad_schedule + ' Main Alter Ad');
-    if (dw.main_page_alter_news_update) workloadItems.push(dw.main_page_alter_news_update + ' Main Alter News');
-    if (dw.hello_full_page_design) workloadItems.push(dw.hello_full_page_design + ' Hello Full');
-    if (dw.display_ad_design) workloadItems.push(dw.display_ad_design + ' Display Ad');
-    if (dw.supplement_design) workloadItems.push(dw.supplement_design + ' Supplement');
+    // FULL DAILY WORKLOAD HTML
+    var dailyWorkloadHtml = generateDailyWorkloadHTML(emp.dailyWorkload);
     
-    for (var w = 0; w < Math.min(workloadItems.length, 5); w++) {
-      workloadChips += '<span class="workload-chip" style="background:#eef2ff; padding:4px 10px; border-radius:20px; font-size:11px; display:inline-block; margin:2px;">📄 ' + workloadItems[w] + '</span>';
-    }
+    // TEAM WORKLOAD
+    var teamWorkloadDisplay = formatTeamWorkloadDisplay(emp.teamWorkload);
+    var teamWorkloadHtml = teamWorkloadDisplay ? '<div class="workload-line" style="background: #e8f4fd; margin: 8px 0;"><i class="fa fa-tasks"></i> ' + teamWorkloadDisplay + '</div>' : '';
     
-    // Get Job Description and Special Projects text
     var jobDescription = '', specialFull = '';
     if (emp.specialProjects) {
       if (typeof emp.specialProjects === 'object') {
@@ -2029,92 +2021,90 @@ function displayVHEmployeeCards(employees, workplaceFilter) {
     var specialProjectsHtml = specialFull ? '<div style="margin-top: 8px;"><i class="fa fa-rocket"></i> <strong>Special Projects & Initiatives:</strong><div style="white-space: pre-wrap; margin-top: 5px; font-size: 12px; background: #fff8e1; padding: 8px; border-radius: 6px;">' + escapeHtml(specialFull) + '</div></div>' : '';
     
     html += `
-  <div class="employee-card" style="background: white; border: 1px solid #e0e0e0; border-radius: 12px; margin-bottom: 24px; padding: 18px; position: relative;">
-    ${isComplete ? '<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80px; height: 80px; background: #28a745; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 20px rgba(0,0,0,0.3); z-index: 20; border: 3px solid #34ce57;"><i class="fa fa-check" style="color: white; font-size: 45px;"></i></div>' : ''}
-    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid #eee;">
-      <div>
-        <strong style="font-size: 16px; color: #1e3c72;"><i class="fa fa-user-circle"></i> ${escapeHtml(emp.name)}</strong>
-        <span style="font-size: 12px; color: #888; margin-left: 5px;">(${escapeHtml(emp.designation || 'N/A')})</span><br>
-        <small><i class="fa fa-map-marker"></i> ${escapeHtml(emp.workplace || 'N/A')} | <i class="fa fa-id-card"></i> ${escapeHtml(emp.code)}</small>
-      </div>
-      <div style="text-align: right;">
-        <button class="btn btn-sm btn-info" onclick="openSelfEvaluationModal('${emp.code}', '${escapeHtml(emp.name)}', true, false)" style="margin-right: 5px;">
-          <i class="fa fa-star"></i> Self-Evaluation
-        </button>
-        <button class="btn btn-sm btn-primary" onclick="openHODEvalForVerticalHead('${emp.code}', '${escapeHtml(emp.name)}')">
-          <i class="fa fa-users"></i> HOD-Evaluation
-        </button>
-      </div>
-    </div>
-    
-    <!-- Workload Section -->
-    <div style="background: #f1f5f9; border-radius: 12px; padding: 10px 14px; margin-bottom: 18px;">
-      <div><i class="fa fa-tasks"></i> <strong>Workload:</strong> ${workloadChips || '—'}</div>
-      ${jobDescriptionHtml}
-      ${specialProjectsHtml}
-    </div>
-    
-    <div style="display: flex; flex-wrap: wrap; gap: 20px;">
-      <div style="flex: 1; min-width: 280px; display: flex; flex-direction: column; gap: 20px;">
-        <div style="background: #f8fafc; border-radius: 16px; padding: 16px; border: 1px solid #e2e8f0;">
-          <div><i class="fa fa-star" style="color:#1e3c72;"></i> <strong>📋 HOD Evaluation</strong></div>
-          <div style="margin: 10px 0;">
-            <span>⭐ Score: <strong>${performanceOutOf10}/10</strong></span>
-            <span style="margin-left: 12px; background: ${levelColor}; color: ${levelColor === '#ffc107' ? '#333' : 'white'}; padding: 2px 10px; border-radius: 20px; font-size: 11px; font-weight: bold;">${levelText}</span>
+      <div class="employee-card" style="background: white; border: 1px solid #e0e0e0; border-radius: 12px; margin-bottom: 24px; padding: 18px; position: relative;">
+        ${isComplete ? '<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80px; height: 80px; background: #28a745; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 20px rgba(0,0,0,0.3); z-index: 20; border: 3px solid #34ce57;"><i class="fa fa-check" style="color: white; font-size: 45px;"></i></div>' : ''}
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid #eee;">
+          <div>
+            <strong style="font-size: 16px; color: #1e3c72;"><i class="fa fa-user-circle"></i> ${escapeHtml(emp.name)}</strong>
+            <span style="font-size: 12px; color: #888; margin-left: 5px;">(${escapeHtml(emp.designation || 'N/A')})</span><br>
+            <small><i class="fa fa-map-marker"></i> ${escapeHtml(emp.workplace || 'N/A')} | <i class="fa fa-id-card"></i> ${escapeHtml(emp.code)}</small><br>
+            ${teamWorkloadHtml}
           </div>
-          <div style="background: white; padding: 8px 12px; border-radius: 12px; font-size: 12px; color: #2c3e50; border-left: 3px solid #1e3c72;">
-            💬 ${emp.hodComments ? escapeHtml(emp.hodComments) : 'No comments yet'}
+          <div style="text-align: right;">
+            <button class="btn btn-sm btn-info" onclick="openSelfEvaluationModal('${emp.code}', '${escapeHtml(emp.name)}', true, false)" style="margin-right: 5px;">
+              <i class="fa fa-star"></i> Self-Evaluation
+            </button>
+            <button class="btn btn-sm btn-primary" onclick="openHODEvalForVerticalHead('${emp.code}', '${escapeHtml(emp.name)}')">
+              <i class="fa fa-users"></i> HOD-Evaluation
+            </button>
           </div>
         </div>
         
-        <div style="background: #f8fafc; border-radius: 16px; padding: 16px; border: 1px solid #e2e8f0;">
-          <div><i class="fa fa-flag" style="color:#e68a00;"></i> <strong>🚩 Vertical Head Evaluation</strong></div>
-          <div style="margin-top: 10px;">
-            ${isComplete ? '<div class="alert alert-success" style="margin-bottom: 10px;"><i class="fa fa-check-circle"></i> Evaluation is complete. No further changes allowed.</div>' : ''}
-            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 12px;">
-              <div style="display: flex; align-items: center; gap: 8px;">
-                <span style="font-size: 12px; font-weight: 500;">🎯 Rating:</span>
-                <select id="vh_performance_${emp.code}" class="form-control" style="width: 65px; display: inline-block; font-size: 12px; padding: 3px 5px;" onchange="updateAssessmentLevel('${emp.code}')" ${isComplete ? 'disabled' : ''}>
-                  <option value="">--</option>
-                  ${perfOptions}
-                </select>
-              </div>
-              <div style="display: flex; align-items: center; gap: 8px;">
-                <span style="font-size: 12px; font-weight: 500;">📊 Level:</span>
-                <input type="text" id="vh_level_display_${emp.code}" class="form-control" value="${escapeHtml(vhOverallLevel)}" readonly style="width: 160px; background-color: #eef2ff; font-size: 11px; padding: 3px 8px;">
-                <input type="hidden" id="vh_level_${emp.code}" value="${escapeHtml(vhOverallLevel)}">
-              </div>
-            </div>
-            <textarea id="vh_remark_${emp.code}" class="form-control" rows="2" style="resize: vertical; font-size: 12px; margin-bottom: 10px;" placeholder="Enter your remark..." ${isComplete ? 'disabled' : ''}>${escapeHtml(vhRemark)}</textarea>
-            ${isComplete ? '<div style="text-align: right; margin-top: 10px;"><span class="label label-success" style="font-size: 14px; padding: 8px 15px;"><i class="fa fa-check-circle"></i> Evaluation Complete ✓</span></div>' : '<div style="text-align: right;"><button class="btn btn-sm btn-success" onclick="saveVHEvaluation(\'' + emp.code + '\')" style="padding: 3px 12px; font-size: 12px;"><i class="fa fa-save"></i> Save</button><button class="btn btn-sm btn-default" onclick="clearVHEvaluation(\'' + emp.code + '\')" style="padding: 3px 12px; font-size: 12px; margin-left: 5px;"><i class="fa fa-undo"></i> Clear</button></div>'}
-          </div>
-        </div>
-      </div>
-      
-      <div style="flex: 1; min-width: 240px; display: flex; flex-direction: column; gap: 12px;">
-        <div style="background: #f8fafc; border-radius: 14px; padding: 12px; border: 1px solid #e2e8f0; text-align: center;">
-          <div style="font-weight: 600; font-size: 13px; margin-bottom: 8px;">📄 Pagination Contribution Out of Total Pages</div>
-          <div style="display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap;">
-            <div style="width: 100px; height: 100px; border-radius: 50%; background: ${pagGrad}; position: relative; flex-shrink: 0;">
-              <span style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 13px; color: #1e3c72;">${pagPercent}%</span>
-            </div>
-            <div style="font-size: 13px; font-weight: 500; color: #1e3c72;">${pagScore.toFixed(1)} <span style="font-size: 10px; font-weight: normal; color: #666;">points</span></div>
-          </div>
-        </div>
+        ${dailyWorkloadHtml}
+        ${jobDescriptionHtml}
+        ${specialProjectsHtml}
         
-        <div style="background: #f8fafc; border-radius: 14px; padding: 12px; border: 1px solid #e2e8f0; text-align: center;">
-          <div style="font-weight: 600; font-size: 13px; margin-bottom: 8px;">🎨 Ad Design, Event Creative, Photo, PDF etc.</div>
-          <div style="display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap;">
-            <div style="width: 100px; height: 100px; border-radius: 50%; background: ${othGrad}; position: relative; flex-shrink: 0;">
-              <span style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 13px; color: #e68a00;">${othPercent}%</span>
+        <div style="display: flex; flex-wrap: wrap; gap: 20px; margin-top: 15px;">
+          <div style="flex: 1; min-width: 280px; display: flex; flex-direction: column; gap: 20px;">
+            <div style="background: #f8fafc; border-radius: 16px; padding: 16px; border: 1px solid #e2e8f0;">
+              <div><i class="fa fa-star" style="color:#1e3c72;"></i> <strong>📋 HOD Evaluation</strong></div>
+              <div style="margin: 10px 0;">
+                <span>⭐ Score: <strong>${performanceOutOf10}/10</strong></span>
+                <span style="margin-left: 12px; background: ${levelColor}; color: ${levelColor === '#ffc107' ? '#333' : 'white'}; padding: 2px 10px; border-radius: 20px; font-size: 11px; font-weight: bold;">${levelText}</span>
+              </div>
+              <div style="background: white; padding: 8px 12px; border-radius: 12px; font-size: 12px; color: #2c3e50; border-left: 3px solid #1e3c72;">
+                💬 ${emp.hodComments ? escapeHtml(emp.hodComments) : 'No comments yet'}
+              </div>
             </div>
-            <div style="font-size: 13px; font-weight: 500; color: #e68a00;">${othScore.toFixed(1)} <span style="font-size: 10px; font-weight: normal; color: #666;">points</span></div>
+            
+            <div style="background: #f8fafc; border-radius: 16px; padding: 16px; border: 1px solid #e2e8f0;">
+              <div><i class="fa fa-flag" style="color:#e68a00;"></i> <strong>🚩 Vertical Head Evaluation</strong></div>
+              <div style="margin-top: 10px;">
+                ${isComplete ? '<div class="alert alert-success" style="margin-bottom: 10px;"><i class="fa fa-check-circle"></i> Evaluation is complete. No further changes allowed.</div>' : ''}
+                <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 12px;">
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 12px; font-weight: 500;">🎯 Rating:</span>
+                    <select id="vh_performance_${emp.code}" class="form-control" style="width: 65px; display: inline-block; font-size: 12px; padding: 3px 5px;" onchange="updateAssessmentLevel('${emp.code}')" ${isComplete ? 'disabled' : ''}>
+                      <option value="">--</option>
+                      ${perfOptions}
+                    </select>
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 12px; font-weight: 500;">📊 Level:</span>
+                    <input type="text" id="vh_level_display_${emp.code}" class="form-control" value="${escapeHtml(vhOverallLevel)}" readonly style="width: 160px; background-color: #f0f7ff; font-size: 11px; padding: 3px 8px;">
+                    <input type="hidden" id="vh_level_${emp.code}" value="${escapeHtml(vhOverallLevel)}">
+                  </div>
+                </div>
+                <textarea id="vh_remark_${emp.code}" class="form-control" rows="2" style="resize: vertical; font-size: 12px; margin-bottom: 10px;" placeholder="Enter your remark..." ${isComplete ? 'disabled' : ''}>${escapeHtml(vhRemark)}</textarea>
+                ${isComplete ? '<div style="text-align: right; margin-top: 10px;"><span class="label label-success" style="font-size: 14px; padding: 8px 15px;"><i class="fa fa-check-circle"></i> Evaluation Complete ✓</span></div>' : '<div style="text-align: right;"><button class="btn btn-sm btn-success" onclick="saveVHEvaluation(\'' + emp.code + '\')" style="padding: 3px 12px; font-size: 12px;"><i class="fa fa-save"></i> Save</button><button class="btn btn-sm btn-default" onclick="clearVHEvaluation(\'' + emp.code + '\')" style="padding: 3px 12px; font-size: 12px; margin-left: 5px;"><i class="fa fa-undo"></i> Clear</button></div>'}
+              </div>
+            </div>
+          </div>
+          
+          <div style="flex: 1; min-width: 240px; display: flex; flex-direction: column; gap: 12px;">
+            <div style="background: #f8fafc; border-radius: 14px; padding: 12px; border: 1px solid #e2e8f0; text-align: center;">
+              <div style="font-weight: 600; font-size: 13px; margin-bottom: 8px;">📄 Pagination Contribution</div>
+              <div style="display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap;">
+                <div style="width: 100px; height: 100px; border-radius: 50%; background: ${pagGrad}; position: relative; flex-shrink: 0;">
+                  <span style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 13px; color: #1e3c72;">${pagPercent}%</span>
+                </div>
+                <div style="font-size: 13px; font-weight: 500; color: #1e3c72;">${pagScore.toFixed(1)} <span style="font-size: 10px; font-weight: normal; color: #666;">points</span></div>
+              </div>
+            </div>
+            
+            <div style="background: #f8fafc; border-radius: 14px; padding: 12px; border: 1px solid #e2e8f0; text-align: center;">
+              <div style="font-weight: 600; font-size: 13px; margin-bottom: 8px;">🎨 Other Creative Work</div>
+              <div style="display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap;">
+                <div style="width: 100px; height: 100px; border-radius: 50%; background: ${othGrad}; position: relative; flex-shrink: 0;">
+                  <span style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 13px; color: #e68a00;">${othPercent}%</span>
+                </div>
+                <div style="font-size: 13px; font-weight: 500; color: #e68a00;">${othScore.toFixed(1)} <span style="font-size: 10px; font-weight: normal; color: #666;">points</span></div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  </div>
-`;
+    `;
   }
   
   html += '</div></div>';
