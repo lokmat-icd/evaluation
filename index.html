@@ -514,10 +514,17 @@
         </div>
         
         <div id="unitHeadProtectedContent" style="display: none;">
-          <div id="unitHeadWorkplaceFilters" class="filter-buttons-group" style="display: none;"></div>
-          <div id="unitHeadTeamList"></div>
-          <div id="unitHeadMessage" class="alert"></div>
-        </div>
+		  <!-- ADD THIS TYPE SUMMARY BAR -->
+		  <div id="unitHeadTypeSummary" class="type-summary-bar" style="display: none; gap: 20px; margin-bottom: 20px; padding: 12px 20px; background: #e8f4fd; border-radius: 12px; border: 1px solid #cce5ff; align-items: center;">
+			<span><strong><i class="fa fa-users"></i> 📊 Overall Employee Type Summary (All Employees)</strong></span>
+			<span id="unitHeadFtaCount" class="badge" style="background: #1e3c72; padding: 6px 12px; border-radius: 20px; color: white;">FTA: 0</span>
+			<span id="unitHeadVoucherCount" class="badge" style="background: #ff9800; padding: 6px 12px; border-radius: 20px; color: white;">Voucher: 0</span>
+			<span id="unitHeadCnfCount" class="badge" style="background: #28a745; padding: 6px 12px; border-radius: 20px; color: white;">CNF: 0</span>
+		  </div>
+		  <div id="unitHeadWorkplaceFilters" class="filter-buttons-group" style="display: none;"></div>
+		  <div id="unitHeadTeamList"></div>
+		  <div id="unitHeadMessage" class="alert"></div>
+		</div>
       </div>
           
         <!-- VERTICAL HEAD TAB -->
@@ -549,11 +556,18 @@
           </div>
           
           <div id="vhProtectedContent" style="display: none;">
-            <div id="centreButtonsContainer" class="filter-buttons-group"></div>
-            <div id="vhWorkplaceFilters" class="filter-buttons-group" style="display: none;"></div>
-            <div id="employeeList"></div>
-            <div id="vhMessage" class="alert"></div>
-          </div>
+		  <!-- ADD THIS TYPE SUMMARY BAR FOR VERTICAL HEAD -->
+		  <div id="vhTypeSummary" class="type-summary-bar" style="display: none; gap: 20px; margin-bottom: 20px; padding: 12px 20px; background: #e8f4fd; border-radius: 12px; border: 1px solid #cce5ff; align-items: center;">
+			<span><strong><i class="fa fa-users"></i> 📊 Overall Employee Type Summary (All Employees)</strong></span>
+			<span id="vhFtaCount" class="badge" style="background: #1e3c72; padding: 6px 12px; border-radius: 20px; color: white;">FTA: 0</span>
+			<span id="vhVoucherCount" class="badge" style="background: #ff9800; padding: 6px 12px; border-radius: 20px; color: white;">Voucher: 0</span>
+			<span id="vhCnfCount" class="badge" style="background: #28a745; padding: 6px 12px; border-radius: 20px; color: white;">CNF: 0</span>
+		  </div>
+		  <div id="centreButtonsContainer" class="filter-buttons-group"></div>
+		  <div id="vhWorkplaceFilters" class="filter-buttons-group" style="display: none;"></div>
+		  <div id="employeeList"></div>
+		  <div id="vhMessage" class="alert"></div>
+		</div>
         </div>
     </div>
   </div>
@@ -633,7 +647,7 @@
   
   <script>
 // ==================== CONFIGURATION ====================
-const API_URL = "https://script.google.com/macros/s/AKfycbwCB5Z4mZkBD04VukaauwoUm1DiMp8Xwrz3VDJ9WO-e8ZedticvP2rUyGtXMQ_7QRZbGA/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbwZeu0cz9Id5R_MzkQ-VafBCiCygkAoNsf0WP2OM5ublG6f_zfc9jX8WffVFPVtXc9W/exec";
 
 // ==================== GLOBAL VARIABLES ====================
 var currentEvalEmp = null;
@@ -790,43 +804,89 @@ function openSelfEvaluationFromSelfTab() {
   
   callServer("checkEmployeeExists", { empCode: empCode }).then(function(checkResult) {
     if (checkResult.exists) {
+      // FIX: Check if status is empty or "Draft" - both are editable
+      var status = checkResult.status || "";
+      var isAlreadySubmitted = (status !== "" && status !== "Draft");
+      
       callServer("checkIfICDUserWithStatus", { empCode: empCode }).then(function(icdStatus) {
         if (icdStatus.isICD && icdStatus.teamWorkloadSaved !== 'Yes') {
           showRegistrationModal(empCode);
         } else {
-          var isCompleted = checkResult.completion === 'Yes';
           callServer("getEmployeeBasicInfo", { empCode: empCode }).then(function(empInfo) {
             var empName = empInfo.success ? empInfo.name : empCode;
-            openSelfEvaluationModal(empCode, empName, true, isCompleted);
-          }).catch(function() { openSelfEvaluationModal(empCode, empCode, true, isCompleted); });
+            // isEditable = true, isSubmitted = isAlreadySubmitted (false for empty or draft)
+            openSelfEvaluationModal(empCode, empName, true, isAlreadySubmitted);
+          }).catch(function() { 
+            openSelfEvaluationModal(empCode, empCode, true, isAlreadySubmitted); 
+          });
         }
-      }).catch(function() { openSelfEvaluationModal(empCode, empCode, true, checkResult.completion === 'Yes'); });
+      }).catch(function() { 
+        openSelfEvaluationModal(empCode, empCode, true, isAlreadySubmitted); 
+      });
     } else {
       showToast('Employee code not found. Please contact HR.', 'warning');
     }
-  }).catch(function(error) { showToast('Error checking employee: ' + error.message, 'error'); });
+  }).catch(function(error) { 
+    showToast('Error checking employee: ' + error.message, 'error'); 
+  });
 }
 
 function openSelfEvaluationModal(empCode, empName, isEditable, isSubmitted) {
   currentSelfEvalEmpCode = empCode;
+  
+  // FIRST, set initial values based on the passed parameters
   currentSelfEvalIsEditable = isEditable && !isSubmitted;
   currentSelfEvalIsSubmitted = isSubmitted;
-  window.currentUserRole = authenticatedUser ? authenticatedUser.position : null;
-  document.getElementById('selfEvalModalTitle').innerHTML = 'Self Evaluation - ' + escapeHtml(empName);
-  document.getElementById('selfEvalModalBody').innerHTML = '<div class="loading"><i class="fa fa-spinner fa-spin"></i> Loading self evaluation data...</div>';
-  var saveBtn = document.getElementById('selfEvalSaveBtn');
-  if (saveBtn) saveBtn.style.display = currentSelfEvalIsEditable ? 'inline-block' : 'none';
-  var draftBtn = document.getElementById('selfEvalDraftBtn');
-  if (draftBtn) draftBtn.style.display = currentSelfEvalIsEditable ? 'inline-block' : 'none';
-  $('#selfEvalModal').modal('show');
   
-  Promise.all([callServer("getSelfEvaluation", { empCode: empCode }), callServer("getEmployeeFromMaster", { empCode: empCode })]).then(function(results) {
-    var dataResult = results[0];
-    var masterResult = results[1];
-    var latest = (dataResult.evaluations && dataResult.evaluations.length > 0) ? dataResult.evaluations[dataResult.evaluations.length - 1] : null;
-    var employeeMaster = masterResult.success ? masterResult.employee : null;
-    renderSelfEvalModalContent(latest, employeeMaster);
-  }).catch(function(error) { console.error(error); renderSelfEvalModalContent(null, null); });
+  // Get fresh status from server to verify
+  callServer("getSelfEvaluation", { empCode: empCode }).then(function(dataResult) {
+    var latestStatus = "";
+    
+    // Check if evaluations exist and get status
+    if (dataResult.evaluations && dataResult.evaluations.length > 0) {
+      latestStatus = dataResult.evaluations[dataResult.evaluations.length - 1].status || "";
+    }
+    
+    console.log("Latest status from server:", latestStatus);
+    
+    // Determine if the evaluation is locked/submitted
+    // Locked if status is NOT empty and NOT "Draft"
+    var isLocked = (latestStatus !== "" && latestStatus !== "Draft");
+    
+    if (isLocked) {
+      currentSelfEvalIsEditable = false;
+      currentSelfEvalIsSubmitted = true;
+    } else {
+      currentSelfEvalIsEditable = true;
+      currentSelfEvalIsSubmitted = false;
+    }
+    
+    console.log("Modal editable:", currentSelfEvalIsEditable, "Submitted:", currentSelfEvalIsSubmitted);
+    
+    window.currentUserRole = authenticatedUser ? authenticatedUser.position : null;
+    document.getElementById('selfEvalModalTitle').innerHTML = 'Self Evaluation - ' + escapeHtml(empName);
+    document.getElementById('selfEvalModalBody').innerHTML = '<div class="loading"><i class="fa fa-spinner fa-spin"></i> Loading self evaluation data...</div>';
+    var saveBtn = document.getElementById('selfEvalSaveBtn');
+    if (saveBtn) saveBtn.style.display = currentSelfEvalIsEditable ? 'inline-block' : 'none';
+    var draftBtn = document.getElementById('selfEvalDraftBtn');
+    if (draftBtn) draftBtn.style.display = currentSelfEvalIsEditable ? 'inline-block' : 'none';
+    $('#selfEvalModal').modal('show');
+    
+    Promise.all([Promise.resolve(dataResult), callServer("getEmployeeFromMaster", { empCode: empCode })]).then(function(results) {
+      var dataResult2 = results[0];
+      var masterResult = results[1];
+      var latest = (dataResult2.evaluations && dataResult2.evaluations.length > 0) ? dataResult2.evaluations[dataResult2.evaluations.length - 1] : null;
+      var employeeMaster = masterResult.success ? masterResult.employee : null;
+      renderSelfEvalModalContent(latest, employeeMaster);
+    }).catch(function(error) { 
+      console.error(error); 
+      renderSelfEvalModalContent(null, null); 
+    });
+  }).catch(function(error) {
+    console.error(error);
+    // Even on error, keep the original editable state
+    renderSelfEvalModalContent(null, null);
+  });
 }
 
 function renderSelfEvalModalContent(evalData, employeeMasterData) {
@@ -886,8 +946,10 @@ function updateSelfModalLiveScore() {
 function saveSelfEvaluationFromModal(isDraft) {
   if (!currentSelfEvalIsEditable) { showToast('This evaluation is locked and cannot be edited.', 'warning'); return; }
   if (!currentSelfEvalEmpCode) return;
+  
   var kraValues = {};
   kraDefinitions.forEach(function(kra) { var select = document.getElementById('modal_kra_' + kra.id); kraValues[kra.id] = select ? parseFloat(select.value) || 0 : 0; });
+  
   var email = document.getElementById('modal_self_email') ? document.getElementById('modal_self_email').value : '';
   var dutyHour = document.getElementById('modal_self_duty_hour') ? document.getElementById('modal_self_duty_hour').value : '';
   var dutyMinute = document.getElementById('modal_self_duty_minute') ? document.getElementById('modal_self_duty_minute').value : '';
@@ -896,20 +958,94 @@ function saveSelfEvaluationFromModal(isDraft) {
   var jobDescription = document.getElementById('modal_job_description') ? document.getElementById('modal_job_description').value : '';
   var specialProjectsText = document.getElementById('modal_special_projects') ? document.getElementById('modal_special_projects').value : '';
   var mColumnData = JSON.stringify({ job_description: jobDescription, special_projects: specialProjectsText });
-  var isFromSelfTab = (!authenticatedUser && !authenticatedUnitHead);
+  
+  // FIX: Properly detect if this is from Self Tab
+  var isFromSelfTab = (document.getElementById('self').className.indexOf('active') !== -1);
+  var isFromVH = (window.currentUserRole === 'Vertical Head');
+  
+  // Validate email only for non-draft from Self tab
   if (!isDraft && isFromSelfTab) { if (!email) { showToast('Please enter your email address', 'error'); return; } }
-  if (!isDraft) { var allRatingsValid = true; for (var key in kraValues) { if (kraValues[key] < 1 || kraValues[key] > 5) { allRatingsValid = false; break; } } if (!allRatingsValid) { showToast('Please provide self ratings (1-5) for all 6 KRAs', 'error'); return; } }
-  var userRole = window.currentUserRole || (authenticatedUser ? authenticatedUser.position : null);
-  var isFromVH = (userRole === 'Vertical Head');
-  var status = isDraft ? "Draft" : "Pending";
-  if (isFromVH && !isDraft) status = null;
-  var formObject = { emp_code: currentSelfEvalEmpCode, email: email, duty_timings: dutyTimings, status: status, comments: "", m_column_data: mColumnData, page_layout: kraValues.page_layout, deadline_adherence: kraValues.deadline_adherence, quality_accuracy: kraValues.quality_accuracy, advertising_integration: kraValues.advertising_integration, platform_adaptation: kraValues.platform_adaptation, collaboration: kraValues.collaboration, main_full_page_design: parseInt(document.getElementById('modal_main_full_page_design')?.value) || 0, main_page_alter_ad_schedule: parseInt(document.getElementById('modal_main_page_alter_ad_schedule')?.value) || 0, main_page_alter_news_update: parseInt(document.getElementById('modal_main_page_alter_news_update')?.value) || 0, main_infographic: parseInt(document.getElementById('modal_main_infographic')?.value) || 0, hello_full_page_design: parseInt(document.getElementById('modal_hello_full_page_design')?.value) || 0, hello_page_alter_ad_schedule: parseInt(document.getElementById('modal_hello_page_alter_ad_schedule')?.value) || 0, hello_page_alter_news_update: parseInt(document.getElementById('modal_hello_page_alter_news_update')?.value) || 0, hello_infographic: parseInt(document.getElementById('modal_hello_infographic')?.value) || 0, display_ad_design: parseInt(document.getElementById('modal_display_ad_design')?.value) || 0, event_creative: parseInt(document.getElementById('modal_event_creative')?.value) || 0, supplement_design: parseInt(document.getElementById('modal_supplement_design')?.value) || 0, ai_image: parseInt(document.getElementById('modal_ai_image')?.value) || 0, photo_correction: parseInt(document.getElementById('modal_photo_correction')?.value) || 0, pdf_quality_check: parseInt(document.getElementById('modal_pdf_quality_check')?.value) || 0, epaper_page_upload: parseInt(document.getElementById('modal_epaper_page_upload')?.value) || 0, news_article_typing: parseInt(document.getElementById('modal_news_article_typing')?.value) || 0 };
-  var serverFunction = isFromVH ? 'updateSelfEvaluation' : 'saveSelfEvaluation';
-  if (serverFunction === 'updateSelfEvaluation') delete formObject.status;
+  
+  // Validate all ratings for non-draft
+  if (!isDraft) { 
+    var allRatingsValid = true; 
+    for (var key in kraValues) { 
+      if (kraValues[key] < 1 || kraValues[key] > 5) { allRatingsValid = false; break; } 
+    } 
+    if (!allRatingsValid) { showToast('Please provide self ratings (1-5) for all 6 KRAs', 'error'); return; } 
+  }
+  
+  // Set status based on mode
+  var status = "";
+  if (isDraft) {
+    status = "Draft";
+  } else if (isFromSelfTab) {
+    status = "Pending";
+  } else if (isFromVH) {
+    // Vertical Head saving - don't change status
+    status = null;
+  } else {
+    status = "Pending";
+  }
+  
+  var formObject = { 
+    emp_code: currentSelfEvalEmpCode, 
+    email: email, 
+    duty_timings: dutyTimings, 
+    status: status, 
+    comments: "", 
+    m_column_data: mColumnData, 
+    page_layout: kraValues.page_layout, 
+    deadline_adherence: kraValues.deadline_adherence, 
+    quality_accuracy: kraValues.quality_accuracy, 
+    advertising_integration: kraValues.advertising_integration, 
+    platform_adaptation: kraValues.platform_adaptation, 
+    collaboration: kraValues.collaboration, 
+    main_full_page_design: parseInt(document.getElementById('modal_main_full_page_design')?.value) || 0, 
+    main_page_alter_ad_schedule: parseInt(document.getElementById('modal_main_page_alter_ad_schedule')?.value) || 0, 
+    main_page_alter_news_update: parseInt(document.getElementById('modal_main_page_alter_news_update')?.value) || 0, 
+    main_infographic: parseInt(document.getElementById('modal_main_infographic')?.value) || 0, 
+    hello_full_page_design: parseInt(document.getElementById('modal_hello_full_page_design')?.value) || 0, 
+    hello_page_alter_ad_schedule: parseInt(document.getElementById('modal_hello_page_alter_ad_schedule')?.value) || 0, 
+    hello_page_alter_news_update: parseInt(document.getElementById('modal_hello_page_alter_news_update')?.value) || 0, 
+    hello_infographic: parseInt(document.getElementById('modal_hello_infographic')?.value) || 0, 
+    display_ad_design: parseInt(document.getElementById('modal_display_ad_design')?.value) || 0, 
+    event_creative: parseInt(document.getElementById('modal_event_creative')?.value) || 0, 
+    supplement_design: parseInt(document.getElementById('modal_supplement_design')?.value) || 0, 
+    ai_image: parseInt(document.getElementById('modal_ai_image')?.value) || 0, 
+    photo_correction: parseInt(document.getElementById('modal_photo_correction')?.value) || 0, 
+    pdf_quality_check: parseInt(document.getElementById('modal_pdf_quality_check')?.value) || 0, 
+    epaper_page_upload: parseInt(document.getElementById('modal_epaper_page_upload')?.value) || 0, 
+    news_article_typing: parseInt(document.getElementById('modal_news_article_typing')?.value) || 0 
+  };
+  
+  // Choose server function
+  var serverFunction = 'saveSelfEvaluation';
+  if (isFromVH && !isDraft) {
+    serverFunction = 'updateSelfEvaluation';
+  }
+  
+  // Log for debugging
+  console.log("Saving with:", { serverFunction, status, isFromSelfTab, isFromVH });
+  
   callServer(serverFunction, formObject).then(function(result) {
-    if (result.success) { showToast(result.message, 'success'); $('#selfEvalModal').modal('hide'); if (!isDraft) { currentSelfEvalIsSubmitted = true; currentSelfEvalIsEditable = false; } if (currentSelectedCentre) loadEmployeesByCentre(currentSelectedCentre, currentSelectedWorkplace || ''); }
-    else showToast('Error: ' + result.message, 'error');
-  }).catch(function(error) { showToast('Error: ' + error.message, 'error'); });
+    if (result.success) { 
+      showToast(result.message, 'success'); 
+      $('#selfEvalModal').modal('hide'); 
+      if (!isDraft) { 
+        currentSelfEvalIsSubmitted = true; 
+        currentSelfEvalIsEditable = false; 
+      } 
+      // Refresh view if needed
+      if (currentSelectedCentre) loadEmployeesByCentre(currentSelectedCentre, currentSelectedWorkplace || ''); 
+      if (authenticatedUser && authenticatedUser.unit) loadEmployeesForICD(authenticatedUser.unit, authenticatedUser.editions);
+    } else {
+      showToast('Error: ' + result.message, 'error');
+    }
+  }).catch(function(error) { 
+    console.error("Save error:", error);
+    showToast('Error: ' + error.message, 'error'); 
+  });
 }
 
 // ==================== HOD AUTHENTICATION ====================
@@ -1004,12 +1140,18 @@ function displayHODEmployeeCards(employees, workplaceFilter) {
   var html = '<h4>Team Members <span class="badge">' + filteredEmployees.length + '</span></h4>';
   var loggedInEmpCode = authenticatedUser ? authenticatedUser.empCode : null;
   var isICDUser = (authenticatedUser && authenticatedUser.position === 'ICD');
+  
   for (var i = 0; i < filteredEmployees.length; i++) {
     var member = filteredEmployees[i];
     var isSelfCard = (isICDUser && loggedInEmpCode === member.code);
     var isUnitHeadApproved = (member.status === "Assessed-UH");
-    var statusClass = member.completion === 'Yes' ? 'status-submitted' : 'status-pending';
-    var statusText = member.completion === 'Yes' ? '✓ Self Evaluation Submitted' : '📝 Draft';
+    var isComplete = (member.status === "Complete");  // <-- NEW: Check for Complete status
+    
+    // OVERRIDE: If status is Complete, treat as approved for all badges
+    var effectiveUnitHeadApproved = isUnitHeadApproved || isComplete;
+    
+    var statusClass = (member.completion === 'Yes' || isComplete) ? 'status-submitted' : 'status-pending';
+    var statusText = (member.completion === 'Yes' || isComplete) ? '✓ Self Evaluation Submitted' : '📝 Draft';
     var workloadDisplay = formatTeamWorkloadDisplay(member.teamWorkload);
     var workloadHtml = workloadDisplay ? '<div class="workload-line"><i class="fa fa-tasks"></i> ' + workloadDisplay + '</div>' : '';
     var dailyWorkloadHtml = generateDailyWorkloadHTML(member.dailyWorkload);
@@ -1028,25 +1170,23 @@ function displayHODEmployeeCards(employees, workplaceFilter) {
     var jobDescriptionHtml = jobDescription ? '<div style="background: #f0f7ff; padding: 10px; margin: 10px 0; border-radius: 6px; border-left: 3px solid #1e3c72;"><strong><i class="fa fa-file-text"></i> 📋 Job Description:</strong><div style="white-space: pre-wrap; margin-top: 5px; font-size: 13px;">' + escapeHtml(jobDescription) + '</div></div>' : '';
     var specialProjectsHtml = specialProjectsText ? '<div style="background: #e8f4fd; padding: 10px; margin: 10px 0; border-radius: 6px; border-left: 3px solid #ff9800;"><strong><i class="fa fa-rocket"></i> 🚀 Special Projects & Initiatives:</strong><div style="white-space: pre-wrap; margin-top: 5px; font-size: 13px;">' + escapeHtml(specialProjectsText) + '</div></div>' : '';
     
-    var hodComplete = member.hodRatings && member.hodRatings.page_layout > 0 && member.hodRatings.deadline_adherence > 0 && member.hodRatings.quality_accuracy > 0 && member.hodRatings.advertising_integration > 0 && member.hodRatings.platform_adaptation > 0 && member.hodRatings.collaboration > 0;
-    var unitHeadApproved = (member.status === "Assessed-UH");
+    var hodComplete = (member.hodRatings && member.hodRatings.page_layout > 0 && member.hodRatings.deadline_adherence > 0 && member.hodRatings.quality_accuracy > 0 && member.hodRatings.advertising_integration > 0 && member.hodRatings.platform_adaptation > 0 && member.hodRatings.collaboration > 0) || isComplete;
+    var unitHeadApproved = (member.status === "Assessed-UH") || isComplete;
     var unitHeadStatusText = unitHeadApproved ? '✓ Approved' : '⏳ Pending';
     var unitHeadStatusClass = unitHeadApproved ? 'status-complete' : 'status-pending';
-    var vhComplete = member.vhEvaluation && member.vhEvaluation.performance_rating && member.vhEvaluation.performance_rating !== '';
+    var vhComplete = (member.vhEvaluation && member.vhEvaluation.performance_rating && member.vhEvaluation.performance_rating !== '') || isComplete;
     var canPrintPdf = vhComplete;
     
-    // BUTTON LOGIC - Updated: Disable if Unit Head has approved (Assessed-UH)
     var buttonHtml = '';
     if (isSelfCard) {
       buttonHtml = '<button class="btn btn-sm btn-info" onclick="openHODEvalForHODTab(\'' + escapeHtml(member.code) + '\', \'' + escapeHtml(member.name) + '\', true)"><i class="fa fa-eye"></i> View My Evaluation</button>';
-    } else if (isUnitHeadApproved) {
-      // Unit Head has already approved - DISABLE the Evaluate button
-      buttonHtml = '<button class="btn btn-sm btn-default" disabled style="opacity:0.6; cursor:not-allowed;" title="This employee has been approved by Unit Head. Evaluation is locked."><i class="fa fa-lock"></i> Locked (Approved by Unit Head)</button>';
+    } else if (effectiveUnitHeadApproved) {
+      buttonHtml = '<button class="btn btn-sm btn-default" disabled style="opacity:0.6; cursor:not-allowed;" title="This employee has been approved by Unit Head/Completed. Evaluation is locked."><i class="fa fa-lock"></i> Locked (Completed)</button>';
     } else {
       buttonHtml = '<button class="btn btn-sm btn-primary" onclick="openHODEvalForHODTab(\'' + escapeHtml(member.code) + '\', \'' + escapeHtml(member.name) + '\', false)"><i class="fa fa-star"></i> Evaluate</button>';
     }
     
-    html += '<div class="team-member-card" ' + (isSelfCard ? 'style="background: #f0f7ff; border-left: 4px solid #ff9800;"' : '') + (isUnitHeadApproved ? 'style="background: #e8f8e8; border-left: 4px solid #28a745;"' : '') + '><div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; margin-bottom: 10px;"><div style="flex: 1;"><strong style="font-size: 16px;"><i class="fa fa-user"></i> ' + escapeHtml(member.name) + '</strong>' + (isSelfCard ? '<span class="label label-warning" style="margin-left: 10px;"><i class="fa fa-user-circle"></i> You (ICD)</span>' : '') + (!isSelfCard && member.isICD ? '<span class="label label-info" style="margin-left: 10px; background-color: #ff9800;"><i class="fa fa-users"></i> ICD</span>' : '') + '<br><small><i class="fa fa-briefcase"></i> ' + escapeHtml(member.designation || 'N/A') + ' | <i class="fa fa-building"></i> ' + escapeHtml(member.unit) + '</small><br><small><i class="fa fa-map-marker"></i> Workplace: ' + escapeHtml(member.workplace || 'N/A') + ' | <i class="fa fa-id-card"></i> Code: ' + escapeHtml(member.code) + '</small>' + workloadHtml + '</div><div style="text-align: right;"><span class="remark-badge ' + statusClass + '">' + statusText + '</span><span class="remark-badge ' + (hodComplete ? 'status-complete' : 'status-pending') + '">HOD: ' + (hodComplete ? '✓ Complete' : '⏳ Pending') + '</span><span class="remark-badge ' + unitHeadStatusClass + '">Unit Head: ' + unitHeadStatusText + '</span><span class="remark-badge ' + (vhComplete ? 'status-complete' : 'status-pending') + '">VH: ' + (vhComplete ? '✓ Complete' : '⏳ Pending') + '</span></div></div>' + dailyWorkloadHtml + jobDescriptionHtml + specialProjectsHtml + '<div style="margin-top: 15px; text-align: right; border-top: 1px solid #eee; padding-top: 12px;">' + buttonHtml + (canPrintPdf ? '<button class="btn btn-sm btn-info" onclick="printEvaluationReport(\'' + escapeHtml(member.code) + '\', \'' + escapeHtml(member.name) + '\')"><i class="fa fa-print"></i> PDF Report</button>' : '<button class="btn btn-sm btn-default" disabled style="opacity: 0.5;" title="VH evaluation required first">PDF Report</button>') + '</div></div>';
+    html += '<div class="team-member-card" ' + (isSelfCard ? 'style="background: #f0f7ff; border-left: 4px solid #ff9800;"' : '') + (effectiveUnitHeadApproved ? 'style="background: #e8f8e8; border-left: 4px solid #28a745;"' : '') + '><div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; margin-bottom: 10px;"><div style="flex: 1;"><strong style="font-size: 16px;"><i class="fa fa-user"></i> ' + escapeHtml(member.name) + '</strong>' + (isSelfCard ? '<span class="label label-warning" style="margin-left: 10px;"><i class="fa fa-user-circle"></i> You (ICD)</span>' : '') + (!isSelfCard && member.isICD ? '<span class="label label-info" style="margin-left: 10px; background-color: #ff9800;"><i class="fa fa-users"></i> ICD</span>' : '') + '<br><small><i class="fa fa-briefcase"></i> ' + escapeHtml(member.designation || 'N/A') + ' | <i class="fa fa-building"></i> ' + escapeHtml(member.unit) + '</small><br><small><i class="fa fa-map-marker"></i> Workplace: ' + escapeHtml(member.workplace || 'N/A') + ' | <i class="fa fa-id-card"></i> Code: ' + escapeHtml(member.code) + '</small>' + workloadHtml + '</div><div style="text-align: right;"><span class="remark-badge ' + statusClass + '">' + statusText + '</span><span class="remark-badge ' + (hodComplete ? 'status-complete' : 'status-pending') + '">HOD: ' + (hodComplete ? '✓ Complete' : '⏳ Pending') + '</span><span class="remark-badge ' + unitHeadStatusClass + '">Unit Head: ' + unitHeadStatusText + '</span><span class="remark-badge ' + (vhComplete ? 'status-complete' : 'status-pending') + '">VH: ' + (vhComplete ? '✓ Complete' : '⏳ Pending') + '</span></div></div>' + dailyWorkloadHtml + jobDescriptionHtml + specialProjectsHtml + '<div style="margin-top: 15px; text-align: right; border-top: 1px solid #eee; padding-top: 12px;">' + buttonHtml + (canPrintPdf ? '<button class="btn btn-sm btn-info" onclick="printEvaluationReport(\'' + escapeHtml(member.code) + '\', \'' + escapeHtml(member.name) + '\')"><i class="fa fa-print"></i> PDF Report</button>' : '<button class="btn btn-sm btn-default" disabled style="opacity: 0.5;" title="VH evaluation required first">PDF Report</button>') + '</div></div>';
   }
   teamListDiv.innerHTML = html;
 }
@@ -1355,9 +1495,31 @@ function authenticateUnitHead() {
       document.getElementById('unitHeadProtectedContent').style.display = 'block';
       document.getElementById('unitHeadAuthSection').style.display = 'none';
       showToast(result.message, 'success');
+      
+      // ADD THIS LINE - Load overall type summary
+      loadOverallTypeSummary();
+      
       loadEmployeesForUnitHead(result.unit);
     } else { showToast(result.success ? 'Access denied. Unit Head access only.' : result.message, 'error'); }
   }).catch(function(error) { showToast('Authentication failed: ' + error.message, 'error'); });
+}
+
+function loadOverallTypeSummary() {
+  callServer("getAllEmployeesTypeCounts", {}).then(function(result) {
+    if (result.success) {
+      var ftaElement = document.getElementById('unitHeadFtaCount');
+      var voucherElement = document.getElementById('unitHeadVoucherCount');
+      var cnfElement = document.getElementById('unitHeadCnfCount');
+      var summaryBar = document.getElementById('unitHeadTypeSummary');
+      
+      if (ftaElement) ftaElement.innerHTML = 'FTA: ' + (result.ftaCount || 0);
+      if (voucherElement) voucherElement.innerHTML = 'Voucher: ' + (result.voucherCount || 0);
+      if (cnfElement) cnfElement.innerHTML = 'CNF: ' + (result.cnfCount || 0);
+      if (summaryBar) summaryBar.style.display = 'flex';
+    }
+  }).catch(function(error) {
+    console.error("Error loading type summary:", error);
+  });
 }
 
 function loadEmployeesForUnitHead(unitPrefix) {
@@ -1469,6 +1631,7 @@ function displayUnitHeadEmployeeCards(employees, workplaceFilter) {
     var isICDEmployee = member.isICD === true;
     var reportsDirectlyToUnitHead = (member.reporting_authority === unitHeadName);
     var needsUnitHeadEvaluation = isICDEmployee || reportsDirectlyToUnitHead;
+    var isComplete = (member.status === "Complete");  // <-- NEW: Check for Complete status
     
     var statusClass = member.completion === 'Yes' ? 'status-submitted' : 'status-pending';
     var statusText = member.completion === 'Yes' ? '✓ Self Evaluation Submitted' : '📝 Draft';
@@ -1476,7 +1639,6 @@ function displayUnitHeadEmployeeCards(employees, workplaceFilter) {
     var workloadHtml = workloadDisplay ? '<div class="workload-line"><i class="fa fa-tasks"></i> ' + workloadDisplay + '</div>' : '';
     var dailyWorkloadHtml = generateDailyWorkloadHTML(member.dailyWorkload);
     
-    // Get Job Description and Special Projects
     var jobDescription = '', specialProjectsText = '';
     if (member.specialProjects) {
       if (typeof member.specialProjects === 'object') {
@@ -1484,17 +1646,10 @@ function displayUnitHeadEmployeeCards(employees, workplaceFilter) {
         specialProjectsText = member.specialProjects.special_projects || '';
       }
       else if (typeof member.specialProjects === 'string') {
-        try { 
-          var parsed = JSON.parse(member.specialProjects); 
-          jobDescription = parsed.job_description || ''; 
-          specialProjectsText = parsed.special_projects || ''; 
-        } catch(e) { 
-          specialProjectsText = member.specialProjects; 
-        }
+        try { var parsed = JSON.parse(member.specialProjects); jobDescription = parsed.job_description || ''; specialProjectsText = parsed.special_projects || ''; } catch(e) { specialProjectsText = member.specialProjects; }
       }
     }
     
-    // Calculate HOD Performance Score
     var hodTotal = (member.hodRatings.page_layout || 0) + (member.hodRatings.deadline_adherence || 0) +
                   (member.hodRatings.quality_accuracy || 0) + (member.hodRatings.advertising_integration || 0) +
                   (member.hodRatings.platform_adaptation || 0) + (member.hodRatings.collaboration || 0);
@@ -1515,12 +1670,13 @@ function displayUnitHeadEmployeeCards(employees, workplaceFilter) {
                     member.hodRatings.platform_adaptation > 0 && member.hodRatings.collaboration > 0;
     }
     
+    // VH Complete - OVERRIDE if status is Complete
+    var vhComplete = (member.vhEvaluation && member.vhEvaluation.performance_rating && member.vhEvaluation.performance_rating !== '') || isComplete;
+    
     var unitHeadStatusText = (member.status === "Assessed-UH") ? '✓ Approved' : ((member.status === "Assessed") ? '⏳ Pending Approval' : '⏳ Pending');
     var unitHeadStatusClass = (member.status === "Assessed-UH") ? 'status-complete' : 'status-pending';
-    var vhComplete = member.vhEvaluation && member.vhEvaluation.performance_rating && member.vhEvaluation.performance_rating !== '';
     var canPrintPdf = vhComplete;
     
-    // Buttons - NO CHANGE
     var buttonHtml = '';
     if (member.status === "Assessed") {
       buttonHtml = '<button class="btn btn-sm btn-success" onclick="approveUnitHeadEvaluation(\'' + member.code + '\', \'' + escapeHtml(member.name) + '\')" style="margin-right: 8px;"><i class="fa fa-check-circle"></i> Approve</button>' +
@@ -1540,7 +1696,6 @@ function displayUnitHeadEmployeeCards(employees, workplaceFilter) {
       badgeHtml = '<span class="label label-info" style="margin-left: 10px; background-color: #ff9800;"><i class="fa fa-users"></i> ICD</span>';
     }
     
-    // Build the card HTML
     html += '<div class="team-member-card" ' + (member.status === 'Assessed-UH' ? 'style="background: #e8f8e8; border-left: 4px solid #28a745;"' : '') + '>' +
             '<div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; margin-bottom: 10px;">' +
             '<div style="flex: 1;">' +
@@ -1669,6 +1824,10 @@ function authenticateVerticalHead() {
       document.getElementById('vhProtectedContent').style.display = 'block';
       document.getElementById('vhAuthSection').style.display = 'none';
       showToast(result.message, 'success');
+      
+      // ADD THIS LINE - Load overall type summary for Vertical Head
+      loadVHOverallTypeSummary();
+      
       generateCentreButtons();
     } else { showToast(result.success ? 'Access denied. Only Vertical Head can access this tab.' : result.message, 'error'); }
   }).catch(function(error) { showToast('Authentication failed: ' + error.message, 'error'); });
@@ -1763,11 +1922,13 @@ function loadEmployeesByCentre(centre, workplaceFilter) {
 }
 
 function displayVHEmployeeCards(employees, workplaceFilter) {
+  // Filter by workplace if needed
   var filteredByWorkplace = employees;
   if (workplaceFilter && workplaceFilter !== '') {
     filteredByWorkplace = employees.filter(function(emp) { return emp.workplace === workplaceFilter; });
   }
   
+  // Get only completed employees (Assessed-UH or Complete)
   var completeEmployees = filteredByWorkplace.filter(function(emp) {
     return emp.status === "Complete" || emp.status === "Assessed" || emp.status === "Assessed-UH";
   });
@@ -1800,6 +1961,9 @@ function displayVHEmployeeCards(employees, workplaceFilter) {
     var emp = item.emp;
     var pagScore = item.paginationScore;
     var othScore = item.otherWorkScore;
+    
+    // DEFINE isComplete HERE - inside the loop for each employee
+    var isComplete = (emp.status === "Complete");
     
     var pagPercent = teamPaginationScore > 0 ? Math.round((pagScore / teamPaginationScore) * 100) : 0;
     var othPercent = teamOtherWorkScore > 0 ? Math.round((othScore / teamOtherWorkScore) * 100) : 0;
@@ -1843,7 +2007,7 @@ function displayVHEmployeeCards(employees, workplaceFilter) {
       workloadChips += '<span class="workload-chip" style="background:#eef2ff; padding:4px 10px; border-radius:20px; font-size:11px; display:inline-block; margin:2px;">📄 ' + workloadItems[w] + '</span>';
     }
     
-    // Get Job Description and Special Projects text (FULL, no truncation)
+    // Get Job Description and Special Projects text
     var jobDescription = '', specialFull = '';
     if (emp.specialProjects) {
       if (typeof emp.specialProjects === 'object') {
@@ -1865,93 +2029,92 @@ function displayVHEmployeeCards(employees, workplaceFilter) {
     var specialProjectsHtml = specialFull ? '<div style="margin-top: 8px;"><i class="fa fa-rocket"></i> <strong>Special Projects & Initiatives:</strong><div style="white-space: pre-wrap; margin-top: 5px; font-size: 12px; background: #fff8e1; padding: 8px; border-radius: 6px;">' + escapeHtml(specialFull) + '</div></div>' : '';
     
     html += `
-      <div class="employee-card" style="background: white; border: 1px solid #e0e0e0; border-radius: 12px; margin-bottom: 24px; padding: 18px;">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid #eee;">
-          <div>
-            <strong style="font-size: 16px; color: #1e3c72;"><i class="fa fa-user-circle"></i> ${escapeHtml(emp.name)}</strong>
-            <span style="font-size: 12px; color: #888; margin-left: 5px;">(${escapeHtml(emp.designation || 'N/A')})</span><br>
-            <small><i class="fa fa-map-marker"></i> ${escapeHtml(emp.workplace || 'N/A')} | <i class="fa fa-id-card"></i> ${escapeHtml(emp.code)}</small>
+  <div class="employee-card" style="background: white; border: 1px solid #e0e0e0; border-radius: 12px; margin-bottom: 24px; padding: 18px; position: relative;">
+    ${isComplete ? '<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80px; height: 80px; background: #28a745; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 20px rgba(0,0,0,0.3); z-index: 20; border: 3px solid #34ce57;"><i class="fa fa-check" style="color: white; font-size: 45px;"></i></div>' : ''}
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid #eee;">
+      <div>
+        <strong style="font-size: 16px; color: #1e3c72;"><i class="fa fa-user-circle"></i> ${escapeHtml(emp.name)}</strong>
+        <span style="font-size: 12px; color: #888; margin-left: 5px;">(${escapeHtml(emp.designation || 'N/A')})</span><br>
+        <small><i class="fa fa-map-marker"></i> ${escapeHtml(emp.workplace || 'N/A')} | <i class="fa fa-id-card"></i> ${escapeHtml(emp.code)}</small>
+      </div>
+      <div style="text-align: right;">
+        <button class="btn btn-sm btn-info" onclick="openSelfEvaluationModal('${emp.code}', '${escapeHtml(emp.name)}', true, false)" style="margin-right: 5px;">
+          <i class="fa fa-star"></i> Self-Evaluation
+        </button>
+        <button class="btn btn-sm btn-primary" onclick="openHODEvalForVerticalHead('${emp.code}', '${escapeHtml(emp.name)}')">
+          <i class="fa fa-users"></i> HOD-Evaluation
+        </button>
+      </div>
+    </div>
+    
+    <!-- Workload Section -->
+    <div style="background: #f1f5f9; border-radius: 12px; padding: 10px 14px; margin-bottom: 18px;">
+      <div><i class="fa fa-tasks"></i> <strong>Workload:</strong> ${workloadChips || '—'}</div>
+      ${jobDescriptionHtml}
+      ${specialProjectsHtml}
+    </div>
+    
+    <div style="display: flex; flex-wrap: wrap; gap: 20px;">
+      <div style="flex: 1; min-width: 280px; display: flex; flex-direction: column; gap: 20px;">
+        <div style="background: #f8fafc; border-radius: 16px; padding: 16px; border: 1px solid #e2e8f0;">
+          <div><i class="fa fa-star" style="color:#1e3c72;"></i> <strong>📋 HOD Evaluation</strong></div>
+          <div style="margin: 10px 0;">
+            <span>⭐ Score: <strong>${performanceOutOf10}/10</strong></span>
+            <span style="margin-left: 12px; background: ${levelColor}; color: ${levelColor === '#ffc107' ? '#333' : 'white'}; padding: 2px 10px; border-radius: 20px; font-size: 11px; font-weight: bold;">${levelText}</span>
           </div>
-          <div style="text-align: right;">
-            <button class="btn btn-sm btn-info" onclick="openSelfEvaluationModal('${emp.code}', '${escapeHtml(emp.name)}', true, false)" style="margin-right: 5px;">
-              <i class="fa fa-star"></i> Self-Evaluation
-            </button>
-            <button class="btn btn-sm btn-primary" onclick="openHODEvalForVerticalHead('${emp.code}', '${escapeHtml(emp.name)}')">
-              <i class="fa fa-users"></i> HOD-Evaluation
-            </button>
+          <div style="background: white; padding: 8px 12px; border-radius: 12px; font-size: 12px; color: #2c3e50; border-left: 3px solid #1e3c72;">
+            💬 ${emp.hodComments ? escapeHtml(emp.hodComments) : 'No comments yet'}
           </div>
         </div>
         
-        <!-- Workload Section -->
-        <div style="background: #f1f5f9; border-radius: 12px; padding: 10px 14px; margin-bottom: 18px;">
-          <div><i class="fa fa-tasks"></i> <strong>Workload:</strong> ${workloadChips || '—'}</div>
-          ${jobDescriptionHtml}
-          ${specialProjectsHtml}
-        </div>
-        
-        <div style="display: flex; flex-wrap: wrap; gap: 20px;">
-          <div style="flex: 1; min-width: 280px; display: flex; flex-direction: column; gap: 20px;">
-            <div style="background: #f8fafc; border-radius: 16px; padding: 16px; border: 1px solid #e2e8f0;">
-              <div><i class="fa fa-star" style="color:#1e3c72;"></i> <strong>📋 HOD Evaluation</strong></div>
-              <div style="margin: 10px 0;">
-                <span>⭐ Score: <strong>${performanceOutOf10}/10</strong></span>
-                <span style="margin-left: 12px; background: ${levelColor}; color: ${levelColor === '#ffc107' ? '#333' : 'white'}; padding: 2px 10px; border-radius: 20px; font-size: 11px; font-weight: bold;">${levelText}</span>
+        <div style="background: #f8fafc; border-radius: 16px; padding: 16px; border: 1px solid #e2e8f0;">
+          <div><i class="fa fa-flag" style="color:#e68a00;"></i> <strong>🚩 Vertical Head Evaluation</strong></div>
+          <div style="margin-top: 10px;">
+            ${isComplete ? '<div class="alert alert-success" style="margin-bottom: 10px;"><i class="fa fa-check-circle"></i> Evaluation is complete. No further changes allowed.</div>' : ''}
+            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 12px;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 12px; font-weight: 500;">🎯 Rating:</span>
+                <select id="vh_performance_${emp.code}" class="form-control" style="width: 65px; display: inline-block; font-size: 12px; padding: 3px 5px;" onchange="updateAssessmentLevel('${emp.code}')" ${isComplete ? 'disabled' : ''}>
+                  <option value="">--</option>
+                  ${perfOptions}
+                </select>
               </div>
-              <div style="background: white; padding: 8px 12px; border-radius: 12px; font-size: 12px; color: #2c3e50; border-left: 3px solid #1e3c72;">
-                💬 ${emp.hodComments ? escapeHtml(emp.hodComments) : 'No comments yet'}
-              </div>
-            </div>
-            
-            <div style="background: #f8fafc; border-radius: 16px; padding: 16px; border: 1px solid #e2e8f0;">
-              <div><i class="fa fa-flag" style="color:#e68a00;"></i> <strong>🚩 Vertical Head Evaluation</strong></div>
-              <div style="margin-top: 10px;">
-                <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 12px;">
-                  <div style="display: flex; align-items: center; gap: 8px;">
-                    <span style="font-size: 12px; font-weight: 500;">🎯 Rating:</span>
-                    <select id="vh_performance_${emp.code}" class="form-control" style="width: 65px; display: inline-block; font-size: 12px; padding: 3px 5px;" onchange="updateAssessmentLevel('${emp.code}')">
-                      <option value="">--</option>
-                      ${perfOptions}
-                    </select>
-                  </div>
-                  <div style="display: flex; align-items: center; gap: 8px;">
-                    <span style="font-size: 12px; font-weight: 500;">📊 Level:</span>
-                    <input type="text" id="vh_level_display_${emp.code}" class="form-control" value="${escapeHtml(vhOverallLevel)}" readonly style="width: 160px; background-color: #eef2ff; font-size: 11px; padding: 3px 8px;">
-                    <input type="hidden" id="vh_level_${emp.code}" value="${escapeHtml(vhOverallLevel)}">
-                  </div>
-                </div>
-                <textarea id="vh_remark_${emp.code}" class="form-control" rows="2" style="resize: vertical; font-size: 12px; margin-bottom: 10px;" placeholder="Enter your remark...">${escapeHtml(vhRemark)}</textarea>
-                <div style="text-align: right;">
-                  <button class="btn btn-sm btn-success" onclick="saveVHEvaluation('${emp.code}')" style="padding: 3px 12px; font-size: 12px;"><i class="fa fa-save"></i> Save</button>
-                  <button class="btn btn-sm btn-default" onclick="clearVHEvaluation('${emp.code}')" style="padding: 3px 12px; font-size: 12px; margin-left: 5px;"><i class="fa fa-undo"></i> Clear</button>
-                </div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 12px; font-weight: 500;">📊 Level:</span>
+                <input type="text" id="vh_level_display_${emp.code}" class="form-control" value="${escapeHtml(vhOverallLevel)}" readonly style="width: 160px; background-color: #eef2ff; font-size: 11px; padding: 3px 8px;">
+                <input type="hidden" id="vh_level_${emp.code}" value="${escapeHtml(vhOverallLevel)}">
               </div>
             </div>
-          </div>
-          
-          <div style="flex: 1; min-width: 240px; display: flex; flex-direction: column; gap: 12px;">
-            <div style="background: #f8fafc; border-radius: 14px; padding: 12px; border: 1px solid #e2e8f0; text-align: center;">
-              <div style="font-weight: 600; font-size: 13px; margin-bottom: 8px;">📄 Pagination Contribution Out of Total Pages</div>
-              <div style="display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap;">
-                <div style="width: 100px; height: 100px; border-radius: 50%; background: ${pagGrad}; position: relative; flex-shrink: 0;">
-                  <span style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 13px; color: #1e3c72;">${pagPercent}%</span>
-                </div>
-                <div style="font-size: 13px; font-weight: 500; color: #1e3c72;">${pagScore.toFixed(1)} <span style="font-size: 10px; font-weight: normal; color: #666;">points</span></div>
-              </div>
-            </div>
-            
-            <div style="background: #f8fafc; border-radius: 14px; padding: 12px; border: 1px solid #e2e8f0; text-align: center;">
-              <div style="font-weight: 600; font-size: 13px; margin-bottom: 8px;">🎨 Ad Design, Event Creative, Photo, PDF etc.</div>
-              <div style="display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap;">
-                <div style="width: 100px; height: 100px; border-radius: 50%; background: ${othGrad}; position: relative; flex-shrink: 0;">
-                  <span style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 13px; color: #e68a00;">${othPercent}%</span>
-                </div>
-                <div style="font-size: 13px; font-weight: 500; color: #e68a00;">${othScore.toFixed(1)} <span style="font-size: 10px; font-weight: normal; color: #666;">points</span></div>
-              </div>
-            </div>
+            <textarea id="vh_remark_${emp.code}" class="form-control" rows="2" style="resize: vertical; font-size: 12px; margin-bottom: 10px;" placeholder="Enter your remark..." ${isComplete ? 'disabled' : ''}>${escapeHtml(vhRemark)}</textarea>
+            ${isComplete ? '<div style="text-align: right; margin-top: 10px;"><span class="label label-success" style="font-size: 14px; padding: 8px 15px;"><i class="fa fa-check-circle"></i> Evaluation Complete ✓</span></div>' : '<div style="text-align: right;"><button class="btn btn-sm btn-success" onclick="saveVHEvaluation(\'' + emp.code + '\')" style="padding: 3px 12px; font-size: 12px;"><i class="fa fa-save"></i> Save</button><button class="btn btn-sm btn-default" onclick="clearVHEvaluation(\'' + emp.code + '\')" style="padding: 3px 12px; font-size: 12px; margin-left: 5px;"><i class="fa fa-undo"></i> Clear</button></div>'}
           </div>
         </div>
       </div>
-    `;
+      
+      <div style="flex: 1; min-width: 240px; display: flex; flex-direction: column; gap: 12px;">
+        <div style="background: #f8fafc; border-radius: 14px; padding: 12px; border: 1px solid #e2e8f0; text-align: center;">
+          <div style="font-weight: 600; font-size: 13px; margin-bottom: 8px;">📄 Pagination Contribution Out of Total Pages</div>
+          <div style="display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap;">
+            <div style="width: 100px; height: 100px; border-radius: 50%; background: ${pagGrad}; position: relative; flex-shrink: 0;">
+              <span style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 13px; color: #1e3c72;">${pagPercent}%</span>
+            </div>
+            <div style="font-size: 13px; font-weight: 500; color: #1e3c72;">${pagScore.toFixed(1)} <span style="font-size: 10px; font-weight: normal; color: #666;">points</span></div>
+          </div>
+        </div>
+        
+        <div style="background: #f8fafc; border-radius: 14px; padding: 12px; border: 1px solid #e2e8f0; text-align: center;">
+          <div style="font-weight: 600; font-size: 13px; margin-bottom: 8px;">🎨 Ad Design, Event Creative, Photo, PDF etc.</div>
+          <div style="display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap;">
+            <div style="width: 100px; height: 100px; border-radius: 50%; background: ${othGrad}; position: relative; flex-shrink: 0;">
+              <span style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 13px; color: #e68a00;">${othPercent}%</span>
+            </div>
+            <div style="font-size: 13px; font-weight: 500; color: #e68a00;">${othScore.toFixed(1)} <span style="font-size: 10px; font-weight: normal; color: #666;">points</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+`;
   }
   
   html += '</div></div>';
@@ -2103,6 +2266,24 @@ function printEvaluationReport(empCode, empName) {
 $(document).ready(function() {
   $('#registrationTabLi').hide();
 });
+
+function loadVHOverallTypeSummary() {
+  callServer("getAllEmployeesTypeCounts", {}).then(function(result) {
+    if (result.success) {
+      var ftaElement = document.getElementById('vhFtaCount');
+      var voucherElement = document.getElementById('vhVoucherCount');
+      var cnfElement = document.getElementById('vhCnfCount');
+      var summaryBar = document.getElementById('vhTypeSummary');
+      
+      if (ftaElement) ftaElement.innerHTML = 'FTA: ' + (result.ftaCount || 0);
+      if (voucherElement) voucherElement.innerHTML = 'Voucher: ' + (result.voucherCount || 0);
+      if (cnfElement) cnfElement.innerHTML = 'CNF: ' + (result.cnfCount || 0);
+      if (summaryBar) summaryBar.style.display = 'flex';
+    }
+  }).catch(function(error) {
+    console.error("Error loading type summary:", error);
+  });
+}
 
 // ==================== EXPOSE FUNCTIONS GLOBALLY ====================
 // Make sure all functions that are called from HTML onclick handlers are available globally
