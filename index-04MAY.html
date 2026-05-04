@@ -1177,13 +1177,17 @@ function displayHODEmployeeCards(employees, workplaceFilter) {
     var vhComplete = (member.vhEvaluation && member.vhEvaluation.performance_rating && member.vhEvaluation.performance_rating !== '') || isComplete;
     var canPrintPdf = vhComplete;
     
-    var buttonHtml = '';
-    if (isSelfCard) {
-      buttonHtml = '<button class="btn btn-sm btn-info" onclick="openHODEvalForHODTab(\'' + escapeHtml(member.code) + '\', \'' + escapeHtml(member.name) + '\', true)"><i class="fa fa-eye"></i> View My Evaluation</button>';
-    } else if (effectiveUnitHeadApproved) {
-      buttonHtml = '<button class="btn btn-sm btn-default" disabled style="opacity:0.6; cursor:not-allowed;" title="This employee has been approved by Unit Head/Completed. Evaluation is locked."><i class="fa fa-lock"></i> Locked (Completed)</button>';
-    } else {
-      buttonHtml = '<button class="btn btn-sm btn-primary" onclick="openHODEvalForHODTab(\'' + escapeHtml(member.code) + '\', \'' + escapeHtml(member.name) + '\', false)"><i class="fa fa-star"></i> Evaluate</button>';
+    // In displayHODEmployeeCards function, replace the button logic section (around line 1914) with:
+
+	var buttonHtml = '';
+	if (isSelfCard) {
+	  buttonHtml = '<button class="btn btn-sm btn-info" onclick="openHODEvalForHODTab(\'' + escapeHtml(member.code) + '\', \'' + escapeHtml(member.name) + '\', true)"><i class="fa fa-eye"></i> View My Evaluation</button>';
+	  buttonHtml += ' <button class="btn btn-sm btn-success" onclick="exportICDKRAExcel(\'' + escapeHtml(member.code) + '\', \'' + escapeHtml(member.name) + '\')"><i class="fa fa-file-excel-o"></i> Export Excel</button>';
+	} else if (effectiveUnitHeadApproved) {
+	  buttonHtml = '<button class="btn btn-sm btn-default" disabled style="opacity:0.6; cursor:not-allowed;" title="This employee has been approved by Unit Head/Completed. Evaluation is locked."><i class="fa fa-lock"></i> Locked (Completed)</button>';
+	  buttonHtml += ' <button class="btn btn-sm btn-success" onclick="exportICDKRAExcel(\'' + escapeHtml(member.code) + '\', \'' + escapeHtml(member.name) + '\')"><i class="fa fa-file-excel-o"></i> Export Excel</button>';
+	} else {
+	  buttonHtml = '<button class="btn btn-sm btn-primary" onclick="openHODEvalForHODTab(\'' + escapeHtml(member.code) + '\', \'' + escapeHtml(member.name) + '\', false)"><i class="fa fa-star"></i> Evaluate</button>';
 	  buttonHtml += ' <button class="btn btn-sm btn-success" onclick="exportICDKRAExcel(\'' + escapeHtml(member.code) + '\', \'' + escapeHtml(member.name) + '\')"><i class="fa fa-file-excel-o"></i> Export Excel</button>';
     }
     
