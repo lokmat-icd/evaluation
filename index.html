@@ -1,5 +1,3 @@
-<!--const API_BASE_URL = 'https://script.google.com/macros/s/AKfycby5CtkcoR-aXIz97Jq1JSCN6Yrdo9jvOYJanTGhL-MtINYhWUie9q6SdiajD0M2FIzB/exec';-->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -256,10 +254,10 @@
         /* RANK DISTRIBUTION - BLUE CHIPS STYLE */
         .rank-distribution {
             display: flex;
-            gap: 16px 24px;
+            gap: 6px 10px;
             flex-wrap: wrap;
             align-items: center;
-            padding: 10px 16px;
+            padding: 8px 16px;
             background: linear-gradient(135deg, #1a3a6b 0%, #2a5298 100%);
             border-radius: 10px;
             margin-bottom: 16px;
@@ -273,11 +271,11 @@
         .rank-distribution .rank-item {
             display: inline-flex;
             align-items: center;
-            gap: 5px;
+            gap: 4px;
             font-size: 13px;
             font-weight: 500;
             background: rgba(255,255,255,0.12);
-            padding: 4px 16px 4px 12px;
+            padding: 3px 14px 3px 10px;
             border-radius: 20px;
             border: 1px solid rgba(255,255,255,0.08);
             color: white;
@@ -550,35 +548,26 @@
             font-size: 13px;
             color: #1a3a6b;
         }
-        /* Color coded values */
         .stats-bar .ps-item.ps-fresh { background: #e8f5e9; border-color: #a5d6a7; }
         .stats-bar .ps-item.ps-fresh .ps-value { color: #2e7d32; }
-        
         .stats-bar .ps-item.ps-alter { background: #fff3e0; border-color: #ffcc80; }
         .stats-bar .ps-item.ps-alter .ps-value { color: #e65100; }
-        
         .stats-bar .ps-item.ps-required { background: #fce4ec; border-color: #ef9a9a; }
         .stats-bar .ps-item.ps-required .ps-value { color: #c62828; }
-        
         .stats-bar .ps-item.ps-reliever { background: #f3e5f5; border-color: #ce93d8; }
         .stats-bar .ps-item.ps-reliever .ps-value { color: #6a1b9a; }
-        
         .stats-bar .ps-item.ps-total { background: #e3f2fd; border-color: #90caf9; }
         .stats-bar .ps-item.ps-total .ps-value { color: #0d47a1; font-weight: 800; }
-        
         .stats-bar .ps-item.ps-workcentre { background: #e8eaf6; border-color: #9fa8da; }
         .stats-bar .ps-item.ps-workcentre .ps-value { color: #283593; }
-        
         .stats-bar .ps-item.ps-editions { background: #fffde7; border-color: #fff176; }
         .stats-bar .ps-item.ps-editions .ps-value { color: #f57f17; }
-        
         .stats-bar .ps-divider {
             color: #ddd;
             font-size: 14px;
             font-weight: 100;
         }
         
-        /* Editions list inside ps-item */
         .stats-bar .ps-item .editions-list {
             font-weight: 400;
             color: #333;
@@ -779,27 +768,27 @@
             display: flex;
             flex-wrap: wrap;
             align-items: center;
-            gap: 8px 12px;
+            gap: 4px 8px;
             background: #f8faff;
             border: 1px solid #e8ecf1;
             border-radius: 8px;
-            padding: 8px 14px;
+            padding: 6px 12px;
             margin-bottom: 12px;
         }
         .model-card .stats-chips .chip-item {
             display: inline-flex;
             align-items: center;
-            gap: 4px;
+            gap: 3px;
             font-size: 12px;
             color: #444;
-            padding: 3px 12px 3px 10px;
+            padding: 2px 10px 2px 8px;
             border-radius: 18px;
             border: 1px solid #e8ecf1;
             background: white;
         }
         .model-card .stats-chips .chip-item .chip-label {
             font-weight: 400;
-            color: #888;
+            color: #000000;
             font-size: 11px;
         }
         .model-card .stats-chips .chip-item .chip-value {
@@ -807,13 +796,8 @@
             font-size: 13px;
             color: #1a3a6b;
         }
-        .model-card .stats-chips .chip-item.chip-fresh .chip-value { color: #2e7d32; }
-        .model-card .stats-chips .chip-item.chip-alter .chip-value { color: #e65100; }
-        .model-card .stats-chips .chip-item.chip-unit .chip-value { color: #283593; }
         .model-card .stats-chips .chip-divider {
-            color: #ddd;
-            font-size: 14px;
-            font-weight: 100;
+            display: none;
         }
 
         /* Page Distribution Box */
@@ -879,7 +863,6 @@
             font-weight: 600;
             color: #6f42c1;
         }
-        /* Alternating row backgrounds */
         .model-card .profile-table tbody tr:nth-child(odd) {
             background: #fafbfc;
         }
@@ -987,132 +970,139 @@
         .model-no-data i { font-size: 36px; opacity: 0.3; display: block; margin-bottom: 12px; }
 
         /* ============================================================ */
-        /* MODEL STATS CHIPS (TOTAL SUMS) */
-        /* ============================================================ */
-        .model-stats-chips {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px 20px;
-            padding: 8px 16px;
-            margin-bottom: 14px;
-            border-radius: 10px;
-            border: 1px solid #e8ecf1;
-            background: white;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.04);
-        }
-        .model-stats-chips .stats-row-title {
-            font-size: 13px;
-            font-weight: 700;
-            padding: 4px 12px 4px 0;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .model-stats-chips .stats-row-title.existing-title {
-            color: #1a3a6b;
-        }
-        .model-stats-chips .stats-row-title.proposed-title {
-            color: #6f42c1;
-        }
-        .model-stats-chips .stats-row-title.workcentre-title {
-            color: #283593;
-        }
-        .model-stats-chips .stats-chip-row {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            gap: 6px 14px;
-            padding: 4px 0;
-            width: 100%;
-        }
-        .model-stats-chips .stats-chip-row.existing-row {
-            border-bottom: 1px solid #f0f2f5;
-            padding-bottom: 8px;
-        }
-        .model-stats-chips .stats-chip-row.proposed-row {
-            border-bottom: 1px solid #f0f2f5;
-            padding-bottom: 8px;
-        }
-        .model-stats-chips .stats-chip-row.workcentre-row {
-            padding-top: 4px;
-        }
-        .model-stats-chips .chip-item {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            font-size: 12px;
-            color: #444;
-            padding: 3px 12px 3px 10px;
-            border-radius: 18px;
-            border: 1px solid #e8ecf1;
-            background: white;
-        }
-        .model-stats-chips .chip-item .chip-label {
-            font-weight: 400;
-            color: #888;
-            font-size: 11px;
-        }
-        .model-stats-chips .chip-item .chip-value {
-            font-weight: 700;
-            font-size: 13px;
-            color: #1a3a6b;
-        }
-        .model-stats-chips .chip-item.chip-desk .chip-value { color: #c79306; }
-        .model-stats-chips .chip-item.chip-reporters .chip-value { color: #2a5298; }
-        .model-stats-chips .chip-item.chip-hello .chip-value { color: #6f42c1; }
-        .model-stats-chips .chip-item.chip-reporting .chip-value { color: #c0392b; }
-        .model-stats-chips .chip-item.chip-photo .chip-value { color: #ff9800; }
-        .model-stats-chips .chip-item.chip-incharge .chip-value { color: #6f42c1; }
-        .model-stats-chips .chip-item.chip-total .chip-value { color: #0d47a1; font-weight: 800; }
-        .model-stats-chips .chip-item.chip-proof .chip-value { color: #c62828; }
-        .model-stats-chips .chip-item.chip-edo .chip-value { color: #ff9800; }
-        .model-stats-chips .chip-item.chip-fresh .chip-value { color: #2e7d32; }
-        .model-stats-chips .chip-item.chip-alter .chip-value { color: #e65100; }
-        .model-stats-chips .chip-divider {
-            color: #ddd;
-            font-size: 14px;
-            font-weight: 100;
-        }
-        .model-stats-chips .chip-item.existing-chip {
-            background: #f0f7ff;
-            border-color: #b3cfe8;
-        }
-        .model-stats-chips .chip-item.proposed-chip {
-            background: #f5f0ff;
-            border-color: #d4c4e8;
-        }
-        .model-stats-chips .chip-item.workcentre-chip {
-            background: #e8eaf6;
-            border-color: #9fa8da;
-        }
-        .model-stats-chips .stats-separator {
-            color: #ddd;
-            font-size: 14px;
-            font-weight: 100;
-            padding: 0 4px;
-        }
-        .model-stats-chips .editions-inline {
-            display: inline-flex;
-            flex-wrap: wrap;
-            align-items: center;
-            gap: 2px 6px;
-        }
-        .model-stats-chips .editions-inline .edition-name {
-            font-weight: 600;
-            color: #1a3a6b;
-        }
-        .model-stats-chips .editions-inline .efresh {
-            color: #2e7d32;
-            font-weight: 600;
-        }
-        .model-stats-chips .editions-inline .ealter {
-            color: #e65100;
-            font-weight: 600;
-        }
-        .model-stats-chips .editions-inline .edition-sep {
-            color: #ccc;
-            font-weight: 300;
-        }
+/* ============================================================ */
+/* MODEL STATS CHIPS - BLUE BAND STYLE (Like Rank Distribution) */
+/* ============================================================ */
+.model-stats-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 6px;
+    padding: 8px 16px;
+    margin-bottom: 14px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #1a3a6b 0%, #2a5298 100%);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.12);
+    border: 1px solid rgba(255,255,255,0.1);
+    align-items: center;
+}
+.model-stats-chips .stats-row-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.9);
+    padding: 2px 8px 2px 0;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.model-stats-chips .stats-row-title.existing-title {
+    color: #81c784;
+}
+.model-stats-chips .stats-row-title.proposed-title {
+    color: #ce93d8;
+}
+.model-stats-chips .stats-row-title.workcentre-title {
+    color: #7eb8ff;
+}
+.model-stats-chips .stats-chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 6px;
+    padding: 2px 0;
+    width: 100%;
+}
+.model-stats-chips .stats-chip-row.existing-row {
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    padding-bottom: 6px;
+}
+.model-stats-chips .stats-chip-row.proposed-row {
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    padding-bottom: 6px;
+}
+.model-stats-chips .stats-chip-row.workcentre-row {
+    padding-top: 4px;
+    padding-bottom: 2px;
+}
+.model-stats-chips .chip-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    background: rgba(255,255,255,0.12);
+    padding: 3px 12px 3px 10px;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.08);
+    color: white;
+}
+.model-stats-chips .chip-item .chip-label {
+    font-weight: 600;
+    font-size: 12px;
+    opacity: 0.8;
+    color: rgba(255,255,255,0.85);
+}
+.model-stats-chips .chip-item .chip-value {
+    font-weight: 700;
+    font-size: 15px;
+    color: white;
+}
+.model-stats-chips .chip-item.chip-desk .chip-value { color: #ffd54f; }
+.model-stats-chips .chip-item.chip-reporters .chip-value { color: #7eb8ff; }
+.model-stats-chips .chip-item.chip-hello .chip-value { color: #ce93d8; }
+.model-stats-chips .chip-item.chip-reporting .chip-value { color: #ef9a9a; }
+.model-stats-chips .chip-item.chip-photo .chip-value { color: #ffb74d; }
+.model-stats-chips .chip-item.chip-incharge .chip-value { color: #ce93d8; }
+.model-stats-chips .chip-item.chip-total .chip-value { color: #81c784; font-weight: 800; }
+.model-stats-chips .chip-item.chip-proof .chip-value { color: #ef9a9a; }
+.model-stats-chips .chip-item.chip-edo .chip-value { color: #ffb74d; }
+.model-stats-chips .chip-item.chip-fresh .chip-value { color: #81c784; }
+.model-stats-chips .chip-item.chip-alter .chip-value { color: #ffb74d; }
+.model-stats-chips .chip-item.existing-chip {
+    background: rgba(129, 199, 132, 0.15);
+    border-color: rgba(129, 199, 132, 0.2);
+}
+.model-stats-chips .chip-item.proposed-chip {
+    background: rgba(206, 147, 216, 0.15);
+    border-color: rgba(206, 147, 216, 0.2);
+}
+.model-stats-chips .chip-item.workcentre-chip {
+    background: rgba(126, 184, 255, 0.15);
+    border-color: rgba(126, 184, 255, 0.2);
+}
+.model-stats-chips .chip-divider {
+    display: none;
+}
+
+/* Editions detail line - plain text below Work Centre row */
+.model-stats-chips .editions-detail-line {
+    font-size: 13px;
+    color: rgba(255,255,255,0.85);
+    padding: 6px 0 2px 0;
+    width: 100%;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    margin-top: 2px;
+    line-height: 1.8;
+    font-weight: 350;
+    letter-spacing: 0.3px;
+    word-break: break-word;
+}
+.model-stats-chips .editions-detail-line .efresh {
+    color: #81c784;
+    font-weight: 600;
+}
+.model-stats-chips .editions-detail-line .ealter {
+    color: #ffb74d;
+    font-weight: 600;
+}
+.model-stats-chips .editions-detail-line .edition-sep {
+    color: rgba(255,255,255,0.2);
+    font-weight: 300;
+    margin: 0 4px;
+}
+.model-stats-chips .editions-detail-line .edition-name {
+    color: rgba(255,255,255,0.9);
+    font-weight: 500;
+}
 
         /* ============================================================ */
         /* EDIT MODAL */
@@ -1368,17 +1358,17 @@
             .tab-btn { padding: 10px 16px; font-size: 13px; white-space: nowrap; }
             .card-body .row .col { min-width: 100%; }
             .stats-bar .ps-item { padding: 3px 10px; font-size: 11px; }
-            .rank-distribution { padding: 8px 12px; gap: 8px 14px; }
+            .rank-distribution { padding: 8px 12px; gap: 6px 8px; }
             .model-card .page-distribution-box { flex-direction: column; align-items: stretch; gap: 6px; }
             .model-filters { flex-direction: column; align-items: stretch; }
             .model-filters .filter-group { justify-content: flex-start; }
             .modal-overlay .modal-box { margin: 16px; max-height: 95vh; }
             .modal-overlay .modal-body .form-row { grid-template-columns: 1fr; }
             .modal-overlay .modal-body .form-row-3 { grid-template-columns: 1fr; }
-            .model-card .stats-chips { gap: 4px 8px; padding: 6px 10px; }
+            .model-card .stats-chips { gap: 4px 6px; padding: 4px 8px; }
             .model-card .stats-chips .chip-item { font-size: 11px; padding: 2px 8px; }
-            .model-stats-chips { flex-direction: column; gap: 8px; padding: 8px 12px; }
-            .model-stats-chips .stats-chip-row { gap: 4px 10px; }
+            .model-stats-chips { gap: 4px 6px; padding: 6px 10px; }
+            .model-stats-chips .stats-chip-row { gap: 4px 6px; }
             .model-stats-chips .chip-item { font-size: 11px; padding: 2px 8px; }
         }
         @media (max-width: 480px) {
@@ -1390,8 +1380,8 @@
             .job-profile-dropdown .dropdown-menu .dropdown-actions { flex-direction: column; }
             .card-body .label { min-width: 60px; font-size: 8.5pt; }
             .card-body .value { font-size: 9.5pt; }
-            .rank-distribution { gap: 6px 10px; padding: 6px 10px; }
-            .rank-distribution .rank-item { font-size: 11px; padding: 3px 10px 3px 8px; }
+            .rank-distribution { gap: 4px 6px; padding: 6px 10px; }
+            .rank-distribution .rank-item { font-size: 11px; padding: 2px 8px 2px 6px; }
             .rank-distribution .rank-item .rank-count { font-size: 13px; }
             .stats-bar .stats-row { padding: 5px 10px; flex-wrap: wrap; }
             .stats-bar .ps-item { padding: 2px 8px; font-size: 10px; white-space: normal; }
@@ -1405,8 +1395,8 @@
             .modal-overlay .modal-body { padding: 16px; }
             .modal-overlay .modal-footer { flex-direction: column; }
             .modal-overlay .modal-footer .btn { width: 100%; text-align: center; }
-            .model-stats-chips .stats-chip-row { flex-direction: column; align-items: flex-start; gap: 4px; }
-            .model-stats-chips .stats-row-title { font-size: 12px; }
+            .model-stats-chips .stats-chip-row { flex-direction: column; align-items: flex-start; gap: 3px; }
+            .model-stats-chips .stats-row-title { font-size: 11px; }
         }
     </style>
 </head>
@@ -1482,7 +1472,7 @@
         </div>
     </div>
 
-    <!-- TABS -->
+    <!-- TABS - New order: Model-A, Model-B, Analysis -->
     <div class="tabs-container">
         <div class="tabs">
             <button class="tab-btn active" data-tab="modela" onclick="switchTab('modela')">
@@ -1494,11 +1484,86 @@
             <button class="tab-btn" data-tab="analysis" onclick="switchTab('analysis')">
                 <i class="fa fa-bar-chart"></i> Analysis
             </button>
-			
         </div>
 
-        <!-- TAB 1: ANALYSIS -->
-        <div class="tab-content active" id="tab-analysis">
+        <!-- TAB 1: MODEL-A (Active by default) -->
+        <div class="tab-content active" id="tab-modela">
+            
+            <!-- Model-A Filters -->
+            <div class="model-filters">
+                <div class="filter-group">
+                    <label><i class="fa fa-building"></i> Department</label>
+                    <select id="modelaDeptFilter" onchange="applyModelAFilters()">
+                        <option value="">All Departments</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label><i class="fa fa-map-marker"></i> Unit</label>
+                    <select id="modelaUnitFilter" onchange="applyModelAFilters()">
+                        <option value="">All Units</option>
+                    </select>
+                </div>
+                <div class="filter-group" style="flex:1; justify-content:flex-end;">
+                    <span style="font-size:12px; color:#888;">
+                        <i class="fa fa-file-text"></i> <span id="modelaCount">0</span> entries
+                    </span>
+                </div>
+            </div>
+
+            <!-- Model-A Stats Chips (Blue Band Style) -->
+            <div class="model-stats-chips" id="modelaStatsChips">
+                <!-- Dynamically populated -->
+            </div>
+
+            <!-- Model-A Grid -->
+            <div class="model-grid" id="modelaGrid">
+                <div class="loading-spinner">
+                    <i class="fa fa-spinner fa-spin"></i>
+                    Loading Model-A data...
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: MODEL-B -->
+        <div class="tab-content" id="tab-modelb">
+            
+            <!-- Model-B Filters -->
+            <div class="model-filters">
+                <div class="filter-group">
+                    <label><i class="fa fa-building"></i> Department</label>
+                    <select id="modelbDeptFilter" onchange="applyModelBFilters()">
+                        <option value="">All Departments</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label><i class="fa fa-map-marker"></i> Unit</label>
+                    <select id="modelbUnitFilter" onchange="applyModelBFilters()">
+                        <option value="">All Units</option>
+                    </select>
+                </div>
+                <div class="filter-group" style="flex:1; justify-content:flex-end;">
+                    <span style="font-size:12px; color:#888;">
+                        <i class="fa fa-file-text"></i> <span id="modelbCount">0</span> entries
+                    </span>
+                </div>
+            </div>
+
+            <!-- Model-B Stats Chips (Blue Band Style with Work Centre) -->
+            <div class="model-stats-chips" id="modelbStatsChips">
+                <!-- Dynamically populated -->
+            </div>
+
+            <!-- Model-B Grid -->
+            <div class="model-grid" id="modelbGrid">
+                <div class="loading-spinner">
+                    <i class="fa fa-spinner fa-spin"></i>
+                    Loading Model-B data...
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: ANALYSIS -->
+        <div class="tab-content" id="tab-analysis">
             
             <!-- Rank Distribution - Blue Chips Style -->
             <div class="rank-distribution" id="rankDistribution">
@@ -1592,7 +1657,6 @@
                     <span class="stat-divider">|</span>
                     <span class="stat-item">⭐ <strong id="displayAvgAge">0</strong> avg age</span>
                 </div>
-                <!-- Row 2: Pages Data - REMOVED -->
             </div>
 
             <!-- Employee Grid -->
@@ -1600,82 +1664,6 @@
                 <div class="loading-spinner">
                     <i class="fa fa-spinner fa-spin"></i>
                     Loading employee data...
-                </div>
-            </div>
-        </div>
-
-        <!-- TAB 2: MODEL-A -->
-        <div class="tab-content" id="tab-modela">
-            
-            <!-- Model-A Filters -->
-            <div class="model-filters">
-                <div class="filter-group">
-                    <label><i class="fa fa-building"></i> Department</label>
-                    <select id="modelaDeptFilter" onchange="applyModelAFilters()">
-                        <option value="">All Departments</option>
-                    </select>
-                </div>
-                <div class="filter-group">
-                    <label><i class="fa fa-map-marker"></i> Unit</label>
-                    <select id="modelaUnitFilter" onchange="applyModelAFilters()">
-                        <option value="">All Units</option>
-                    </select>
-                </div>
-                <div class="filter-group" style="flex:1; justify-content:flex-end;">
-                    <span style="font-size:12px; color:#888;">
-                        <i class="fa fa-file-text"></i> <span id="modelaCount">0</span> entries
-                    </span>
-                </div>
-            </div>
-
-            <!-- Model-A Stats Chips (Sums) -->
-            <div class="model-stats-chips" id="modelaStatsChips">
-                <!-- Dynamically populated -->
-            </div>
-
-            <!-- Model-A Grid -->
-            <div class="model-grid" id="modelaGrid">
-                <div class="loading-spinner">
-                    <i class="fa fa-spinner fa-spin"></i>
-                    Loading Model-A data...
-                </div>
-            </div>
-        </div>
-
-        <!-- TAB 3: MODEL-B -->
-        <div class="tab-content" id="tab-modelb">
-            
-            <!-- Model-B Filters -->
-            <div class="model-filters">
-                <div class="filter-group">
-                    <label><i class="fa fa-building"></i> Department</label>
-                    <select id="modelbDeptFilter" onchange="applyModelBFilters()">
-                        <option value="">All Departments</option>
-                    </select>
-                </div>
-                <div class="filter-group">
-                    <label><i class="fa fa-map-marker"></i> Unit</label>
-                    <select id="modelbUnitFilter" onchange="applyModelBFilters()">
-                        <option value="">All Units</option>
-                    </select>
-                </div>
-                <div class="filter-group" style="flex:1; justify-content:flex-end;">
-                    <span style="font-size:12px; color:#888;">
-                        <i class="fa fa-file-text"></i> <span id="modelbCount">0</span> entries
-                    </span>
-                </div>
-            </div>
-
-            <!-- Model-B Stats Chips (Sums + Work Centre Data) -->
-            <div class="model-stats-chips" id="modelbStatsChips">
-                <!-- Dynamically populated -->
-            </div>
-
-            <!-- Model-B Grid -->
-            <div class="model-grid" id="modelbGrid">
-                <div class="loading-spinner">
-                    <i class="fa fa-spinner fa-spin"></i>
-                    Loading Model-B data...
                 </div>
             </div>
         </div>
@@ -1760,6 +1748,8 @@ function switchTab(tabName) {
         applyModelAFilters();
     } else if (tabName === 'modelb') {
         applyModelBFilters();
+    } else if (tabName === 'analysis') {
+        applyFilters();
     }
 }
 
@@ -2659,14 +2649,14 @@ function applyModelBFilters() {
 }
 
 // ============================================================
-// MODEL STATS CHIPS (SUMS) - Without Work Centre
+// MODEL STATS CHIPS (SUMS) - BLUE BAND STYLE (No dividers)
 // ============================================================
 function renderModelStatsChips(data, containerId) {
     const container = document.getElementById(containerId);
     
     if (data.length === 0) {
         container.innerHTML = `
-            <div style="padding: 8px 0; color: #999; font-size: 13px; text-align: center; width:100%;">
+            <div style="padding: 8px 0; color: rgba(255,255,255,0.7); font-size: 13px; text-align: center; width:100%;">
                 <i class="fa fa-info-circle"></i> No data to display stats
             </div>
         `;
@@ -2720,35 +2710,29 @@ function renderModelStatsChips(data, containerId) {
         { key: 'EDO', label: 'EDO', cssClass: 'chip-edo' }
     ];
     
-    // Build Existing Row
+    // Build Existing Row - no dividers
     let existingChips = '';
-    chipItems.forEach((item, index) => {
+    chipItems.forEach((item) => {
         const value = sums[item.key] || 0;
         existingChips += `
             <span class="chip-item existing-chip ${item.cssClass}">
-                <span class="chip-label">${item.label}:</span>
+                <span class="chip-label">${item.label}</span>
                 <span class="chip-value">${value}</span>
             </span>
         `;
-        if (index < chipItems.length - 1) {
-            existingChips += `<span class="chip-divider">|</span>`;
-        }
     });
     
-    // Build Proposed Row
+    // Build Proposed Row - no dividers
     let proposedChips = '';
-    chipItems.forEach((item, index) => {
+    chipItems.forEach((item) => {
         const newKey = item.key + 'New';
         const value = sums[newKey] || 0;
         proposedChips += `
             <span class="chip-item proposed-chip ${item.cssClass}">
-                <span class="chip-label">${item.label}:</span>
+                <span class="chip-label">${item.label}</span>
                 <span class="chip-value">${value}</span>
             </span>
         `;
-        if (index < chipItems.length - 1) {
-            proposedChips += `<span class="chip-divider">|</span>`;
-        }
     });
     
     container.innerHTML = `
@@ -2764,14 +2748,14 @@ function renderModelStatsChips(data, containerId) {
 }
 
 // ============================================================
-// MODEL STATS CHIPS (SUMS + WORK CENTRE DATA)
+// MODEL STATS CHIPS (SUMS + WORK CENTRE DATA) - BLUE BAND STYLE
 // ============================================================
 function renderModelStatsChipsWithWorkCentre(data, containerId, unitFilter) {
     const container = document.getElementById(containerId);
     
     if (data.length === 0) {
         container.innerHTML = `
-            <div style="padding: 8px 0; color: #999; font-size: 13px; text-align: center; width:100%;">
+            <div style="padding: 8px 0; color: rgba(255,255,255,0.7); font-size: 13px; text-align: center; width:100%;">
                 <i class="fa fa-info-circle"></i> No data to display stats
             </div>
         `;
@@ -2829,35 +2813,29 @@ function renderModelStatsChipsWithWorkCentre(data, containerId, unitFilter) {
         { key: 'EDO', label: 'EDO', cssClass: 'chip-edo' }
     ];
     
-    // Build Existing Row
+    // Build Existing Row - no dividers
     let existingChips = '';
-    chipItems.forEach((item, index) => {
+    chipItems.forEach((item) => {
         const value = sums[item.key] || 0;
         existingChips += `
             <span class="chip-item existing-chip ${item.cssClass}">
-                <span class="chip-label">${item.label}:</span>
+                <span class="chip-label">${item.label}</span>
                 <span class="chip-value">${value}</span>
             </span>
         `;
-        if (index < chipItems.length - 1) {
-            existingChips += `<span class="chip-divider">|</span>`;
-        }
     });
     
-    // Build Proposed Row
+    // Build Proposed Row - no dividers
     let proposedChips = '';
-    chipItems.forEach((item, index) => {
+    chipItems.forEach((item) => {
         const newKey = item.key + 'New';
         const value = sums[newKey] || 0;
         proposedChips += `
             <span class="chip-item proposed-chip ${item.cssClass}">
-                <span class="chip-label">${item.label}:</span>
+                <span class="chip-label">${item.label}</span>
                 <span class="chip-value">${value}</span>
             </span>
         `;
-        if (index < chipItems.length - 1) {
-            proposedChips += `<span class="chip-divider">|</span>`;
-        }
     });
     
     // Determine Work Centre label and data
@@ -2869,7 +2847,7 @@ function renderModelStatsChipsWithWorkCentre(data, containerId, unitFilter) {
     // Check if a specific unit is selected
     if (unitFilter && unitFilter !== '') {
         // Specific Unit selected - show that unit's data
-        workCentreLabel = 'Work Centre - ' + unitFilter;
+        workCentreLabel = '🏢 Work Centre - ' + unitFilter;
         // Use sums from filtered data (which already has only this unit)
         freshValue = sums.FreshPagination || '—';
         alterValue = sums.AlterPagination || '—';
@@ -2907,23 +2885,20 @@ function renderModelStatsChipsWithWorkCentre(data, containerId, unitFilter) {
                 const freshDisplay = (e.freshPagination > 0) ? e.freshPagination : '—';
                 const alterDisplay = (e.alterPagination > 0) ? e.alterPagination : '—';
                 const editionName = e.edition || 'Main';
-                const comma = (index < allEditions.length - 1) ? ' <span class="edition-sep">|</span> ' : '';
-                editionsList += `<span class="edition-name">${escapeHtml(editionName)}</span>(<span class="efresh">${freshDisplay}</span>,<span class="ealter">${alterDisplay}</span>)${comma}`;
+                const comma = (index < allEditions.length - 1) ? ' | ' : '';
+                editionsList += `${escapeHtml(editionName)}(<span class="efresh">${freshDisplay}</span>,<span class="ealter">${alterDisplay}</span>)${comma}`;
             });
             editionsHtml = `
-                <span class="chip-divider">|</span>
-                <span class="chip-item workcentre-chip">
-                    <span class="chip-label">📋</span>
-                    <span class="chip-value editions-inline">${editionsList}</span>
-                </span>
+                <div class="editions-detail-line">
+                    ${editionsList}
+                </div>
             `;
         }
     } else {
         // All Units selected - show total of all rows
-        workCentreLabel = 'Work Centre - All Units';
+        workCentreLabel = '🏢 Work Centre - All Units';
         freshValue = sums.FreshPagination || '—';
         alterValue = sums.AlterPagination || '—';
-        // No editions shown when All Units selected
     }
     
     container.innerHTML = `
@@ -2936,18 +2911,17 @@ function renderModelStatsChipsWithWorkCentre(data, containerId, unitFilter) {
             ${proposedChips}
         </div>
         <div class="stats-chip-row workcentre-row">
-            <span class="stats-row-title workcentre-title">🏢 ${escapeHtml(workCentreLabel)}</span>
+            <span class="stats-row-title workcentre-title">${escapeHtml(workCentreLabel)}</span>
             <span class="chip-item workcentre-chip chip-fresh">
-                <span class="chip-label">📄 Fresh:</span>
+                <span class="chip-label">📄 Fresh</span>
                 <span class="chip-value">${freshValue}</span>
             </span>
-            <span class="chip-divider">|</span>
             <span class="chip-item workcentre-chip chip-alter">
-                <span class="chip-label">🔄 Alter:</span>
+                <span class="chip-label">🔄 Alter</span>
                 <span class="chip-value">${alterValue}</span>
             </span>
-            ${editionsHtml}
         </div>
+        ${editionsHtml}
     `;
 }
 
@@ -3024,17 +2998,15 @@ function buildModelCard(item, index) {
                 <!-- Stats Chips -->
                 <div class="stats-chips">
                     <span class="chip-item chip-unit">
-                        <span class="chip-label">🏢 Unit:</span>
+                        <span class="chip-label">🏢 Unit</span>
                         <span class="chip-value">${escapeHtml(item.Unit || '—')}</span>
                     </span>
-                    <span class="chip-divider">|</span>
                     <span class="chip-item chip-fresh">
-                        <span class="chip-label">📄 Fresh:</span>
+                        <span class="chip-label">📄 Fresh</span>
                         <span class="chip-value">${formatNum(item['Fresh Pagination'])}</span>
                     </span>
-                    <span class="chip-divider">|</span>
                     <span class="chip-item chip-alter">
-                        <span class="chip-label">🔄 Alter:</span>
+                        <span class="chip-label">🔄 Alter</span>
                         <span class="chip-value">${formatNum(item['Alter Pagination'])}</span>
                     </span>
                 </div>
